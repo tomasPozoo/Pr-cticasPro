@@ -23,3 +23,8 @@ def dashboard_estudiante(request):
 
 def suscripcion(request):
     return render(request, 'suscripcion.html')
+def dashboard_empresa(request):
+    return render(request, 'dashboard-empresa.html')
+
+def perfil_estudiante(request):
+    return render(request, 'perfil-estudiante.html')

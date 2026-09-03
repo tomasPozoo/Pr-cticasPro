@@ -81,7 +81,6 @@
           <h2 class="text-xl font-bold text-blue-900">Mapa de Ubicación de Prácticas 🗺️</h2>
           <p class="text-sm text-gray-600">Explora la ubicación geográfica de los cupos disponibles según tu sede.</p>
         </div>
-        <!-- Contenedor del Mapa con altura especificada (h-96) y z-index controlado -->
         <div id="map" class="h-96 w-full rounded-lg border border-gray-200 z-10"></div>
       </div>
     </section>
@@ -137,8 +136,8 @@
       <span class="font-bold text-sm hidden md:inline">Asistente IA Duoc</span>
     </button>
 
-    <!-- Se añade la clase 'hidden' para que inicie cerrado -->
-    <div id="chatBox" class="chat-container hidden absolute bottom-16 right-0 w-80 md:w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+    <!-- Usamos la clase 'hidden' nativa de Tailwind para ocultar el chat inicialmente -->
+    <div id="chatBox" class="chat-container hidden absolute bottom-16 right-0 w-80 md:w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col">
       <div class="bg-blue-900 text-white p-4 flex justify-between items-center">
         <div>
           <h4 class="font-bold text-sm">Asistente Virtual IA</h4>
@@ -147,13 +146,13 @@
         <button onclick="toggleChat()" class="text-gray-300 hover:text-white font-bold text-xl">&times;</button>
       </div>
       
-      <div id="chatMessages" class="p-4 h-64 overflow-y-auto space-y-3 text-sm">
-        <div class="bg-gray-100 p-3 rounded-lg text-gray-800 max-w-[85%]">
+      <div id="chatMessages" class="p-4 h-64 overflow-y-auto space-y-3 text-sm bg-gray-50">
+        <div class="bg-blue-100 text-blue-900 border border-blue-200 p-3 rounded-lg max-w-[85%]">
           ¡Hola! Soy tu asistente de IA. ¿Necesitas ayuda para buscar prácticas en tu sede, saber más del Plan Premium o ajustar tu perfil?
         </div>
       </div>
 
-      <div class="p-3 border-t border-gray-200 flex space-x-2">
+      <div class="p-3 border-t border-gray-200 flex space-x-2 bg-white">
         <input type="text" id="userInput" placeholder="Escribe tu consulta aquí..." class="flex-1 p-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-900">
         <button onclick="sendMessage()" class="bg-blue-900 hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm font-bold transition">Enviar</button>
       </div>
@@ -215,30 +214,21 @@
     </div>
   </footer>
 
-  <!-- Scripts -->
+  <!-- ARCHIVO JS PRINCIPAL -->
   <script src="{% static 'js/app.js' %}"></script>
-  
+
+  <!-- LÓGICA AUXILIAR TECLA ENTER -->
   <script>
-    // 1. Script para inicializar Leaflet Mapa
     document.addEventListener("DOMContentLoaded", function() {
-      // Coordenadas iniciales (Puente Alto / Santiago)
-      var map = L.map('map').setView([-33.5986, -70.5785], 13);
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
-
-      // Marcador de ejemplo
-      L.marker([-33.5986, -70.5785]).addTo(map)
-        .bindPopup('<b>Sede Duoc UC Puente Alto</b><br>Ofertas activas cercanas.')
-        .openPopup();
+      const input = document.getElementById('userInput');
+      if (input) {
+        input.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            sendMessage();
+          }
+        });
+      }
     });
-
-    // 2. Funciones del Chat
-    function toggleChat() {
-      const chatBox = document.getElementById('chatBox');
-      chatBox.classList.toggle('hidden');
-    }
   </script>
 </body>
 </html>

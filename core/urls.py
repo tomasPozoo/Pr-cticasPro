@@ -14,4 +14,6 @@ urlpatterns = [
     # Plataforma Interna
     path('dashboard-estudiante/', views.dashboard_estudiante, name='dashboard_estudiante'),
     path('suscripcion/', views.suscripcion, name='suscripcion'),
+    path('dashboard-empresa/', views.dashboard_empresa, name='dashboard_empresa'),
+    path('perfil-estudiante/', views.perfil_estudiante, name='perfil_estudiante'),
 ]
