@@ -1,0 +1,244 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PrácticasPro - Plataforma de Vinculación Laboral</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Leaflet CSS/JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Hoja de Estilos Propia con Django Static -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans flex flex-col min-h-screen">
+
+  <!-- NAVBAR -->
+  <header class="bg-blue-900 text-white shadow-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <span class="text-2xl font-bold tracking-tight">Prácticas<span class="text-yellow-400">Pro</span></span>
+        <span class="text-xs bg-blue-800 text-blue-200 px-2.5 py-1 rounded-full font-medium">Exclusivo Duoc UC</span>
+      </div>
+      <nav class="hidden md:flex space-x-6 items-center">
+        <a href="#mapa-section" class="hover:text-yellow-400 font-medium transition">Mapa Interactivo</a>
+        <a href="{% url 'login_empresa' %}" class="hover:text-yellow-400 transition font-medium">Portal Empresas</a>
+        <a href="{% url 'login_usuario' %}" class="bg-yellow-500 hover:bg-yellow-600 text-blue-900 font-semibold px-4 py-2 rounded-lg transition shadow">Portal Estudiantes</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="bg-blue-800 text-white py-10 px-4 text-center">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-3xl md:text-5xl font-extrabold mb-3">Encuentra tu práctica laboral o profesional</h1>
+      <p class="text-lg text-blue-100">Conectamos a estudiantes de Duoc UC con las mejores oportunidades del mercado.</p>
+    </div>
+  </section>
+
+  <!-- SECCIÓN PRINCIPAL: FILTROS + MAPA AL LADO -->
+  <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-4 gap-8 flex-grow w-full">
+    
+    <!-- FILTROS LATERALES (IZQUIERDA) -->
+    <aside class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 h-fit">
+      <h3 class="text-lg font-bold mb-4 text-blue-900">Filtros de Búsqueda</h3>
+      
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Sede Duoc UC</label>
+        <select class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-900">
+          <option value="puente-alto">Sede Puente Alto</option>
+          <option value="san-bernardo">Sede San Bernardo</option>
+          <option value="plaza-vespucio">Sede Plaza Vespucio</option>
+          <option value="antonio-varas">Sede Antonio Varas</option>
+          <option value="san-joaquin">Sede San Joaquín</option>
+          <option value="plaza-oeste">Sede Plaza Oeste</option>
+          <option value="padre-alonso-ovalle">Sede Padre Alonso de Ovalle</option>
+        </select>
+        <p class="text-xs text-gray-500 mt-2">Plan Gratuito: Oportunidades asociadas a la comuna de tu sede.</p>
+      </div>
+
+      <div class="bg-gradient-to-br from-yellow-100 to-yellow-50 border border-yellow-300 p-4 rounded-xl shadow-sm">
+        <div class="flex items-center space-x-2">
+          <span class="text-xl">🔒</span>
+          <h4 class="font-bold text-yellow-800 text-sm">¿Buscar en toda la RM?</h4>
+        </div>
+        <p class="text-xs text-yellow-700 mt-2 mb-3">Pasa al Plan Premium con 7 días de prueba gratis y accede a vacantes en Providencia, Santiago, Las Condes y más.</p>
+        <a href="#premium" class="block text-center text-xs bg-yellow-500 hover:bg-yellow-600 text-blue-900 font-bold py-2 rounded-lg transition shadow-sm">
+          Activar Prueba Gratuita
+        </a>
+      </div>
+    </aside>
+
+    <!-- MAPA INTERACTIVO (DERECHA) -->
+    <section id="mapa-section" class="lg:col-span-3">
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <div class="mb-4">
+          <h2 class="text-xl font-bold text-blue-900">Mapa de Ubicación de Prácticas 🗺️</h2>
+          <p class="text-sm text-gray-600">Explora la ubicación geográfica de los cupos disponibles según tu sede.</p>
+        </div>
+        <!-- Contenedor del Mapa con altura especificada (h-96) y z-index controlado -->
+        <div id="map" class="h-96 w-full rounded-lg border border-gray-200 z-10"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- SECCIÓN INFERIOR: RESULTADOS / LISTA DE OFERTAS -->
+  <section class="max-w-7xl mx-auto px-4 pb-12 w-full">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold text-gray-800">Ofertas Recomendadas para tu Sede</h2>
+      <span class="text-sm text-gray-500">Mostrando 2 ofertas</span>
+    </div>
+
+    <div class="space-y-4">
+      <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <span class="text-xs font-semibold bg-green-100 text-green-800 px-2.5 py-1 rounded-full">98% Compatible</span>
+          <h3 class="text-lg font-bold text-blue-900 mt-2">Practicante de Desarrollo Software / TI</h3>
+          <p class="text-sm font-medium text-gray-600">Tech Solutions Chile SpA</p>
+          <div class="flex flex-wrap gap-3 text-xs text-gray-500 mt-3">
+            <span>📍 Cerca de Sede Puente Alto</span>
+            <span>💼 Práctica Profesional</span>
+            <span>💻 Presencial</span>
+          </div>
+        </div>
+        <button class="bg-blue-900 hover:bg-blue-800 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition w-full md:w-auto">
+          Postular
+        </button>
+      </div>
+
+      <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <span class="text-xs font-semibold bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full">85% Compatible</span>
+          <h3 class="text-lg font-bold text-blue-900 mt-2">Soporte TI y Redes</h3>
+          <p class="text-sm font-medium text-gray-600">Transportes Fregosi</p>
+          <div class="flex flex-wrap gap-3 text-xs text-gray-500 mt-3">
+            <span>📍 Cerca de Sede Puente Alto</span>
+            <span>💼 Práctica Laboral</span>
+            <span>💻 Híbrido</span>
+          </div>
+        </div>
+        <button class="bg-blue-900 hover:bg-blue-800 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition w-full md:w-auto">
+          Postular
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- WIDGET DEL ASISTENTE DE IA -->
+  <div class="fixed bottom-6 right-6 z-50">
+    <button onclick="toggleChat()" class="bg-blue-900 hover:bg-blue-800 text-white p-4 rounded-full shadow-2xl flex items-center space-x-2 transition transform hover:scale-105">
+      <span class="text-xl">🤖</span>
+      <span class="font-bold text-sm hidden md:inline">Asistente IA Duoc</span>
+    </button>
+
+    <!-- Se añade la clase 'hidden' para que inicie cerrado -->
+    <div id="chatBox" class="chat-container hidden absolute bottom-16 right-0 w-80 md:w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+      <div class="bg-blue-900 text-white p-4 flex justify-between items-center">
+        <div>
+          <h4 class="font-bold text-sm">Asistente Virtual IA</h4>
+          <p class="text-xs text-blue-200">Soporte y Orientación de Prácticas</p>
+        </div>
+        <button onclick="toggleChat()" class="text-gray-300 hover:text-white font-bold text-xl">&times;</button>
+      </div>
+      
+      <div id="chatMessages" class="p-4 h-64 overflow-y-auto space-y-3 text-sm">
+        <div class="bg-gray-100 p-3 rounded-lg text-gray-800 max-w-[85%]">
+          ¡Hola! Soy tu asistente de IA. ¿Necesitas ayuda para buscar prácticas en tu sede, saber más del Plan Premium o ajustar tu perfil?
+        </div>
+      </div>
+
+      <div class="p-3 border-t border-gray-200 flex space-x-2">
+        <input type="text" id="userInput" placeholder="Escribe tu consulta aquí..." class="flex-1 p-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-900">
+        <button onclick="sendMessage()" class="bg-blue-900 hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm font-bold transition">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-blue-950 text-gray-300 border-t border-blue-900 mt-12">
+    <div class="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div class="space-y-4">
+        <div class="flex items-center space-x-2">
+          <span class="text-2xl font-bold tracking-tight text-white">Prácticas<span class="text-yellow-400">Pro</span></span>
+        </div>
+        <p class="text-xs text-gray-400 leading-relaxed">
+          Plataforma de vinculación laboral enfocada en conectar a estudiantes y egresados de Duoc UC con las mejores ofertas de prácticas en el mercado.
+        </p>
+        <span class="inline-block text-xs bg-blue-900 text-blue-200 px-2.5 py-1 rounded font-medium">
+          Comunidad Duoc UC
+        </span>
+      </div>
+
+      <div>
+        <h4 class="text-white text-sm font-bold mb-4 uppercase tracking-wider">Navegación</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#mapa-section" class="hover:text-yellow-400 transition">Mapa de Vacantes</a></li>
+          <li><a href="#premium" class="hover:text-yellow-400 transition">Plan Premium RM</a></li>
+          <li><a href="{% url 'login_usuario' %}" class="hover:text-yellow-400 transition">Portal Estudiantes</a></li>
+          <li><a href="{% url 'login_empresa' %}" class="hover:text-yellow-400 transition">Portal Empresas</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="text-white text-sm font-bold mb-4 uppercase tracking-wider">Soporte & Legal</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" class="hover:text-yellow-400 transition">Preguntas Frecuentes</a></li>
+          <li><a href="#" class="hover:text-yellow-400 transition">Términos y Condiciones</a></li>
+          <li><a href="#" class="hover:text-yellow-400 transition">Políticas de Privacidad</a></li>
+          <li><a href="#" class="hover:text-yellow-400 transition">Contacto y Ayuda</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="text-white text-sm font-bold mb-4 uppercase tracking-wider">Contacto</h4>
+        <p class="text-xs text-gray-400 mb-3">¿Tienes dudas sobre los convenios o acreditaciones de práctica?</p>
+        <p class="text-xs text-yellow-400 font-medium mb-4">soporte@practicaspro.cl</p>
+        <div class="flex space-x-4 text-gray-400">
+          <a href="#" class="hover:text-white transition">LinkedIn</a>
+          <a href="#" class="hover:text-white transition">Instagram</a>
+          <a href="#" class="hover:text-white transition">Twitter / X</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="border-t border-blue-900/60 bg-blue-950 py-4 text-center text-xs text-gray-500">
+      <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+        <p>&copy; 2026 PrácticasPro. Todos los derechos reservados.</p>
+        <p>Desarrollado para la comunidad Duoc UC.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="{% static 'js/app.js' %}"></script>
+  
+  <script>
+    // 1. Script para inicializar Leaflet Mapa
+    document.addEventListener("DOMContentLoaded", function() {
+      // Coordenadas iniciales (Puente Alto / Santiago)
+      var map = L.map('map').setView([-33.5986, -70.5785], 13);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      // Marcador de ejemplo
+      L.marker([-33.5986, -70.5785]).addTo(map)
+        .bindPopup('<b>Sede Duoc UC Puente Alto</b><br>Ofertas activas cercanas.')
+        .openPopup();
+    });
+
+    // 2. Funciones del Chat
+    function toggleChat() {
+      const chatBox = document.getElementById('chatBox');
+      chatBox.classList.toggle('hidden');
+    }
+  </script>
+</body>
+</html>

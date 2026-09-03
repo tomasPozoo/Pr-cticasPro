@@ -1,0 +1,218 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Estudiante - PrácticasPro</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col font-sans text-gray-800">
+
+  <!-- NAVBAR / NAVEGACIÓN -->
+  <header class="bg-blue-900 text-white shadow-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="{% url 'index' %}" class="flex items-center space-x-2">
+        <span class="text-2xl font-bold tracking-tight">Prácticas<span class="text-yellow-400">Pro</span></span>
+        <span class="bg-blue-800 text-blue-200 text-xs px-2 py-0.5 rounded font-medium border border-blue-700">Duoc UC</span>
+      </a>
+
+      <nav class="flex items-center space-x-4 text-xs sm:text-sm">
+        <a href="{% url 'dashboard_estudiante' %}" class="text-yellow-400 font-bold border-b-2 border-yellow-400 pb-1">Buscar Prácticas</a>
+        <a href="{% url 'suscripcion_premium' %}" class="bg-yellow-500 hover:bg-yellow-400 text-blue-950 px-3 py-1.5 rounded-lg font-bold transition flex items-center space-x-1 shadow">
+          <span>⭐ Pasar a Premium</span>
+        </a>
+        <a href="{% url 'login_usuario' %}" class="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg transition font-medium">Cerrar Sesión</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+
+    <!-- BANNER DE BIENVENIDA Y ESTADO PREMIUM -->
+    <div class="bg-blue-900 text-white rounded-2xl p-6 shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-bold">¡Hola, Juan Pérez! 👋</h1>
+        <p class="text-xs sm:text-sm text-blue-200 mt-1">
+          Estudiante de <strong>Ingeniería en Informática</strong> (Sede Puente Alto)
+        </p>
+      </div>
+      <div class="bg-blue-800/80 border border-blue-700 p-3 rounded-xl text-xs space-y-1">
+        <div class="flex items-center space-x-2">
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-green-400"></span>
+          <span class="font-semibold text-white">Plan Gratuito Activo</span>
+        </div>
+        <p class="text-blue-200">Zona de búsqueda actual: <strong>Puente Alto</strong></p>
+        <a href="{% url 'suscripcion_premium' %}" class="inline-block text-yellow-400 font-bold hover:underline pt-1">
+          Ampliar búsqueda a toda la Región Metropolitana →
+        </a>
+      </div>
+    </div>
+
+    <!-- BARRA DE BÚSQUEDA Y FILTROS -->
+    <section class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+      <form class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Palabra clave</label>
+          <input type="text" placeholder="Ej. Soporte, Python, SQL..." class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-900 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Tipo de Práctica</label>
+          <select class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-900 focus:outline-none">
+            <option value="">Todas las modalidades</option>
+            <option value="laboral">Práctica Laboral</option>
+            <option value="profesional" selected>Práctica Profesional</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Comuna / Cobertura</label>
+          <select class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-900 focus:outline-none bg-gray-50">
+            <option value="puente-alto" selected>Puente Alto (Tu comuna)</option>
+            <option value="rm" disabled>🔒 Toda la RM (Requiere Premium)</option>
+          </select>
+        </div>
+        <div class="flex items-end">
+          <button type="button" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-2.5 rounded-lg transition shadow text-sm">
+            Buscar Prácticas
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- CONTENEDOR PRINCIPAL: MAPA + RESULTADOS -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- COLUMNA IZQ: LISTA DE VACANTES -->
+      <div class="lg:col-span-2 space-y-4">
+        <div class="flex justify-between items-center">
+          <h2 class="text-lg font-bold text-gray-900">Oportunidades Compatibles (2)</h2>
+          <span class="text-xs text-gray-500">Ordenadas por compatibilidad con tu perfil</span>
+        </div>
+
+        <!-- TARJETA VACANTE 1 -->
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="bg-green-100 text-green-800 text-xs px-2.5 py-0.5 rounded-full font-bold">95% Compatible</span>
+              <h3 class="text-base font-bold text-gray-900 mt-1">Practicante de Desarrollo Software / TI</h3>
+              <p class="text-xs font-semibold text-blue-900">Tech Solutions Chile • Puente Alto</p>
+            </div>
+            <span class="bg-blue-50 text-blue-900 text-xs font-semibold px-2.5 py-1 rounded">Práctica Profesional</span>
+          </div>
+          <p class="text-xs text-gray-600 line-clamp-2">
+            Buscamos estudiante de Ingeniería en Informática para apoyar en proyectos de desarrollo web, mantenimiento de bases de datos SQL y soporte en sistemas internos.
+          </p>
+          <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+            <span class="text-xs text-gray-400">Publicado hace 2 días</span>
+            <button class="bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold px-4 py-2 rounded-lg transition">
+              Postular Ahora
+            </button>
+          </div>
+        </div>
+
+        <!-- TARJETA VACANTE 2 -->
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="bg-green-100 text-green-800 text-xs px-2.5 py-0.5 rounded-full font-bold">88% Compatible</span>
+              <h3 class="text-base font-bold text-gray-900 mt-1">Soporte Técnico e Infraestructura TI</h3>
+              <p class="text-xs font-semibold text-blue-900">Redes & Servicios SpA • Puente Alto</p>
+            </div>
+            <span class="bg-blue-50 text-blue-900 text-xs font-semibold px-2.5 py-1 rounded">Práctica Profesional</span>
+          </div>
+          <p class="text-xs text-gray-600 line-clamp-2">
+            Apoyo en configuración de redes locales, instalación de equipamiento computacional y atención de mesa de ayuda institucional.
+          </p>
+          <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+            <span class="text-xs text-gray-400">Publicado hace 4 días</span>
+            <button class="bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold px-4 py-2 rounded-lg transition">
+              Postular Ahora
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMNA DER: MAPA DE GEOLOCALIZACIÓN -->
+      <div class="space-y-4">
+        <h2 class="text-lg font-bold text-gray-900">Mapa de Ubicación</h2>
+        
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col h-[400px]">
+          <!-- SIMULACIÓN DE MAPA -->
+          <div class="bg-blue-50 flex-grow relative flex items-center justify-center border-b border-gray-200">
+            <div class="text-center p-4">
+              <span class="text-4xl">📍</span>
+              <p class="text-xs font-bold text-gray-700 mt-2">Visualización de Comuna: Puente Alto</p>
+              <p class="text-xs text-gray-500">2 empresas con cupos disponibles cerca de ti</p>
+            </div>
+            
+            <!-- Marcadores Simulados -->
+            <div class="absolute top-1/3 left-1/3 bg-blue-900 text-white text-xs px-2 py-1 rounded-full shadow font-bold cursor-pointer hover:scale-110 transition">
+              📍 Tech Solutions
+            </div>
+            <div class="absolute bottom-1/3 right-1/4 bg-blue-900 text-white text-xs px-2 py-1 rounded-full shadow font-bold cursor-pointer hover:scale-110 transition">
+              📍 Redes SpA
+            </div>
+          </div>
+
+          <!-- AVISO SUSCRIPCIÓN EN MAPA -->
+          <div class="p-4 bg-yellow-50 text-center text-xs border-t border-yellow-200 space-y-2">
+            <p class="text-yellow-900 font-medium">
+              ¿Quieres ver ofertas en Santiago, Providencia, Las Condes o Ñuñoa?
+            </p>
+            <a href="{% url 'suscripcion_premium' %}" class="inline-block bg-yellow-500 hover:bg-yellow-400 text-blue-950 font-bold px-3 py-1.5 rounded-lg transition">
+              Activar Prueba Gratuita Premium ⭐
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- WIDGET FLOTANTE: ASISTENTE VIRTUAL IA -->
+  <div class="fixed bottom-6 right-6 z-50">
+    <button onclick="document.getElementById('chat-ia').classList.toggle('hidden')" 
+      class="bg-blue-900 hover:bg-blue-800 text-white p-4 rounded-full shadow-2xl flex items-center space-x-2 transition transform hover:scale-105">
+      <span class="text-xl">🤖</span>
+      <span class="text-xs font-bold hidden sm:inline">Asistente IA</span>
+    </button>
+
+    <!-- CAJA DE CHAT FLOTANTE -->
+    <div id="chat-ia" class="hidden absolute bottom-16 right-0 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col h-[420px]">
+      <div class="bg-blue-900 text-white p-3.5 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+          <span class="text-lg">🤖</span>
+          <div>
+            <h4 class="text-xs font-bold">Asistente PrácticasPro</h4>
+            <p class="text-[10px] text-blue-200">En línea para ayudarte</p>
+          </div>
+        </div>
+        <button onclick="document.getElementById('chat-ia').classList.add('hidden')" class="text-gray-300 hover:text-white text-sm font-bold">✕</button>
+      </div>
+
+      <div class="flex-grow p-3 space-y-3 overflow-y-auto text-xs bg-gray-50">
+        <div class="bg-white p-3 rounded-lg border border-gray-200 shadow-sm max-w-[85%]">
+          Hola Juan 👋. Soy tu asistente virtual. ¿Tienes dudas sobre cómo postular, crear tu CV o contratar el plan Premium para ampliar tu búsqueda?
+        </div>
+      </div>
+
+      <div class="p-2.5 bg-white border-t border-gray-200 flex gap-2">
+        <input type="text" placeholder="Escribe tu consulta aquí..." class="flex-grow p-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-900">
+        <button class="bg-blue-900 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-blue-800 transition">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-gray-900 text-gray-400 py-6 border-t border-gray-800 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 text-center text-xs space-y-2">
+      <p>&copy; 2026 PrácticasPro — Plataforma de Vinculación de Prácticas para Estudiantes Duoc UC.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

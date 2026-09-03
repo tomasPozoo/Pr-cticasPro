@@ -1,0 +1,163 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro Estudiantes - PrácticasPro</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 py-8 font-sans">
+
+  <div class="max-w-2xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200 my-auto">
+    
+    <!-- ENCABEZADO / BRANDING -->
+    <div class="bg-blue-900 p-6 text-white text-center">
+      <div class="flex justify-center items-center space-x-2 mb-1">
+        <span class="text-2xl font-bold tracking-tight">Prácticas<span class="text-yellow-400">Pro</span></span>
+      </div>
+      <h2 class="text-xl font-bold text-blue-100">Registro de Estudiante</h2>
+      <p class="text-xs text-blue-200 mt-1">Crea tu perfil institucional para conectar con oportunidades de práctica</p>
+    </div>
+
+    <!-- FORMULARIO DE REGISTRO -->
+    <form class="p-6 md:p-8 space-y-6">
+      
+      <!-- SECCIÓN 1: DATOS DE CUENTA -->
+      <div>
+        <h3 class="text-sm font-bold text-blue-900 border-b border-gray-200 pb-2 mb-4 uppercase tracking-wider">
+          1. Credenciales de Acceso
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <!-- Nombre Completo -->
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium text-gray-700 mb-1">Nombre Completo *</label>
+            <input type="text" placeholder="Ej. Juan Pérez González" required
+              class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-900">
+          </div>
+
+          <!-- Correo Institucional -->
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium text-gray-700 mb-1">Correo Institucional Duoc UC *</label>
+            <input type="email" placeholder="ejemplo@alumnos.duoc.cl" required
+              class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-900">
+            <p class="text-xs text-gray-500 mt-1">Exclusivo para dominios @alumnos.duoc.cl o @duocuc.cl</p>
+          </div>
+
+          <!-- Contraseña -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Contraseña *</label>
+            <input type="password" placeholder="••••••••" required
+              class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-900">
+          </div>
+
+          <!-- Confirmar Contraseña -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Confirmar Contraseña *</label>
+            <input type="password" placeholder="••••••••" required
+              class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-900">
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SECCIÓN 2: INFORMACIÓN ACADÉMICA Y PRÁCTICA -->
+      <div>
+        <h3 class="text-sm font-bold text-blue-900 border-b border-gray-200 pb-2 mb-4 uppercase tracking-wider">
+          2. Perfil Académico
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <!-- Carrera -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Carrera *</label>
+            <select required class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-900">
+              <option value="" disabled selected>Selecciona tu carrera</option>
+              <option value="informatica">Ingeniería en Informática</option>
+              <option value="desarrollo-software">Analista Programador / Software</option>
+              <option value="redes">Ingeniería en Redes y Telecomunicaciones</option>
+              <option value="administracion">Administración de Empresas</option>
+              <option value="otra">Otra carrera Duoc UC</option>
+            </select>
+          </div>
+
+          <!-- Sede Duoc UC -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Sede Duoc UC *</label>
+            <select required class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-900">
+              <option value="" disabled selected>Selecciona tu sede</option>
+              <option value="puente-alto">Sede Puente Alto</option>
+              <option value="san-bernardo">Sede San Bernardo</option>
+              <option value="plaza-vespucio">Sede Plaza Vespucio</option>
+              <option value="antonio-varas">Sede Antonio Varas</option>
+              <option value="san-joaquin">Sede San Joaquín</option>
+              <option value="plaza-oeste">Sede Plaza Oeste</option>
+              <option value="padre-alonso-ovalle">Sede Padre Alonso de Ovalle</option>
+            </select>
+          </div>
+
+          <!-- Modalidad de Estudios -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Modalidad de Estudios *</label>
+            <select required class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-900">
+              <option value="diurno">Diurno</option>
+              <option value="vespertino">Vespertino</option>
+              <option value="online">100% Online</option>
+            </select>
+          </div>
+
+          <!-- Etapa / Año Académico -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Etapa Académica *</label>
+            <select required class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-900">
+              <option value="ultimo-ano">Último Año / Semestre</option>
+              <option value="egresado">Egresado / Titulación pendiente</option>
+              <option value="intermedio">Año Intermedio</option>
+            </select>
+          </div>
+
+          <!-- Tipo de Práctica Pendiente -->
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium text-gray-700 mb-1">Tipo de Práctica Pendiente *</label>
+            <div class="grid grid-cols-2 gap-4 mt-1">
+              <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50 transition">
+                <input type="radio" name="tipo_practica" value="laboral" required class="text-blue-900 focus:ring-blue-900">
+                <span class="ml-2 text-xs font-medium text-gray-700">Práctica Laboral</span>
+              </label>
+              <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50 transition">
+                <input type="radio" name="tipo_practica" value="profesional" required class="text-blue-900 focus:ring-blue-900">
+                <span class="ml-2 text-xs font-medium text-gray-700">Práctica Profesional</span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TERMINOS Y CONDICIONES -->
+      <div class="flex items-start space-x-2 text-xs text-gray-600">
+        <input type="checkbox" required class="mt-0.5 rounded text-blue-900 focus:ring-blue-900">
+        <span>Acepto los <a href="#" class="text-blue-900 font-medium underline">Términos y Condiciones</a> de la plataforma y confirmo ser estudiante o egresado activo de Duoc UC.</span>
+      </div>
+
+      <!-- BOTÓN REGISTRAR -->
+      <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 rounded-lg transition shadow-md">
+        Crear Cuenta de Estudiante
+      </button>
+
+      <!-- ENLACE DE INICIO DE SESIÓN -->
+      <div class="text-center pt-2 border-t border-gray-100">
+        <p class="text-xs text-gray-600">
+          ¿Ya tienes una cuenta creada? 
+          <a href="{% url 'login_usuario' %}" class="text-blue-900 font-bold hover:underline ml-1">Inicia sesión aquí</a>
+        </p>
+      </div>
+
+    </form>
+  </div>
+
+</body>
+</html>

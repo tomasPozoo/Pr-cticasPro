@@ -1,0 +1,14 @@
+#map {
+  height: 480px;
+  width: 100%;
+  border-radius: 0.75rem;
+  z-index: 1;
+}
+
+.chat-container {
+  display: none;
+}
+
+.chat-container.active {
+  display: block;
+}

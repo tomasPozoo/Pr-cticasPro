@@ -1,0 +1,134 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro Empresa - PrácticasPro</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 py-8 font-sans">
+
+  <div class="max-w-2xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200 my-auto">
+    
+    <!-- ENCABEZADO / BRANDING -->
+    <div class="bg-blue-900 p-6 text-white text-center">
+      <div class="flex justify-center items-center space-x-2 mb-1">
+        <span class="text-2xl font-bold tracking-tight">Prácticas<span class="text-yellow-400">Pro</span></span>
+      </div>
+      <h2 class="text-xl font-bold text-blue-100">Registro de Organización / Empresa</h2>
+      <p class="text-xs text-blue-200 mt-1">Crea tu perfil empresarial para publicar ofertas y conectar con estudiantes de Duoc UC</p>
+    </div>
+
+    <!-- FORMULARIO DE REGISTRO -->
+    <form class="p-6 md:p-8 space-y-6">
+      
+      <!-- SECCIÓN 1: DATOS DE LA EMPRESA -->
+      <div>
+        <h3 class="text-sm font-bold text-blue-900 border-b border-gray-200 pb-2 mb-4 uppercase tracking-wider">
+          1. Información de la Empresa
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <!-- Razón Social / Nombre Fantasía -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Nombre o Razón Social *</label>
+            <input type="text" placeholder="Ej. Tech Solutions Chile SpA" required
+              class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-900">
+          </div>
+
+          <!-- RUT Empresa -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">RUT Empresa *</label>
+            <input type="text" placeholder="Ej. 76.123.456-7" required
+              class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-900">
+          </div>
+
+          <!-- Rubro / Sector -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Rubro o Sector Industrial *</label>
+            <select required class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-900">
+              <option value="" disabled selected>Selecciona un rubro</option>
+              <option value="tecnologia">Tecnología / TI / Software</option>
+              <option value="telecomunicaciones">Telecomunicaciones y Redes</option>
+              <option value="administracion">Administración, Banca y Finanzas</option>
+              <option value="logistica">Logística y Transporte</option>
+              <option value="otra">Otro Sector</option>
+            </select>
+          </div>
+
+          <!-- Dirección Principal -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Comuna Casa Matriz / Oficina *</label>
+            <input type="text" placeholder="Ej. Providencia, Santiago, Puente Alto..." required
+              class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-900">
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SECCIÓN 2: DATOS DEL ENCARGADO / RECURSOS HUMANOS -->
+      <div>
+        <h3 class="text-sm font-bold text-blue-900 border-b border-gray-200 pb-2 mb-4 uppercase tracking-wider">
+          2. Encargado / Reclutamiento
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <!-- Nombre del Contacto -->
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium text-gray-700 mb-1">Nombre Completo del Contacto *</label>
+            <input type="text" placeholder="Ej. María González" required
+              class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-900">
+          </div>
+
+          <!-- Correo Corporativo -->
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium text-gray-700 mb-1">Correo Electrónico Corporativo *</label>
+            <input type="email" placeholder="reclutamiento@empresa.com" required
+              class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-900">
+            <p class="text-xs text-gray-500 mt-1">Utiliza el correo del encargado de RRHH o del área de selección.</p>
+          </div>
+
+          <!-- Contraseña -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Contraseña *</label>
+            <input type="password" placeholder="••••••••" required
+              class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-900">
+          </div>
+
+          <!-- Confirmar Contraseña -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Confirmar Contraseña *</label>
+            <input type="password" placeholder="••••••••" required
+              class="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-900">
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TÉRMINOS Y CONDICIONES -->
+      <div class="flex items-start space-x-2 text-xs text-gray-600">
+        <input type="checkbox" required class="mt-0.5 rounded text-blue-900 focus:ring-blue-900">
+        <span>Acepto las <a href="#" class="text-blue-900 font-medium underline">Políticas de Uso de Empresas</a> y confirmo representar legalmente a la entidad para publicar cupos de práctica.</span>
+      </div>
+
+      <!-- BOTÓN REGISTRAR -->
+      <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 rounded-lg transition shadow-md">
+        Crear Cuenta de Empresa
+      </button>
+
+      <!-- ENLACE DE INICIO DE SESIÓN -->
+      <div class="text-center pt-2 border-t border-gray-100">
+        <p class="text-xs text-gray-600">
+          ¿Tu empresa ya tiene una cuenta activa? 
+          <a href="{% url 'login_empresa' %}" class="text-blue-900 font-bold hover:underline ml-1">Inicia sesión aquí</a>
+        </p>
+      </div>
+
+    </form>
+  </div>
+
+</body>
+</html>
