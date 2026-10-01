@@ -1,0 +1,33 @@
+/* Transiciones de sliders */
+.hero-slide {
+  transition: opacity 0.7s ease-in-out;
+}
+
+.feature-slide {
+  transition: all 0.5s ease-in-out;
+}
+
+/* Ajustes de mapa Leaflet */
+#map {
+  min-height: 420px;
+  width: 100%;
+}
+
+/* Scrollbar personalizada para el chat interactivo */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: rgba(23, 37, 84, 0.5);
+  border-radius: 8px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #3b82f6;
+  border-radius: 8px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #60a5fa;
+}
