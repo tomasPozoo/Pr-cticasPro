@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <a href="{% url 'ofertas_list' %}" class="text-gray-500 hover:text-blue-600 flex items-center gap-2 mb-6 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Volver a las ofertas
+    </a>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <!-- Cabecera -->
+        <div class="bg-gray-50 p-6 sm:p-8 border-b border-gray-100">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-bold">
+                    {{ oferta.modalidad }}
+                </span>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ oferta.titulo }}</h1>
+            <p class="text-xl text-emerald-600 font-medium">🏢 {{ oferta.empresa_nombre }}</p>
+        </div>
+
+        <!-- Cuerpo -->
+        <div class="p-6 sm:p-8 space-y-8">
+            <div>
+                <h3 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Descripción del Cargo</h3>
+                <p class="text-gray-700 whitespace-pre-line">{{ oferta.descripcion }}</p>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Requisitos</h3>
+                <p class="text-gray-700 whitespace-pre-line">{{ oferta.requisitos }}</p>
+            </div>
+
+            <div class="pt-6">
+                <!-- Botón de navegación al formulario de postulación -->
+                <a href="{% url 'postular_oferta' oferta.id %}" class="inline-block w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition shadow-md text-center">
+                    Postular a esta práctica
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

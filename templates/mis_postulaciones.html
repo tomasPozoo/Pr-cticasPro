@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Mis Postulaciones</h2>
+
+    {% if postulaciones %}
+        <div class="grid gap-6">
+            {% for postulacion in postulaciones %}
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900">
+                            {{ postulacion.oferta_titulo }}
+                        </h3>
+                        <p class="text-gray-600 text-sm">
+                            Empresa: <strong>{{ postulacion.empresa_nombre }}</strong>
+                        </p>
+                    </div>
+
+                    <!-- Insignia de Estado -->
+                    <span class="px-3 py-1 text-xs font-bold rounded-full uppercase
+                        {% if postulacion.estado == 'aceptado' %} bg-green-100 text-green-800
+                        {% elif postulacion.estado == 'rechazado' %} bg-red-100 text-red-800
+                        {% else %} bg-yellow-100 text-yellow-800 {% endif %}">
+                        {{ postulacion.estado }}
+                    </span>
+                </div>
+
+                <!-- Mensaje de Respuesta de la Empresa (si existe) -->
+                {% if postulacion.mensaje_empresa %}
+                <div class="mt-4 p-4 rounded-xl border {% if postulacion.estado == 'aceptado' %} bg-green-50 border-green-200 text-green-900 {% else %} bg-gray-50 border-gray-200 text-gray-800 {% endif %}">
+                    <p class="text-xs font-bold uppercase tracking-wider mb-1">
+                        Mensaje de la empresa:
+                    </p>
+                    <p class="text-sm font-medium whitespace-pre-line">
+                        {{ postulacion.mensaje_empresa }}
+                    </p>
+                </div>
+                {% endif %}
+
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-blue-50 border border-blue-200 text-blue-800 p-6 rounded-2xl text-center">
+            Aún no te has postulado a ninguna oferta.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

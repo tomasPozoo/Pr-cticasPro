@@ -27,8 +27,8 @@
         </div>
     </div>
 
-    <!-- Contenido del Panel -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Contenido del Panel (Estadísticas) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <h3 class="text-gray-500 text-sm font-medium">Ofertas Publicadas</h3>
             <p class="text-3xl font-bold text-gray-800 mt-2">0</p>
@@ -40,6 +40,20 @@
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <h3 class="text-gray-500 text-sm font-medium">Vacantes Abiertas</h3>
             <p class="text-3xl font-bold text-gray-800 mt-2">0</p>
+        </div>
+    </div>
+
+    <!-- Acciones Rápidas -->
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Acciones Rápidas</h2>
+        <div class="flex flex-wrap gap-4">
+            <a href="{% url 'crear_oferta' %}" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-medium transition shadow-sm flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                Crear Nueva Oferta
+            </a>
+            <a href="{% url 'mis_ofertas' %}" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-medium transition shadow-sm">
+                Ver Mis Ofertas
+            </a>
         </div>
     </div>
 

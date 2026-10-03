@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-5" style="max-width: 1000px; padding: 20px;">
+    
+    <!-- Encabezado -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px;">
+        <div>
+            <h2 style="font-size: 1.8rem; font-weight: 700; color: #1e293b; margin: 0;">
+                Postulantes para: <span style="color: #0284c7;">{{ oferta.titulo }}</span>
+            </h2>
+            <p style="color: #64748b; margin: 5px 0 0 0;">
+                Total de postulaciones recibidas: <strong>{{ total_postulantes }}</strong>
+            </p>
+        </div>
+        <a href="{% url 'mis_ofertas' %}" style="background-color: #f1f5f9; color: #334155; text-decoration: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; transition: all 0.2s;">
+            ← Volver a mis ofertas
+        </a>
+    </div>
+
+    <!-- Lista de Postulantes -->
+    {% if postulantes %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); gap: 20px;">
+            {% for postulante in postulantes %}
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; justify-content: space-between;">
+                
+                <div>
+                    <!-- Encabezado de la Tarjeta del Postulante -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <div>
+                            <h4 style="font-size: 1.25rem; font-weight: 700; color: #0f172a; margin: 0;">
+                                {{ postulante.estudiante_nombre }}
+                            </h4>
+                            <span style="color: #64748b; font-size: 0.9rem;">
+                                ✉ {{ postulante.estudiante_email }}
+                            </span>
+                        </div>
+
+                        <!-- Badge de Estado -->
+                        <span style="padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+                            {% if postulante.estado == 'pendiente' %} background-color: #fef3c7; color: #b45309;
+                            {% elif postulante.estado == 'aceptado' %} background-color: #dcfce7; color: #15803d;
+                            {% elif postulante.estado == 'rechazado' %} background-color: #fee2e2; color: #b91c1c;
+                            {% else %} background-color: #f1f5f9; color: #475569; {% endif %}">
+                            {{ postulante.estado }}
+                        </span>
+                    </div>
+
+                    <!-- Carta de Presentación -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-weight: 600; color: #334155; font-size: 0.85rem; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Carta de Presentación:
+                        </label>
+                        <div style="background-color: #f8fafc; border: 1px solid #f1f5f9; padding: 14px; border-radius: 8px; color: #334155; font-size: 0.95rem; line-height: 1.5; white-space: pre-line;">
+                            {{ postulante.mensaje|default:"El estudiante no adjuntó un mensaje." }}
+                        </div>
+                    </div>
+
+                    <!-- Botón para ver/descargar CV Subido -->
+                    {% if postulante.cv_url %}
+                    <div style="margin-bottom: 20px;">
+                        <a href="{{ postulante.cv_url }}" target="_blank" download style="display: inline-block; background-color: #0284c7; color: #ffffff; text-decoration: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; transition: background 0.2s;">
+                            📥 Descargar / Ver CV Adjunto
+                        </a>
+                    </div>
+                    {% elif postulante.cv_link %}
+                    <div style="margin-bottom: 20px;">
+                        <a href="{{ postulante.cv_link }}" target="_blank" style="display: inline-block; background-color: #ffc107; color: #000; text-decoration: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; transition: background 0.2s;">
+                            🔗 Ver CV / Portafolio (Enlace)
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Mensaje de respuesta guardado previamente -->
+                    {% if postulante.mensaje_empresa %}
+                    <div style="margin-bottom: 20px; background-color: #f0f9ff; border: 1px solid #bae6fd; padding: 12px; border-radius: 8px;">
+                        <label style="font-weight: 700; color: #0369a1; font-size: 0.8rem; display: block; margin-bottom: 4px; text-transform: uppercase;">
+                            Mensaje dejado al postulante:
+                        </label>
+                        <p style="margin: 0; color: #0c4a6e; font-size: 0.9rem;">
+                            {{ postulante.mensaje_empresa }}
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Acciones para abrir el Modal -->
+                <div style="border-top: 1px solid #f1f5f9; padding-top: 15px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Cambiar estado:</span>
+                    
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" 
+                            onclick="abrirModal('{{ postulante.id }}', 'aceptado', '{{ postulante.estudiante_nombre }}')"
+                            style="background-color: #16a34a; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                            ✓ Aceptar
+                        </button>
+
+                        <button type="button" 
+                            onclick="abrirModal('{{ postulante.id }}', 'rechazado', '{{ postulante.estudiante_nombre }}')"
+                            style="background-color: #dc2626; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                            ✕ Rechazar
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 40px; text-align: center; color: #0369a1;">
+            <h4 style="margin: 0 0 8px 0; font-weight: 700;">Aún no hay postulaciones</h4>
+            <p style="margin: 0;">Cuando los estudiantes se postulen a esta oferta, aparecerán listados aquí.</p>
+        </div>
+    {% endif %}
+
+</div>
+
+<!-- VENTANA EMERGENTE (MODAL) -->
+<div id="modalRespuesta" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; justify-content: center; align-items: center;">
+    <div style="background: white; border-radius: 12px; width: 90%; max-width: 500px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+        
+        <h3 id="modalTitulo" style="font-size: 1.3rem; font-weight: 700; color: #0f172a; margin-top: 0; margin-bottom: 8px;"></h3>
+        <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 16px;">
+            Escribe un mensaje para el estudiante (ej: correo de contacto, fecha de entrevista o motivos):
+        </p>
+
+        <form id="formRespuesta" method="POST" action="">
+            {% csrf_token %}
+            <input type="hidden" name="oferta_id" value="{{ oferta_id }}">
+            <input type="hidden" id="nuevo_estado_input" name="nuevo_estado" value="">
+
+            <textarea id="mensaje_respuesta" name="mensaje_respuesta" rows="4" required
+                placeholder="Ej: ¡Felicidades! Por favor comunícate a contacto@empresa.com para coordinar la entrevista..."
+                style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; margin-bottom: 16px; box-sizing: border-box; resize: vertical;"></textarea>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="cerrarModal()" 
+                    style="background: #e2e8f0; color: #334155; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                    Cancelar
+                </button>
+                <button type="submit" 
+                    style="background: #0284c7; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                    Enviar y Confirmar
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<script>
+function abrirModal(postulacionId, estado, nombreEstudiante) {
+    const modal = document.getElementById('modalRespuesta');
+    const form = document.getElementById('formRespuesta');
+    const titulo = document.getElementById('modalTitulo');
+    const estadoInput = document.getElementById('nuevo_estado_input');
+
+    // Asignar ruta dinámica al formulario
+    form.action = `/empresa/postulaciones/${postulacionId}/cambiar-estado/`;
+    
+    // Asignar estado y título
+    estadoInput.value = estado;
+    titulo.innerText = estado === 'aceptado' 
+        ? `Aceptar a ${nombreEstudiante}` 
+        : `Rechazar a ${nombreEstudiante}`;
+
+    modal.style.display = 'flex';
+}
+
+function cerrarModal() {
+    document.getElementById('modalRespuesta').style.display = 'none';
+}
+</script>
+{% endblock %}

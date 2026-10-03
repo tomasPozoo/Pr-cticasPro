@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <div class="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 shadow-sm">
+        
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">
+            Postular a la Oferta
+        </h2>
+        <p class="text-gray-600 mb-6">
+            Adjunta tu currículum vitae y escribe una carta de presentación para la empresa.
+        </p>
+
+        <!-- Resumen de la oferta -->
+        <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-lg mb-6">
+            <h4 class="text-lg font-bold text-blue-900 margin-0">
+                {{ oferta.titulo }}
+            </h4>
+            <p class="text-sm text-blue-700 mt-1">
+                <strong>Empresa:</strong> {{ oferta.empresa_nombre }} | <strong>Modalidad:</strong> {{ oferta.modalidad }}
+            </p>
+        </div>
+
+        <!-- Formulario (enctype necesario para enviar archivos) -->
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+
+            <div>
+                <label for="mensaje" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Carta de Presentación / Mensaje *
+                </label>
+                <textarea id="mensaje" name="mensaje" rows="4" required
+                    placeholder="Escribe un breve mensaje para la empresa explicando por qué te interesa el cargo..."
+                    class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+            </div>
+
+            <div>
+                <label for="cv_file" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Subir Currículum Vitae (PDF o DOCX) *
+                </label>
+                <input type="file" id="cv_file" name="cv_file" accept=".pdf,.doc,.docx" required
+                    class="w-full p-3 border border-gray-300 rounded-xl bg-gray-50 text-sm">
+            </div>
+
+            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                <a href="{% url 'oferta_detail' oferta.id %}" class="text-gray-500 hover:text-gray-700 text-sm font-semibold">
+                    ← Cancelar
+                </a>
+                
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-md">
+                    Enviar Postulación
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <a href="{% url 'home_empresa' %}" class="text-gray-500 hover:text-emerald-600 flex items-center gap-2 mb-2 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Volver al Panel
+            </a>
+            <h1 class="text-2xl font-bold text-gray-800">Mis Ofertas Publicadas</h1>
+        </div>
+        <a href="{% url 'crear_oferta' %}" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition shadow-sm">
+            + Nueva Oferta
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        {% if ofertas %}
+            <ul class="divide-y divide-gray-100">
+                {% for oferta in ofertas %}
+                <li class="p-6 hover:bg-gray-50 transition">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">{{ oferta.titulo }}</h3>
+                            <div class="mt-1 flex items-center gap-4 text-sm text-gray-500">
+                                <span class="flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                    {{ oferta.modalidad }}
+                                </span>
+                                <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-xs font-medium">
+                                    {{ oferta.estado|title }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <a href="{% url 'ver_postulantes' oferta.id %}" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition">
+                                Ver Postulantes
+                            </a>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="p-12 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No hay ofertas</h3>
+                <p class="mt-1 text-sm text-gray-500">Aún no has publicado ninguna oferta de práctica.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
