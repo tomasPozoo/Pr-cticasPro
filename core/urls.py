@@ -7,7 +7,7 @@ from portal.views import (
     home_estudiante, perfil_estudiante, ofertas_list, oferta_detail, mis_postulaciones,
     postular_oferta, ver_postulantes, cambiar_estado_postulacion, ver_perfil_estudiante,
     home_empresa, perfil_empresa, crear_oferta, mis_ofertas,
-    home_admin, eliminar_usuario, eliminar_oferta
+    home_admin, eliminar_usuario, eliminar_oferta, quienes_somos
 )
 
 urlpatterns = [
@@ -35,6 +35,8 @@ urlpatterns = [
     path('empresa/postulaciones/<str:postulacion_id>/cambiar-estado/', cambiar_estado_postulacion, name='cambiar_estado_postulacion'),
     path('empresa/estudiante/<str:estudiante_id>/perfil/', ver_perfil_estudiante, name='ver_perfil_estudiante'),
 
+    path('quienes-somos/', quienes_somos, name='quienes_somos'),
+    
     # Rutas Admin Panel
     path('admin-panel/', home_admin, name='home_admin'),
     path('admin-panel/eliminar-usuario/<str:usuario_id>/', eliminar_usuario, name='eliminar_usuario'),

@@ -13,7 +13,9 @@ FIREBASE_WEB_API_KEY = "AIzaSyCqOyF0LYCHlHGU44ClVfG5DPeCPnUGRHo"
 # ==========================================
 # VISTAS GENERALES
 # ==========================================
-
+def quienes_somos(request):
+    """Página informativa sobre PrácticasPro, términos y privacidad."""
+    return render(request, 'quienes_somos.html')
 def index(request):
     return render(request, 'index.html')
 
