@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-5" style="max-width: 750px; padding: 20px;">
+    
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+        
+        <h2 style="font-size: 1.6rem; font-weight: 700; color: #0f172a; margin-top: 0; margin-bottom: 8px;">
+            Mi Perfil de Estudiante
+        </h2>
+        <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 25px;">
+            Actualiza tus datos y sube tu foto de perfil.
+        </p>
+
+        <!-- IMPORTANTE: enctype="multipart/form-data" es obligatorio para subir archivos -->
+        <form method="POST" action="{% url 'perfil_estudiante' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Foto de Perfil Actual y Campo para Subir -->
+            <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 25px; background: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #f1f5f9;">
+                <div style="width: 85px; height: 85px; border-radius: 50%; overflow: hidden; background-color: #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 2px solid #0284c7;">
+                    {% if estudiante.foto_url %}
+                        <img src="{{ estudiante.foto_url }}" alt="Foto actual" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                        <span style="font-size: 2.5rem; color: #64748b;">👤</span>
+                    {% endif %}
+                </div>
+                
+                <div style="flex: 1;">
+                    <label style="font-size: 0.85rem; font-weight: 700; color: #334155; display: block; margin-bottom: 6px;">
+                        Subir Nueva Foto de Perfil
+                    </label>
+                    <!-- Campo de tipo FILE para seleccionar imagen -->
+                    <input type="file" name="foto" accept="image/*"
+                        style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; background: #ffffff;">
+                    <small style="color: #64748b; font-size: 0.75rem; display: block; margin-top: 4px;">Formatos permitidos: JPG, PNG, WEBP.</small>
+                </div>
+            </div>
+
+            <!-- Datos personales -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div>
+                    <label style="font-size: 0.85rem; font-weight: 700; color: #334155; display: block; margin-bottom: 6px;">Nombre Completo</label>
+                    <input type="text" name="nombre" value="{{ estudiante.nombre|default:'' }}" required
+                        style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; box-sizing: border-box;">
+                </div>
+
+                <div>
+                    <label style="font-size: 0.85rem; font-weight: 700; color: #334155; display: block; margin-bottom: 6px;">Carrera</label>
+                    <input type="text" name="carrera" value="{{ estudiante.carrera|default:'' }}" placeholder="Ej: Analista Programador"
+                        style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div>
+                    <label style="font-size: 0.85rem; font-weight: 700; color: #334155; display: block; margin-bottom: 6px;">Correo Electrónico (No editable)</label>
+                    <input type="email" value="{{ estudiante.email|default:'' }}" disabled
+                        style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; background-color: #f1f5f9; color: #64748b; border-radius: 6px; font-size: 0.9rem; box-sizing: border-box;">
+                </div>
+
+                <div>
+                    <label style="font-size: 0.85rem; font-weight: 700; color: #334155; display: block; margin-bottom: 6px;">Teléfono</label>
+                    <input type="text" name="telefono" value="{{ estudiante.telefono|default:'' }}" placeholder="+56 9 1234 5678"
+                        style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <label style="font-size: 0.85rem; font-weight: 700; color: #334155; display: block; margin-bottom: 6px;">Biografía / Presentación Profesional</label>
+                <textarea name="bio" rows="4" placeholder="Cuéntanos un poco sobre ti..."
+                    style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; box-sizing: border-box; resize: vertical;">{{ estudiante.bio|default:'' }}</textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #f1f5f9; padding-top: 20px;">
+                <a href="{% url 'home_estudiante' %}" style="background: #e2e8f0; color: #334155; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 0.9rem;">
+                    Cancelar
+                </a>
+                <button type="submit" style="background: #0284c7; color: white; border: none; padding: 10px 22px; border-radius: 6px; font-weight: 700; font-size: 0.9rem; cursor: pointer;">
+                    💾 Guardar Perfil
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+{% endblock %}

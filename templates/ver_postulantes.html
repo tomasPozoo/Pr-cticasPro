@@ -31,9 +31,16 @@
                             <h4 style="font-size: 1.25rem; font-weight: 700; color: #0f172a; margin: 0;">
                                 {{ postulante.estudiante_nombre }}
                             </h4>
-                            <span style="color: #64748b; font-size: 0.9rem;">
+                            <span style="color: #64748b; font-size: 0.9rem; display: block; margin-bottom: 6px;">
                                 ✉ {{ postulante.estudiante_email }}
                             </span>
+
+                            <!-- BOTÓN PARA VER PERFIL COMPLETO -->
+                            {% if postulante.estudiante_id %}
+                            <a href="{% url 'ver_perfil_estudiante' postulante.estudiante_id %}" style="display: inline-block; background-color: #f1f5f9; color: #0f172a; text-decoration: none; padding: 5px 12px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #cbd5e1; margin-top: 4px;">
+                                👤 Ver Perfil Completo
+                            </a>
+                            {% endif %}
                         </div>
 
                         <!-- Badge de Estado -->

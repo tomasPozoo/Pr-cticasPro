@@ -122,31 +122,85 @@ def logout_view(request):
 def home_estudiante(request):
     if request.session.get('user_rol') != 'estudiante':
         return redirect('login')
-        
+
+    user_uid = request.session.get('user_uid')
     db = firestore.client()
-    
-    # Obtener todas las ofertas activas
-    ofertas_ref = db.collection('ofertas').where('estado', '==', 'activa').stream()
-    
-    lista_ofertas = []
-    for doc in ofertas_ref:
-        data = doc.to_dict()
-        data['id'] = doc.id
-        lista_ofertas.append(data)
-        
-    # Extraemos solo las primeras 3 para la vista previa de "Ofertas Recientes"
-    ofertas_recientes = lista_ofertas[:3] 
-    
+
+    # 1. Obtener perfil del estudiante
+    user_doc = db.collection('usuarios').document(user_uid).get()
+    estudiante_data = user_doc.to_dict() if user_doc.exists else {}
+
+    # 2. Contar postulaciones activas del estudiante
+    postulaciones_ref = db.collection('postulaciones').where('estudiante_id', '==', user_uid).get()
+    total_postulaciones = len(postulaciones_ref)
+
+    # 3. Obtener ofertas disponibles
+    ofertas_ref = db.collection('ofertas').stream()
+    ofertas = [{'id': doc.id, **doc.to_dict()} for doc in ofertas_ref]
+
     context = {
-        'nombre': request.session.get('user_name'),
-        'ofertas': ofertas_recientes,
-        'total_ofertas': len(lista_ofertas)
+        'estudiante': estudiante_data,
+        'total_postulaciones': total_postulaciones,
+        'total_ofertas': len(ofertas),
+        'ofertas': ofertas[:6],  # Mostrar solo las primeras 6
     }
-    
     return render(request, 'home_estudiante.html', context)
 
 def perfil_estudiante(request):
-    return render(request, 'perfil_estudiante.html')
+    user_id = request.session.get('user_id')
+    user_rol = request.session.get('user_rol')
+
+    if not user_id or user_rol != 'estudiante':
+        messages.error(request, "Acceso no autorizado.")
+        return redirect('login')
+
+    db = firestore.client()
+    user_ref = db.collection('usuarios').document(user_id)
+
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre')
+        carrera = request.POST.get('carrera')
+        telefono = request.POST.get('telefono')
+        bio = request.POST.get('bio')
+
+        # Obtener datos actuales de Firestore
+        doc_actual = user_ref.get()
+        data_actual = doc_actual.to_dict() if doc_actual.exists else {}
+        foto_url = data_actual.get('foto_url', '')
+
+        # Si el usuario adjuntó una nueva foto
+        if 'foto' in request.FILES:
+            foto_file = request.FILES['foto']
+            fs = FileSystemStorage()
+            
+            # Nombre de archivo único usando el ID del usuario
+            extension = foto_file.name.split('.')[-1]
+            nombre_archivo = f"perfiles/{user_id}.{extension}"
+
+            # Si ya existe una foto anterior, la borramos para reemplazarla
+            if fs.exists(nombre_archivo):
+                fs.delete(nombre_archivo)
+
+            filename = fs.save(nombre_archivo, foto_file)
+            foto_url = fs.url(filename)  # Retorna '/media/perfiles/ID_USUARIO.png'
+
+        # Actualizar Firestore
+        user_ref.update({
+            'nombre': nombre,
+            'carrera': carrera,
+            'telefono': telefono,
+            'bio': bio,
+            'foto_url': foto_url
+        })
+
+        messages.success(request, "¡Perfil y foto actualizados con éxito!")
+        return redirect('perfil_estudiante')
+
+    # GET: Cargar datos para llenar el formulario
+    doc = user_ref.get()
+    estudiante_data = doc.to_dict() if doc.exists else {}
+
+    return render(request, 'perfil_estudiante.html', {'estudiante': estudiante_data})
 
 def ofertas_list(request):
     if request.session.get('user_rol') != 'estudiante':
@@ -385,10 +439,72 @@ def cambiar_estado_postulacion(request, postulacion_id):
         return redirect('ver_postulantes', oferta_id=oferta_id)
 
     return redirect('mis_ofertas')
+def ver_perfil_estudiante(request, estudiante_id):
+    # Opcional: Proteger la vista para que solo entren empresas
+    if request.session.get('user_rol') != 'empresa':
+        messages.error(request, "Acceso denegado. Solo las empresas pueden ver esta página.")
+        return redirect('mis_ofertas')
+
+    try:
+        db = firestore.client()
+        # IMPORTANTE: Cambia 'usuarios' por el nombre real de tu colección si se llama distinto
+        estudiante_doc = db.collection('usuarios').document(estudiante_id).get()
+
+        if not estudiante_doc.exists:
+            messages.error(request, "El perfil del estudiante no fue encontrado.")
+            return redirect('mis_ofertas') # O redirigir a la página anterior
+
+        estudiante_data = estudiante_doc.to_dict()
+        
+        # Le enviamos los datos al nuevo template que creaste
+        return render(request, 'ver_perfil_estudiante.html', {'estudiante': estudiante_data})
+
+    except Exception as e:
+        messages.error(request, f"Error al cargar el perfil: {str(e)}")
+        return redirect('mis_ofertas')
 # ==========================================
 # VISTAS DE ADMINISTRADOR
 # ==========================================
+def ver_perfil_estudiante(request, estudiante_id):
+    rol_actual = request.session.get('user_rol')
+    print(f"\n--- [DEBUG] CARGANDO PERFIL ESTUDIANTE ---")
+    print(f"1. Rol en sesión: '{rol_actual}'")
+    print(f"2. ID recibido: '{estudiante_id}'")
 
+    # Validación 1: Rol de usuario
+    if rol_actual != 'empresa':
+        print("❌ FALLO: El rol de usuario no es 'empresa'. Redirigiendo...")
+        messages.error(request, f"Permiso denegado. Rol actual: {rol_actual}")
+        return redirect('mis_ofertas')
+
+    try:
+        db = firestore.client()
+        
+        # OJO: Verifica si tu colección se llama 'usuarios' o 'estudiantes'
+        doc_ref = db.collection('usuarios').document(estudiante_id)
+        estudiante_doc = doc_ref.get()
+
+        print(f"3. Documento existe en Firestore: {estudiante_doc.exists}")
+
+        # Validación 2: Documento en Firestore
+        if not estudiante_doc.exists:
+            print(f"❌ FALLO: No existe el documento con ID '{estudiante_id}' en la colección 'usuarios'. Redirigiendo...")
+            messages.error(request, "El perfil del estudiante no existe en la base de datos.")
+            return redirect('mis_ofertas')
+
+        estudiante_data = estudiante_doc.to_dict()
+        print(f"4. Datos encontrados: {estudiante_data}")
+
+        # Intentar renderizar la plantilla
+        return render(request, 'ver_perfil_estudiante.html', {'estudiante': estudiante_data})
+
+    except Exception as e:
+        # Validación 3: Error de código o plantilla
+        print(f"❌ EXCEPCIÓN DETECTADA: {type(e).__name__} - {str(e)}")
+        messages.error(request, f"Error interno: {str(e)}")
+        return redirect('mis_ofertas')
+    
+    
 def home_admin(request):
     if request.session.get('user_rol') != 'admin':
         return redirect('login')

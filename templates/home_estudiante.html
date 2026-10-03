@@ -30,72 +30,79 @@
         </div>
     </div>
 
-    <!-- Contenido del Panel (Estadísticas) -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 class="text-gray-500 text-sm font-medium">Postulaciones Activas</h3>
-            <p class="text-3xl font-bold text-gray-800 mt-2">0</p>
-        </div>
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 class="text-gray-500 text-sm font-medium">Ofertas Disponibles</h3>
-            <p class="text-3xl font-bold text-gray-800 mt-2">{{ total_ofertas }}</p>
-        </div>
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 class="text-gray-500 text-sm font-medium">Estado de Perfil</h3>
-            <p class="text-sm font-semibold text-amber-600 mt-2">Incompleto</p>
-        </div>
+ <!-- Contenido del Panel (Estadísticas) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <h3 class="text-gray-500 text-sm font-medium">Postulaciones Activas</h3>
+        <p class="text-3xl font-bold text-gray-800 mt-2">{{ total_postulaciones|default:"0" }}</p>
     </div>
-
-    <!-- Acciones Rápidas -->
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Acciones Rápidas</h2>
-        <div class="flex flex-wrap gap-4">
-            <a href="{% url 'ofertas_list' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition shadow-sm flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                Explorar Todas las Ofertas
-            </a>
-            <a href="{% url 'mis_postulaciones' %}" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-medium transition shadow-sm">
-                Ver Mis Postulaciones
-            </a>
-        </div>
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <h3 class="text-gray-500 text-sm font-medium">Ofertas Disponibles</h3>
+        <p class="text-3xl font-bold text-gray-800 mt-2">{{ total_ofertas }}</p>
     </div>
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <h3 class="text-gray-500 text-sm font-medium">Estado de Perfil</h3>
+        {% if estudiante.carrera and estudiante.telefono %}
+            <p class="text-sm font-semibold text-emerald-600 mt-2">✓ Completo</p>
+        {% else %}
+            <p class="text-sm font-semibold text-amber-600 mt-2">⚠️ Incompleto</p>
+        {% endif %}
+    </div>
+</div>
 
-    <!-- Ofertas Recientes -->
-    <div class="mb-12">
-        <div class="flex justify-between items-end mb-4">
-            <h2 class="text-2xl font-bold text-gray-800">Ofertas Recientes</h2>
-            <a href="{% url 'ofertas_list' %}" class="text-blue-600 hover:text-blue-800 font-medium text-sm transition">Ver todas &rarr;</a>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% for oferta in ofertas %}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col h-full hover:shadow-md transition">
-                <div class="flex-grow">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-bold tracking-wide">
-                            {{ oferta.modalidad }}
-                        </span>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-1">{{ oferta.titulo }}</h3>
-                    <p class="text-emerald-600 font-medium text-sm mb-3">🏢 {{ oferta.empresa_nombre }}</p>
-                    <p class="text-gray-600 text-sm line-clamp-2 mb-4">
-                        {{ oferta.descripcion|truncatechars:100 }}
-                    </p>
+<!-- Acciones Rápidas -->
+<div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
+    <h2 class="text-xl font-bold text-gray-800 mb-4">Acciones Rápidas</h2>
+    <div class="flex flex-wrap gap-4">
+        <a href="{% url 'ofertas_list' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition shadow-sm flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            Explorar Todas las Ofertas
+        </a>
+        <a href="{% url 'mis_postulaciones' %}" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-medium transition shadow-sm">
+            Ver Mis Postulaciones
+        </a>
+        <!-- Botón para Editar Perfil -->
+        <a href="{% url 'perfil_estudiante' %}" class="bg-slate-800 hover:bg-slate-900 text-white px-6 py-3 rounded-xl font-medium transition shadow-sm flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            Mi Perfil / Editar Datos
+        </a>
+    </div>
+</div>
+
+<!-- Ofertas Recientes -->
+<div class="mb-12">
+    <div class="flex justify-between items-end mb-4">
+        <h2 class="text-2xl font-bold text-gray-800">Ofertas Recientes</h2>
+        <a href="{% url 'ofertas_list' %}" class="text-blue-600 hover:text-blue-800 font-medium text-sm transition">Ver todas &rarr;</a>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for oferta in ofertas %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col h-full hover:shadow-md transition">
+            <div class="flex-grow">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-bold tracking-wide">
+                        {{ oferta.modalidad }}
+                    </span>
                 </div>
-                <div class="pt-4 border-t border-gray-100 mt-auto">
-                    <a href="{% url 'oferta_detail' oferta.id %}" class="block w-full text-center bg-gray-900 hover:bg-gray-800 text-white py-2 rounded-lg font-medium transition text-sm">
-                        Ver Detalles
-                    </a>
-                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-1">{{ oferta.titulo }}</h3>
+                <p class="text-emerald-600 font-medium text-sm mb-3">🏢 {{ oferta.empresa_nombre }}</p>
+                <p class="text-gray-600 text-sm line-clamp-2 mb-4">
+                    {{ oferta.descripcion|truncatechars:100 }}
+                </p>
             </div>
-            {% empty %}
-            <div class="col-span-full bg-white p-8 text-center rounded-xl border border-gray-100">
-                <p class="text-gray-500">Aún no hay ofertas de práctica publicadas.</p>
+            <div class="pt-4 border-t border-gray-100 mt-auto">
+                <a href="{% url 'oferta_detail' oferta.id %}" class="block w-full text-center bg-gray-900 hover:bg-gray-800 text-white py-2 rounded-lg font-medium transition text-sm">
+                    Ver Detalles
+                </a>
             </div>
-            {% endfor %}
         </div>
+        {% empty %}
+        <div class="col-span-full bg-white p-8 text-center rounded-xl border border-gray-100">
+            <p class="text-gray-500">Aún no hay ofertas de práctica publicadas.</p>
+        </div>
+        {% endfor %}
     </div>
-
 </div>
 
 <!-- ==================== SECCIÓN: MAPA DE OFERTAS ==================== -->
