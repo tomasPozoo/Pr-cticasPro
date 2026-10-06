@@ -1,195 +1,311 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - PrácticasPro</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #f4f6f9; }
+        .card-kpi { border: none; border-radius: 12px; transition: transform 0.2s; }
+        .card-kpi:hover { transform: translateY(-3px); }
+        .icon-box { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+    </style>
+</head>
+<body>
 
-{% block content %}
-<!-- Importamos Chart.js para los gráficos -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Navbar Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4 shadow-sm">
+        <a class="navbar-brand fw-bold text-primary" href="#">PrácticasPro <span class="badge bg-danger text-uppercase fs-6">Admin</span></a>
+        <div class="ms-auto d-flex align-items-center gap-3 text-white">
+            <span><i class="bi bi-person-circle me-1"></i> {{ nombre }}</span>
+            <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
+        </div>
+    </nav>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div class="container-fluid py-4 px-4">
 
-    <!-- Banner del Administrador -->
-    <div class="bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl p-6 sm:p-8 text-white shadow-lg">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <!-- Encabezado y Acciones -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
             <div>
-                <span class="bg-white/20 text-gray-300 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
-                    Panel de Administración
-                </span>
-                <h1 class="text-3xl sm:text-4xl font-extrabold mt-3">Gestión de Plataforma ⚙️</h1>
-                <p class="text-gray-300 mt-2">Control total de usuarios, empresas y ofertas de práctica.</p>
+                <h2 class="fw-bold m-0">Panel de Control General</h2>
+                <p class="text-muted m-0">Métricas globales, conversiones y rendimiento en tiempo real.</p>
             </div>
-            <a href="{% url 'logout' %}" class="px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-medium transition flex items-center gap-2 shrink-0">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                </svg>
-                Cerrar Sesión
-            </a>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'exportar_reporte_csv' 'usuarios' %}" class="btn btn-outline-success btn-sm">
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> Exportar Usuarios CSV
+                </a>
+                <a href="{% url 'exportar_reporte_csv' 'suscripciones' %}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-cash-stack me-1"></i> Exportar Pagos CSV
+                </a>
+                <a href="{% url 'exportar_reporte_csv' 'ofertas' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-briefcase me-1"></i> Exportar Ofertas CSV
+                </a>
+            </div>
         </div>
-    </div>
 
-    <!-- Alertas y Mensajes del Sistema -->
-    {% if messages %}
-    <div class="space-y-4">
-        {% for message in messages %}
-        <div class="p-4 rounded-xl text-sm font-medium {% if message.tags == 'success' %}bg-green-50 text-green-700 border border-green-200{% else %}bg-red-50 text-red-700 border border-red-200{% endif %}">
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
+        <!-- Fila de Tarjetas KPI -->
+        <div class="row g-3 mb-4">
+            <!-- Total Usuarios -->
+            <div class="col-12 col-sm-6 col-xl">
+                <div class="card card-kpi shadow-sm p-3 bg-white">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-semibold">TOTAL USUARIOS</span>
+                            <h3 class="fw-bold my-1">{{ total_usuarios }}</h3>
+                            <span class="badge bg-info text-dark">{{ empresas_count }} Empresas</span>
+                        </div>
+                        <div class="icon-box bg-primary text-white"><i class="bi bi-people"></i></div>
+                    </div>
+                </div>
+            </div>
 
-    <!-- Tarjetas de Estadísticas (KPIs) -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-blue-500">
-            <h3 class="text-gray-500 text-sm font-medium">Total Usuarios</h3>
-            <p class="text-3xl font-bold text-gray-800 mt-2">{{ total_usuarios }}</p>
-        </div>
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-green-500">
-            <h3 class="text-gray-500 text-sm font-medium">Empresas</h3>
-            <p class="text-3xl font-bold text-gray-800 mt-2">{{ empresas_count }}</p>
-        </div>
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-yellow-500">
-            <h3 class="text-gray-500 text-sm font-medium">Estudiantes</h3>
-            <p class="text-3xl font-bold text-gray-800 mt-2">{{ estudiantes_count }}</p>
-        </div>
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-purple-500">
-            <h3 class="text-gray-500 text-sm font-medium">Ofertas Publicadas</h3>
-            <p class="text-3xl font-bold text-gray-800 mt-2">{{ total_ofertas }}</p>
-        </div>
-    </div>
+            <!-- Estudiantes & Premium -->
+            <div class="col-12 col-sm-6 col-xl">
+                <div class="card card-kpi shadow-sm p-3 bg-white">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-semibold">ESTUDIANTES</span>
+                            <h3 class="fw-bold my-1">{{ estudiantes_count }}</h3>
+                            <span class="badge bg-success">{{ estudiantes_premium_count }} Premium</span>
+                            <span class="badge bg-secondary">{{ estudiantes_free_count }} Free</span>
+                        </div>
+                        <div class="icon-box bg-success text-white"><i class="bi bi-star"></i></div>
+                    </div>
+                </div>
+            </div>
 
-    <!-- Sección de Gráfico -->
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">Distribución de Usuarios</h2>
-        <div class="w-full max-w-xs mx-auto">
-            <canvas id="usuariosChart"></canvas>
-        </div>
-    </div>
+            <!-- Tasa de Conversión -->
+            <div class="col-12 col-sm-6 col-xl">
+                <div class="card card-kpi shadow-sm p-3 bg-white">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-semibold">CONVERSIÓN FREEMIUM</span>
+                            <h3 class="fw-bold my-1 text-primary">{{ tasa_conversion }}%</h3>
+                            <span class="text-muted small">Estudiantes a Premium</span>
+                        </div>
+                        <div class="icon-box bg-warning text-dark"><i class="bi bi-graph-up-arrow"></i></div>
+                    </div>
+                </div>
+            </div>
 
-    <!-- Tabla de Gestión de Usuarios -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-            <h2 class="text-lg font-semibold text-gray-800">👥 Gestión de Usuarios</h2>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="text-gray-500 text-xs uppercase tracking-wider border-b">
-                        <th class="px-6 py-3 font-medium">Nombre</th>
-                        <th class="px-6 py-3 font-medium">Email</th>
-                        <th class="px-6 py-3 font-medium">Rol</th>
-                        <th class="px-6 py-3 font-medium text-center">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100 text-sm">
-                    {% for usuario in usuarios %}
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="px-6 py-4 font-medium text-gray-900">{{ usuario.nombre }}</td>
-                        <td class="px-6 py-4 text-gray-600">{{ usuario.email }}</td>
-                        <td class="px-6 py-4">
-                            {% if usuario.rol == 'admin' %}
-                                <span class="bg-purple-100 text-purple-700 px-2 py-1 rounded-md text-xs font-semibold">Admin</span>
-                            {% elif usuario.rol == 'empresa' %}
-                                <span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-md text-xs font-semibold">Empresa</span>
-                            {% else %}
-                                <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-md text-xs font-semibold">Estudiante</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            <!-- Evitar que el admin se elimine a sí mismo accidentalmente -->
-                            {% if usuario.rol != 'admin' %}
-                            <a href="{% url 'eliminar_usuario' usuario.id %}" 
-                               onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario definitivamente? Esta acción no se puede deshacer.');" 
-                               class="text-red-500 hover:text-red-700 font-semibold bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition">
-                               Eliminar
-                            </a>
-                            {% else %}
-                            <span class="text-gray-400 text-xs italic">No aplica</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+            <!-- Total Postulaciones -->
+            <div class="col-12 col-sm-6 col-xl">
+                <div class="card card-kpi shadow-sm p-3 bg-white">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-semibold">POSTULACIONES</span>
+                            <h3 class="fw-bold my-1">{{ total_postulaciones }}</h3>
+                            <span class="text-muted small">Prom: {{ promedio_postulaciones }} / oferta</span>
+                        </div>
+                        <div class="icon-box bg-info text-white"><i class="bi bi-send"></i></div>
+                    </div>
+                </div>
+            </div>
 
-    <!-- Tabla de Gestión de Ofertas -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-            <h2 class="text-lg font-semibold text-gray-800">📄 Gestión de Publicaciones (Ofertas)</h2>
+            <!-- Ingresos Totales -->
+            <div class="col-12 col-sm-6 col-xl">
+                <div class="card card-kpi shadow-sm p-3 bg-white">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-semibold">INGRESOS TOTALES</span>
+                            <h3 class="fw-bold my-1 text-success">${{ ingresos_totales }}</h3>
+                            <span class="text-muted small">CLP acumulados</span>
+                        </div>
+                        <div class="icon-box bg-dark text-white"><i class="bi bi-currency-dollar"></i></div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="text-gray-500 text-xs uppercase tracking-wider border-b">
-                        <th class="px-6 py-3 font-medium">Título de la Oferta</th>
-                        <th class="px-6 py-3 font-medium">Empresa</th>
-                        <th class="px-6 py-3 font-medium text-center">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100 text-sm">
-                    {% for oferta in ofertas %}
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="px-6 py-4 font-medium text-gray-900">{{ oferta.titulo }}</td>
-                        <td class="px-6 py-4 text-gray-600">{{ oferta.empresa_nombre }}</td>
-                        <td class="px-6 py-4 text-center">
-                            <a href="{% url 'eliminar_oferta' oferta.id %}" 
-                               onclick="return confirm('¿Estás seguro de que deseas eliminar esta oferta?');" 
-                               class="text-red-500 hover:text-red-700 font-semibold bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition">
-                               Eliminar
-                            </a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="3" class="px-6 py-8 text-center text-gray-500">
-                            Aún no hay ofertas publicadas en la base de datos.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
 
+        <!-- Fila de Gráficos Analíticos -->
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-lg-6">
+                <div class="card border-0 shadow-sm p-3 bg-white h-100">
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-pie-chart me-2"></i>Distribución de Usuarios</h5>
+                    <div style="max-height: 280px;" class="d-flex justify-content-center">
+                        <canvas id="chartUsuarios"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-6">
+                <div class="card border-0 shadow-sm p-3 bg-white h-100">
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-bar-chart me-2"></i>Estado de las Postulaciones</h5>
+                    <div style="max-height: 280px;" class="d-flex justify-content-center">
+                        <canvas id="chartPostulaciones"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Suscripciones Recientes -->
+        <div class="card border-0 shadow-sm bg-white mb-4">
+            <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold m-0"><i class="bi bi-receipt me-2"></i>Últimas Suscripciones Procesadas</h5>
+                <a href="{% url 'dashboard_suscripciones' %}" class="btn btn-sm btn-link text-decoration-none">Ver todas &rarr;</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID Transacción</th>
+                            <th>Usuario</th>
+                            <th>Monto</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in ultimas_suscripciones %}
+                        <tr>
+                            <td class="fw-semibold text-muted">#{{ sub.payment_id|default:sub.id|slice:":8" }}</td>
+                            <td>
+                                <div>{{ sub.usuario_nombre|default:"Usuario" }}</div>
+                                <small class="text-muted">{{ sub.email_usuario }}</small>
+                            </td>
+                            <td class="fw-bold text-success">${{ sub.monto|floatformat:0 }} CLP</td>
+                            <td>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                    {{ sub.estado|upper }}
+                                </span>
+                            </td>
+                            <td class="text-muted small">{{ sub.fecha }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">No hay registros de suscripciones recientes.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<!-- Tabla de Gestión de Usuarios -->
+<div class="card border-0 shadow-sm bg-white mb-4">
+    <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold m-0"><i class="bi bi-people-fill me-2"></i>Gestión de Usuarios Registrados</h5>
+        <span class="badge bg-secondary">{{ total_usuarios }} Usuarios</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Tipo Plan</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in usuarios %}
+                <tr>
+                    <td class="fw-semibold">
+                        <i class="bi bi-person-circle me-1 text-secondary"></i>
+                        {{ u.nombre|default:"Sin Nombre" }}
+                    </td>
+                    <td class="text-muted">{{ u.email }}</td>
+                    <td>
+                        {% if u.rol == 'empresa' %}
+                            <span class="badge bg-success">Empresa</span>
+                        {% elif u.rol == 'admin' %}
+                            <span class="badge bg-danger">Admin</span>
+                        {% else %}
+                            <span class="badge bg-primary">Estudiante</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if u.es_premium %}
+                            <span class="badge bg-warning text-dark"><i class="bi bi-star-fill me-1"></i>Premium</span>
+                        {% else %}
+                            <span class="badge bg-light text-dark border">Free</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        {% if u.rol != 'admin' %}
+                        <!-- Formulario de eliminación con confirmación -->
+                        <form action="{% url 'eliminar_usuario' u.id %}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de que deseas eliminar al usuario {{ u.email }}? Esta acción no se puede deshacer.');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                <i class="bi bi-trash-fill"></i> Eliminar
+                            </button>
+                        </form>
+                        {% else %}
+                        <span class="text-muted small">Protegido</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">No hay usuarios registrados en el sistema.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
-
-<!-- Script para inicializar el gráfico -->
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const ctx = document.getElementById('usuariosChart').getContext('2d');
-        
-        // Solo renderizar si hay datos
-        const estudiantes = {{ estudiantes_count }};
-        const empresas = {{ empresas_count }};
-        
-        if (estudiantes === 0 && empresas === 0) {
-            document.getElementById('usuariosChart').parentElement.innerHTML = '<p class="text-center text-gray-500 my-8">No hay suficientes datos para el gráfico</p>';
-            return;
-        }
-
-        new Chart(ctx, {
+    <!-- Script para Renderizar Gráficos con Chart.js -->
+    <script>
+        // 1. Gráfico Circular de Usuarios
+        const ctxUsuarios = document.getElementById('chartUsuarios').getContext('2d');
+        new Chart(ctxUsuarios, {
             type: 'doughnut',
             data: {
-                labels: ['Estudiantes', 'Empresas'],
+                labels: ['Estudiantes Free', 'Estudiantes Premium', 'Empresas'],
                 datasets: [{
-                    data: [estudiantes, empresas],
-                    backgroundColor: [
-                        '#3B82F6', // Azul
-                        '#10B981'  // Verde
-                    ],
-                    borderWidth: 0,
-                    hoverOffset: 4
+                    data: {{ chart_data_usuarios|safe }},
+                    backgroundColor: ['#6c757d', '#0d6efd', '#198754'],
+                    borderWidth: 2
                 }]
             },
             options: {
                 responsive: true,
                 plugins: {
-                    legend: {
-                        position: 'bottom',
-                    }
+                    legend: { position: 'bottom' }
                 }
             }
         });
-    });
-</script>
-{% endblock %}
+
+        // 2. Gráfico de Barras de Postulaciones
+        const ctxPostulaciones = document.getElementById('chartPostulaciones').getContext('2d');
+        new Chart(ctxPostulaciones, {
+            type: 'bar',
+            data: {
+                labels: ['Pendientes', 'Aceptadas', 'Rechazadas'],
+                datasets: [{
+                    label: 'Cantidad',
+                    data: {{ chart_data_postulaciones|safe }},
+                    backgroundColor: ['#ffc107', '#198754', '#dc3545'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

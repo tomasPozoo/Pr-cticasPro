@@ -1,6 +1,8 @@
 venv/
 firebase_key.json
+gemini_key.json
+mercadopago_key.json
 __pycache__/
 *.pyc
 .env
-db.sqlite3gemini_key.json 
+db.sqlite3

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <!-- Cargar CSS de Leaflet para el mapa -->
@@ -23,183 +24,191 @@
             <a href="{% url 'logout' %}" 
                class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl text-sm font-medium transition backdrop-blur-sm flex items-center gap-2 shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 01-3-3h4a3 3 0 013 3v1"/>
                 </svg>
                 Cerrar Sesión
             </a>
         </div>
     </div>
 
- <!-- Contenido del Panel (Estadísticas) -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h3 class="text-gray-500 text-sm font-medium">Postulaciones Activas</h3>
-        <p class="text-3xl font-bold text-gray-800 mt-2">{{ total_postulaciones|default:"0" }}</p>
+    <!-- Contenido del Panel (Estadísticas) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="text-gray-500 text-sm font-medium">Postulaciones Activas</h3>
+            <p class="text-3xl font-bold text-gray-800 mt-2">{{ total_postulaciones|default:"0" }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="text-gray-500 text-sm font-medium">Ofertas Disponibles</h3>
+            <p class="text-3xl font-bold text-gray-800 mt-2">{{ total_ofertas }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="text-gray-500 text-sm font-medium">Estado de Perfil</h3>
+            {% if estudiante.carrera and estudiante.telefono %}
+                <p class="text-sm font-semibold text-emerald-600 mt-2">✓ Completo</p>
+            {% else %}
+                <p class="text-sm font-semibold text-amber-600 mt-2">⚠️ Incompleto</p>
+            {% endif %}
+        </div>
     </div>
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h3 class="text-gray-500 text-sm font-medium">Ofertas Disponibles</h3>
-        <p class="text-3xl font-bold text-gray-800 mt-2">{{ total_ofertas }}</p>
-    </div>
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h3 class="text-gray-500 text-sm font-medium">Estado de Perfil</h3>
-        {% if estudiante.carrera and estudiante.telefono %}
-            <p class="text-sm font-semibold text-emerald-600 mt-2">✓ Completo</p>
-        {% else %}
-            <p class="text-sm font-semibold text-amber-600 mt-2">⚠️ Incompleto</p>
-        {% endif %}
-    </div>
-</div>
 
-<!-- Acciones Rápidas -->
-<div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-    <h2 class="text-xl font-bold text-gray-800 mb-4">Acciones Rápidas</h2>
-    <div class="flex flex-wrap gap-4">
-        <a href="{% url 'ofertas_list' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition shadow-sm flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-            Explorar Todas las Ofertas
-        </a>
-        <a href="{% url 'mis_postulaciones' %}" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-medium transition shadow-sm">
-            Ver Mis Postulaciones
-        </a>
-        <!-- Botón para Editar Perfil -->
-        <a href="{% url 'perfil_estudiante' %}" class="bg-slate-800 hover:bg-slate-900 text-white px-6 py-3 rounded-xl font-medium transition shadow-sm flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-            Mi Perfil / Editar Datos
-        </a>
-    </div>
-</div>
+    <!-- MODAL PLAN PREMIUM -->
+    <div id="modal-premium" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center transform transition-all">
+            <!-- Ícono Encabezado -->
+            <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold">
+                ⭐
+            </div>
 
-<!-- Ofertas Recientes -->
-<div class="mb-12">
-    <div class="flex justify-between items-end mb-4">
-        <h2 class="text-2xl font-bold text-gray-800">Ofertas Recientes</h2>
-        <a href="{% url 'ofertas_list' %}" class="text-blue-600 hover:text-blue-800 font-medium text-sm transition">Ver todas &rarr;</a>
-    </div>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for oferta in ofertas %}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col h-full hover:shadow-md transition">
-            <div class="flex-grow">
-                <div class="flex justify-between items-start mb-4">
-                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-bold tracking-wide">
-                        {{ oferta.modalidad }}
-                    </span>
+            <h3 class="text-2xl font-extrabold text-gray-800 mb-2">¡Pásate a PrácticasPro MAX!</h3>
+            <p class="text-gray-600 text-sm mb-6">
+                Actualmente estás registrado en <strong id="texto-region-base" class="text-indigo-600">tu región base</strong>. Para acceder al mapa y ofertas de prácticas en todo Chile, suscríbete al Plan Premium.
+            </p>
+
+            <!-- Beneficios -->
+            <div class="bg-gray-50 rounded-xl p-4 text-left mb-6 space-y-2 text-sm text-gray-700">
+                <div class="flex items-center gap-2">
+                    <span class="text-green-500 font-bold">✓</span> Búsqueda ilimitada en todas las regiones.
                 </div>
-                <h3 class="text-lg font-bold text-gray-900 mb-1">{{ oferta.titulo }}</h3>
-                <p class="text-emerald-600 font-medium text-sm mb-3">🏢 {{ oferta.empresa_nombre }}</p>
-                <p class="text-gray-600 text-sm line-clamp-2 mb-4">
-                    {{ oferta.descripcion|truncatechars:100 }}
-                </p>
+                <div class="flex items-center gap-2">
+                    <span class="text-green-500 font-bold">✓</span> Alertas prioritarias para postulaciones.
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-green-500 font-bold">✓</span> Soporte avanzado con ProBot IA.
+                </div>
             </div>
-            <div class="pt-4 border-t border-gray-100 mt-auto">
-                <a href="{% url 'oferta_detail' oferta.id %}" class="block w-full text-center bg-gray-900 hover:bg-gray-800 text-white py-2 rounded-lg font-medium transition text-sm">
-                    Ver Detalles
-                </a>
+
+            <!-- Botones de Acción -->
+            <div class="flex gap-3">
+                <button onclick="cerrarModalPremium()" type="button" class="w-1/2 py-2.5 px-4 border border-gray-300 rounded-xl text-gray-700 font-semibold hover:bg-gray-100 transition">
+                    Cancelar
+                </button>
+                <button id="btn-pagar-premium" onclick="irAPagarSuscripcion()" type="button" class="w-1/2 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition">
+                    Ir a Pagar $2.990
+                </button>
             </div>
         </div>
-        {% empty %}
-        <div class="col-span-full bg-white p-8 text-center rounded-xl border border-gray-100">
-            <p class="text-gray-500">Aún no hay ofertas de práctica publicadas.</p>
-        </div>
-        {% endfor %}
     </div>
-</div>
 
-<!-- ==================== SECCIÓN: MAPA DE OFERTAS ==================== -->
-<section id="mapa" class="py-12 bg-gray-50 border-t border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="text-center max-w-3xl mx-auto mb-10 space-y-2">
-        <span class="text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-100 px-3 py-1 rounded-full">Geolocalización</span>
-        <h2 class="text-3xl font-extrabold text-gray-900">Explora Prácticas Cerca de Ti</h2>
-        <p class="text-gray-600">Visualiza en tiempo real las empresas que están ofreciendo cupos de práctica en tu comuna o ciudad.</p>
-      </div>
+    <!-- Acciones Rápidas -->
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Acciones Rápidas</h2>
+        <div class="flex flex-wrap gap-4">
+            <a href="{% url 'ofertas_list' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition shadow-sm flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                Explorar Todas las Ofertas
+            </a>
+            <a href="{% url 'mis_postulaciones' %}" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-medium transition shadow-sm">
+                Ver Mis Postulaciones
+            </a>
+            <a href="{% url 'perfil_estudiante' %}" class="bg-slate-800 hover:bg-slate-900 text-white px-6 py-3 rounded-xl font-medium transition shadow-sm flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                Mi Perfil / Editar Datos
+            </a>
+        </div>
+    </div>
 
-      <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 grid grid-cols-1 lg:grid-cols-4">
+    <!-- Ofertas Recientes -->
+    <div class="mb-12">
+        <div class="flex justify-between items-end mb-4">
+            <h2 class="text-2xl font-bold text-gray-800">Ofertas Recientes</h2>
+            <a href="{% url 'ofertas_list' %}" class="text-blue-600 hover:text-blue-800 font-medium text-sm transition">Ver todas &rarr;</a>
+        </div>
         
-        <div class="p-6 bg-gray-900 text-white space-y-6 flex flex-col justify-between">
-          <div>
-            <h3 class="text-lg font-bold text-amber-400 mb-2">Filtro de Ubicación</h3>
-            <p class="text-xs text-gray-300 mb-6">Selecciona un área para centrar las vacantes disponibles.</p>
-            
-            <div class="space-y-3">
-              <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400">Región / Zona</label>
-              <select id="region-selector" class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
-                <option value="-33.4489,-70.6693">Todas las regiones (Santiago)</option>
-                <option value="-33.4372,-70.6506">Santiago Centro</option>
-                <option value="-33.4314,-70.6093">Providencia</option>
-                <option value="-33.4144,-70.5799">Las Condes</option>
-              </select>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for oferta in ofertas %}
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col h-full hover:shadow-md transition">
+                <div class="flex-grow">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-bold tracking-wide">
+                            {{ oferta.modalidad }}
+                        </span>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-1">{{ oferta.titulo }}</h3>
+                    <p class="text-emerald-600 font-medium text-sm mb-3">🏢 {{ oferta.empresa_nombre }}</p>
+                    <p class="text-gray-600 text-sm line-clamp-2 mb-4">
+                        {{ oferta.descripcion|truncatechars:100 }}
+                    </p>
+                </div>
+                <div class="pt-4 border-t border-gray-100 mt-auto">
+                    <a href="{% url 'oferta_detail' oferta.id %}" class="block w-full text-center bg-gray-900 hover:bg-gray-800 text-white py-2 rounded-lg font-medium transition text-sm">
+                        Ver Detalles
+                    </a>
+                </div>
             </div>
+            {% empty %}
+            <div class="col-span-full bg-white p-8 text-center rounded-xl border border-gray-100">
+                <p class="text-gray-500">Aún no hay ofertas de práctica publicadas.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 
-            <div class="mt-6 space-y-2">
-              <div class="flex items-center justify-between text-xs text-gray-300 py-2 border-b border-gray-800">
-                <span>Santiago Centro</span>
-                <span class="bg-amber-400 text-gray-900 font-bold px-2 py-0.5 rounded-full">Activo</span>
-              </div>
-              <div class="flex items-center justify-between text-xs text-gray-300 py-2 border-b border-gray-800">
-                <span>Providencia</span>
-                <span class="bg-amber-400 text-gray-900 font-bold px-2 py-0.5 rounded-full">Activo</span>
-              </div>
-            </div>
+    <!-- ==================== SECCIÓN: MAPA DE OFERTAS ==================== -->
+    <section id="mapa" class="py-12 bg-gray-50 border-t border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div class="text-center max-w-3xl mx-auto mb-10 space-y-2">
+            <span class="text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-100 px-3 py-1 rounded-full">Geolocalización</span>
+            <h2 class="text-3xl font-extrabold text-gray-900">Explora Prácticas Cerca de Ti</h2>
+            <p class="text-gray-600">Visualiza en tiempo real las empresas que están ofreciendo cupos de práctica en tu comuna o ciudad.</p>
           </div>
 
-          <button onclick="centrarMapa()" class="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-gray-900 font-bold py-3 rounded-xl transition text-sm shadow-md">
-            Usar mi ubicación actual
-          </button>
-        </div>
+          <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 grid grid-cols-1 lg:grid-cols-4">
+            
+            <div class="p-6 bg-gray-900 text-white space-y-6 flex flex-col justify-between">
+              <div>
+                <h3 class="text-lg font-bold text-amber-400 mb-2">Filtro de Ubicación</h3>
+                <p class="text-xs text-gray-300 mb-6">Selecciona una región para consultar vacantes disponibles.</p>
+                
+                <div class="space-y-3">
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400">Región / Zona</label>
+                  <select id="filtro-region" class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                    <option value="Región Metropolitana" data-coords="-33.4489,-70.6693">Región Metropolitana</option>
+                    <option value="Valparaíso" data-coords="-33.0472,-71.6127">Valparaíso</option>
+                    <option value="Biobío" data-coords="-36.8201,-73.0444">Biobío</option>
+                    <option value="Antofagasta" data-coords="-23.6509,-70.3975">Antofagasta</option>
+                  </select>
+                </div>
+              </div>
 
-        <!-- Contenedor del Mapa -->
-        <div class="lg:col-span-3 h-[420px] relative">
-          <div id="map" class="w-full h-full z-10"></div>
-        </div>
-      </div>
-    </div>
-</section>
+              <button onclick="centrarMapa()" class="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-gray-900 font-bold py-3 rounded-xl transition text-sm shadow-md">
+                Usar mi ubicación actual
+              </button>
+            </div>
 
-<!-- Cargar JS de Leaflet -->
+            <!-- Contenedor del Mapa -->
+            <div class="lg:col-span-3 h-[420px] relative">
+              <div id="map" class="w-full h-full z-10"></div>
+            </div>
+          </div>
+        </div>
+    </section>
+
+</div>
+
+<!-- Cargar librería Leaflet -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Archivos JS estáticos -->
+<script src="{% static 'js/mapa.js' %}"></script>
+<script src="{% static 'js/premium.js' %}"></script>
+
+<!-- Inicialización del mapa -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // 1. Inicializar el mapa centrado en Santiago de Chile
-        var map = L.map('map').setView([-33.4489, -70.6693], 11);
+        const ofertasData = [
+            {% for oferta in ofertas %}
+            {
+                titulo: "{{ oferta.titulo|escapejs }}",
+                empresa_nombre: "{{ oferta.empresa_nombre|escapejs }}",
+                latitud: "{{ oferta.latitud|default:'-33.4489' }}",
+                longitud: "{{ oferta.longitud|default:'-70.6693' }}",
+                url_detalle: "{% url 'oferta_detail' oferta.id %}"
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
 
-        // 2. Cargar los tiles (el diseño del mapa de OpenStreetMap)
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-
-        // 3. Crear pines por cada oferta usando las coordenadas exactas de la base de datos
-        {% for oferta in ofertas %}
-            var lat = parseFloat("{{ oferta.latitud|default:'-33.4489' }}");
-            var lng = parseFloat("{{ oferta.longitud|default:'-70.6693' }}");
-
-            var marker = L.marker([lat, lng]).addTo(map);
-            marker.bindPopup(`
-                <b>{{ oferta.titulo }}</b><br>
-                🏢 {{ oferta.empresa_nombre }}<br>
-                <a href="{% url 'oferta_detail' oferta.id %}" class="text-blue-600 text-sm mt-1 inline-block">Ver detalle</a>
-            `);
-        {% endfor %}
-
-        // 4. Lógica para cambiar la vista al seleccionar otra comuna en el Select
-        document.getElementById('region-selector').addEventListener('change', function(e) {
-            var coords = e.target.value.split(',');
-            map.setView([parseFloat(coords[0]), parseFloat(coords[1])], 13);
-        });
+        initMapa(ofertasData);
     });
-
-    // Función para obtener la ubicación actual del usuario
-    function centrarMapa() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                alert("Ubicación detectada: " + position.coords.latitude + ", " + position.coords.longitude);
-            }, function() {
-                alert("No se pudo obtener la ubicación. Verifica los permisos de tu navegador.");
-            });
-        } else {
-            alert("Tu navegador no soporta geolocalización.");
-        }
-    }
 </script>
 {% endblock %}
