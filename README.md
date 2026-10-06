@@ -1,65 +1,44 @@
-# 🎓 PrácticasPro - Portal de Prácticas Profesionales & Panel Admin
+# 🚀 PrácticasPro - Red de Vinculación Duoc UC
 
-Plataforma web integral desarrollada con **Django** y **Firebase Firestore** diseñada para conectar a estudiantes con empresas para sus prácticas profesionales. La plataforma incluye un modelo **Freemium / Premium**, integración con pasarela de **pagos**, métricas analíticas en tiempo real y un panel de administración avanzado.
+![Django](https://img.shields.io/badge/Django-6.1.1-092E20?style=for-the-badge&logo=django)
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python)
+![Gemini AI](https://img.shields.io/badge/Google%20Gemini-3.8%20Flash-8E75B2?style=for-the-badge&logo=googlegemini)
+![Firebase](https://img.shields.io/badge/Firebase-Auth%20%26%20Firestore-FFCA28?style=for-the-badge&logo=firebase)
 
----
-
-## 🚀 Características Principales
-
-### 👤 Módulo de Estudiantes
-* **Catálogo de Prácticas:** Búsqueda y postulación a ofertas en tiempo real.
-* **Modelo Freemium / Premium:** Acceso a ventajas exclusivas al actualizar el plan.
-* **Flujo de Pagos Integrado:** Procesamiento seguro de suscripciones Premium.
-
-### 🏢 Módulo de Empresas
-* **Publicación de Ofertas:** Creación y administración de convocatorias de práctica.
-* **Gestión de Postulantes:** Visualización y seguimiento de solicitudes recibidas.
-
-### 🛡️ Módulo de Administración (`home_admin`)
-* **KPIs Analíticos:**
-  * Total de usuarios registrados (Estudiantes Free/Premium y Empresas).
-  * Tasa de conversión Freemium $\rightarrow$ Premium.
-  * Módulo financiero con **ingresos acumulados en CLP**.
-  * Promedio de postulantes por oferta y totales generales.
-* **Visualización de Datos con Chart.js:**
-  * Gráfico de rosquilla (*Doughnut*) para la distribución de roles y cuentas Premium.
-  * Gráfico de barras (*Bar Chart*) para el estado de las postulaciones (Pendientes, Aceptadas, Rechazadas).
-* **Gestión de Usuarios:**
-  * Tabla interactiva de usuarios registrados.
-  * Eliminación segura de usuarios directamente en Firestore con diálogo de confirmación.
-* **Exportación de Reportes a CSV:**
-  * Descarga instantánea de reportes en formato CSV (con compatibilidad UTF-8 BOM para MS Excel) para:
-    1. Usuarios
-    2. Suscripciones / Pagos
-    3. Ofertas de Práctica
+> Plataforma web de vinculación laboral y geolocalización de prácticas profesionales para estudiantes de **Duoc UC**, integrada con un asistente virtual impulsado por inteligencia artificial.
 
 ---
 
-## 🛠️ Tecnologías Utilizadas
+## 📸 Captura del Proyecto
 
-| Categoría | Tecnología |
+![Vista Principal de PrácticasPro](static/img/banner.png)
+
+---
+
+## ✨ Características Principales
+
+* 🤖 **ProBot IA (Asistente Virtual):** Chatbot inteligente impulsado por la API de **Google Gemini (`gemini-3.8-flash`)**, con lógica de resiliencia automática de 4 reintentos y modo fallback contingente.
+* 🗺️ **Mapa Interactivo de Ofertas:** Geolocalización de vacantes de prácticas en tiempo real utilizando **Leaflet.js** y cartografía de alta velocidad **CARTO Voyager**.
+* 🔐 **Autenticación e Integración Cloud:** Inicio de sesión seguro integrado con **Firebase Identity Toolkit** y base de datos NoSQL en **Firestore**.
+* 🛡️ **Seguridad de Credenciales:** Manejo aislado de llaves sensibles mediante archivos JSON locales protegidos por `.gitignore`.
+
+---
+
+## 🛠️ Stack Tecnológico
+
+| Capa | Tecnología |
 | :--- | :--- |
-| **Backend** | Python 3, Django 4.x |
-| **Base de Datos** | Google Firebase Firestore (NoSQL) |
-| **Pasarela de Pagos** | Mercado Pago API / Webhooks |
-| **Frontend** | HTML5, CSS3, Bootstrap 5, Bootstrap Icons |
-| **Gráficos & Analítica** | Chart.js |
-| **Formatos de Salida** | CSV (Módulo nativo `csv` de Python) |
+| **Backend** | Python 3.12, Django 6.1.1 |
+| **Inteligencia Artificial** | Google GenAI SDK (`google-genai`), Modelo `gemini-3.8-flash` |
+| **Base de Datos & Auth** | Google Firebase, Firestore, SQLite3 |
+| **Frontend** | HTML5, Tailwind CSS, JavaScript ES6+, Leaflet.js |
+| **Servicios de Mapas** | CARTO Voyager Basemaps / OpenStreetMap |
 
 ---
 
-## 📂 Estructura del Proyecto
+## ⚙️ Instalación y Configuración Local
 
-```text
-.
-├── portal/
-│   ├── templates/
-│   │   ├── home_admin.html         # Panel principal de administración con gráficos
-│   │   ├── login.html
-│   │   └── ...
-│   ├── views.py                    # Vistas (Lógica de pagos, métricas, CRUD y CSV)
-│   ├── urls.py                     # Definición de rutas del sistema
-│   └── ...
-├── manage.py
-├── requirements.txt                # Dependencias del proyecto
-└── README.md
+### 1. Clonar el repositorio
+```bash
+git clone [https://github.com/tomasPozoo/Pr-cticasPro.git](https://github.com/tomasPozoo/Pr-cticasPro.git)
+cd Pr-cticasPro
