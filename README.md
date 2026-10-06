@@ -11,7 +11,7 @@
 
 ## 📸 Captura del Proyecto
 
-![Vista Principal de PrácticasPro](documentacion/banner.png)
+![Vista Principal de PrácticasPro](static/img/banner.png)
 
 ---
 
