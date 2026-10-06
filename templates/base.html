@@ -90,7 +90,217 @@
     {% block content %}
     {% endblock %}
   </main>
+  <!-- WIDGET FLOTANTE PROBOT IA -->
+<style>
+    /* Contenedor del botón flotante */
+    .probot-widget-container {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-family: system-ui, -apple-system, sans-serif;
+    }
 
+    /* Burbuja de texto "¡Chatea con nosotros!" */
+    .probot-speech-bubble {
+        background: #ffffff;
+        color: #8a2be2;
+        padding: 10px 18px;
+        border-radius: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        font-weight: 600;
+        font-size: 14px;
+        position: relative;
+        cursor: pointer;
+        animation: pulse 2s infinite;
+    }
+    .probot-speech-bubble::after {
+        content: '';
+        position: absolute;
+        right: -8px;
+        top: 50%;
+        transform: translateY(-50%);
+        border-width: 6px 0 6px 8px;
+        border-style: solid;
+        border-color: transparent transparent transparent #ffffff;
+    }
+
+    /* Botón / Avatar del Bot */
+    .probot-avatar-btn {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #8a2be2, #4a00e0);
+        border: 3px solid #ffffff;
+        box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: white;
+        font-size: 28px;
+        transition: transform 0.2s ease;
+    }
+    .probot-avatar-btn:hover {
+        transform: scale(1.08);
+    }
+
+    /* Ventana emergente del Chat */
+    .probot-chat-box {
+        display: none;
+        position: fixed;
+        bottom: 95px;
+        right: 25px;
+        width: 340px;
+        height: 430px;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        z-index: 10000;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .probot-header {
+        background: linear-gradient(135deg, #8a2be2, #4a00e0);
+        color: white;
+        padding: 12px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+    }
+    .probot-messages {
+        flex: 1;
+        padding: 12px;
+        overflow-y: auto;
+        background: #f8f9fa;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .probot-msg {
+        max-width: 80%;
+        padding: 8px 12px;
+        border-radius: 12px;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+    .probot-msg-bot {
+        background: #e9ecef;
+        color: #212529;
+        align-self: flex-start;
+        border-bottom-left-radius: 2px;
+    }
+    .probot-msg-user {
+        background: #8a2be2;
+        color: white;
+        align-self: flex-end;
+        border-bottom-right-radius: 2px;
+    }
+    .probot-input-area {
+        padding: 10px;
+        display: flex;
+        gap: 6px;
+        background: #ffffff;
+        border-top: 1px solid #eee;
+    }
+    .probot-input-area input {
+        flex: 1;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        padding: 6px 12px;
+        font-size: 13px;
+        outline: none;
+    }
+    .probot-input-area button {
+        background: #8a2be2;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        cursor: pointer;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.03); }
+        100% { transform: scale(1); }
+    }
+</style>
+
+<!-- Elementos visibles -->
+<div class="probot-widget-container" id="probotWidget">
+    <div class="probot-speech-bubble" onclick="toggleProbot()">¡Chatea con nosotros!</div>
+    <div class="probot-avatar-btn" onclick="toggleProbot()">🤖</div>
+</div>
+
+<!-- Ventana de Chat -->
+<div class="probot-chat-box" id="probotChatBox">
+    <div class="probot-header">
+        <span>🤖 ProBot IA</span>
+        <span style="cursor:pointer;" onclick="toggleProbot()">✕</span>
+    </div>
+    <div class="probot-messages" id="probotMessages">
+        <div class="probot-msg probot-msg-bot">
+            ¡Hola! Soy ProBot IA. ¿En qué puedo ayudarte hoy con tus prácticas?
+        </div>
+    </div>
+    <div class="probot-input-area">
+        <input type="text" id="probotInput" placeholder="Escribe tu duda..." onkeypress="if(event.key==='Enter') sendProBotMessage()">
+        <button onclick="sendProBotMessage()">➤</button>
+    </div>
+</div>
+
+<script>
+function toggleProbot() {
+    const box = document.getElementById('probotChatBox');
+    box.style.display = (box.style.display === 'flex') ? 'none' : 'flex';
+}
+
+async function sendProBotMessage() {
+    const input = document.getElementById('probotInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    const messagesContainer = document.getElementById('probotMessages');
+
+    // Agregar mensaje del usuario
+    const userDiv = document.createElement('div');
+    userDiv.className = 'probot-msg probot-msg-user';
+    userDiv.innerText = msg;
+    messagesContainer.appendChild(userDiv);
+    input.value = '';
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+    // Indicador "pensando"
+    const botDiv = document.createElement('div');
+    botDiv.className = 'probot-msg probot-msg-bot';
+    botDiv.innerText = 'Pensando...';
+    messagesContainer.appendChild(botDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+    try {
+        const response = await fetch('/probot-ia/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ mensaje: msg })
+        });
+        const data = await response.json();
+        botDiv.innerText = data.respuesta;
+    } catch (e) {
+        botDiv.innerText = 'Error de conexión con ProBot IA.';
+    }
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+</script>
+<!-- <footer> -->
   <footer class="bg-brand-950 text-gray-300 border-t border-brand-900 mt-auto">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
         

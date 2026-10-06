@@ -3,26 +3,111 @@ import requests
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from firebase_admin import auth, firestore
-
 from django.core.files.storage import FileSystemStorage
+import json
+from django.http import JsonResponse
+from google import genai
+from google.genai import types
+import time
+from django.conf import settings
 
-# Reemplaza esto con tu 'Clave de API web' de Firebase Console (empieza por AIzaSy...)
-FIREBASE_WEB_API_KEY = "AIzaSyCqOyF0LYCHlHGU44ClVfG5DPeCPnUGRHo"
+#############
+FIREBASE_KEY_PATH = os.path.join(settings.BASE_DIR, 'firebase_key.json')
+FIREBASE_WEB_API_KEY = ""
 
+if os.path.exists(FIREBASE_KEY_PATH):
+    try:
+        with open(FIREBASE_KEY_PATH, 'r', encoding='utf-8') as f:
+            fb_data = json.load(f)
+            FIREBASE_WEB_API_KEY = fb_data.get('FIREBASE_WEB_API_KEY', '')
+    except Exception as e:
+        print(f"⚠️ Error al cargar firebase_key.json: {e}")
+########################
+KEY_FILE_PATH = os.path.join(settings.BASE_DIR, 'gemini_key.json')
+GEMINI_API_KEY = ""
 
+if os.path.exists(KEY_FILE_PATH):
+    try:
+        with open(KEY_FILE_PATH, 'r', encoding='utf-8') as f:
+            key_data = json.load(f)
+            GEMINI_API_KEY = key_data.get('GEMINI_API_KEY', '')
+    except Exception as e:
+        print(f"⚠️ Error al leer gemini_key.json: {e}")
+# VISTA CHATBOT PROBOT IA
+# ==========================================
+
+def probot_ia(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            mensaje_usuario = data.get('mensaje', '').strip()
+
+            if not mensaje_usuario:
+                return JsonResponse({'respuesta': 'Por favor escribe una pregunta.'})
+
+            client = genai.Client(api_key=GEMINI_API_KEY)
+
+            instrucciones = (
+                "Eres ProBot IA, el asistente virtual oficial del portal PrácticasPro. "
+                "Tu objetivo es ayudar a estudiantes a encontrar su primera práctica profesional, "
+                "revisar o mejorar su CV, dar tips para entrevistas de trabajo y resolver dudas. "
+                "Responde en español de forma profesional, cercana y breve (máximo 2 párrafos)."
+            )
+
+            respuesta_texto = None
+            max_intentos = 4
+            tiempos_espera = [1.5, 2.5, 3.5]  # Pausas progresivas si ocurre un 503
+
+            for intento in range(max_intentos):
+                try:
+                    chat = client.chats.create(
+                        model='gemini-3.8-flash',
+                        config=types.GenerateContentConfig(
+                            system_instruction=instrucciones
+                        )
+                    )
+                    response = chat.send_message(mensaje_usuario)
+
+                    if response and response.text:
+                        respuesta_texto = response.text
+                        print(f"🚀 ¡ProBot IA respondió exitosamente en el intento {intento + 1}!")
+                        break
+
+                except Exception as err:
+                    err_str = str(err)
+                    print(f"⚠️ Intento {intento + 1}/{max_intentos} en gemini-3.8-flash: {err_str}")
+
+                    # Si es error de demanda (503), aguarda el tiempo de pausa y reintenta
+                    if "503" in err_str and intento < max_intentos - 1:
+                        time.sleep(tiempos_espera[intento])
+                    else:
+                        break
+
+            if respuesta_texto:
+                return JsonResponse({'respuesta': respuesta_texto})
+            else:
+                return JsonResponse({
+                    'respuesta': '🤖 Los servidores de la IA experimentan una alta demanda en este instante. Por favor reintenta tu pregunta en unos segundos.'
+                })
+
+        except Exception as e:
+            print("❌ ERROR CRÍTICO EN PROBOT IA:", str(e))
+            return JsonResponse({'respuesta': f"🤖 Ocurrió un error: {str(e)}"}, status=200)
+
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
 # ==========================================
 # VISTAS GENERALES
+
+
 # ==========================================
 def quienes_somos(request):
     """Página informativa sobre PrácticasPro, términos y privacidad."""
     return render(request, 'quienes_somos.html')
+
 def index(request):
     return render(request, 'index.html')
 
 def dashboard_view(request):
-    # Nota: Tienes un 'dashboard_view.html' en tus templates, pero esta vista 
-    # actualmente actúa como un enrutador que redirige según el rol. 
-    # Si la idea es solo redirigir, se mantiene así.
     rol = request.session.get('user_rol')
     if rol == 'estudiante':
         return redirect('home_estudiante')
@@ -51,12 +136,13 @@ def register_view(request):
                 display_name=nombre
             )
 
-            # 2. Guardar rol en Firestore
+            # 2. Guardar rol y datos en Firestore
             db = firestore.client()
             db.collection('usuarios').document(user.uid).set({
                 'nombre': nombre,
                 'email': email,
                 'rol': rol,
+                'es_premium': False,  # Estado inicial para el modelo de suscripción
                 'creado_en': firestore.SERVER_TIMESTAMP
             })
 
@@ -97,13 +183,12 @@ def login_view(request):
                 request.session['user_name'] = user_data.get('nombre')
                 request.session['user_rol'] = rol
 
-                # --- AQUÍ ESTÁ LA CORRECCIÓN ---
                 if rol == 'estudiante':
                     return redirect('home_estudiante')
                 elif rol == 'empresa':
                     return redirect('home_empresa')
                 elif rol == 'admin':
-                    return redirect('home_admin') # Ahora sí reconoce al admin y lo redirige
+                    return redirect('home_admin')
                 else:
                     return redirect('index') 
             else:
@@ -125,15 +210,15 @@ def home_estudiante(request):
     if request.session.get('user_rol') != 'estudiante':
         return redirect('login')
 
-    user_uid = request.session.get('user_uid')
+    user_id = request.session.get('user_id')  # CORREGIDO: user_id unificado
     db = firestore.client()
 
     # 1. Obtener perfil del estudiante
-    user_doc = db.collection('usuarios').document(user_uid).get()
+    user_doc = db.collection('usuarios').document(user_id).get()
     estudiante_data = user_doc.to_dict() if user_doc.exists else {}
 
     # 2. Contar postulaciones activas del estudiante
-    postulaciones_ref = db.collection('postulaciones').where('estudiante_id', '==', user_uid).get()
+    postulaciones_ref = db.collection('postulaciones').where('estudiante_id', '==', user_id).get()
     total_postulaciones = len(postulaciones_ref)
 
     # 3. Obtener ofertas disponibles
@@ -144,7 +229,7 @@ def home_estudiante(request):
         'estudiante': estudiante_data,
         'total_postulaciones': total_postulaciones,
         'total_ofertas': len(ofertas),
-        'ofertas': ofertas[:6],  # Mostrar solo las primeras 6
+        'ofertas': ofertas[:6],
     }
     return render(request, 'home_estudiante.html', context)
 
@@ -165,28 +250,23 @@ def perfil_estudiante(request):
         telefono = request.POST.get('telefono')
         bio = request.POST.get('bio')
 
-        # Obtener datos actuales de Firestore
         doc_actual = user_ref.get()
         data_actual = doc_actual.to_dict() if doc_actual.exists else {}
         foto_url = data_actual.get('foto_url', '')
 
-        # Si el usuario adjuntó una nueva foto
         if 'foto' in request.FILES:
             foto_file = request.FILES['foto']
             fs = FileSystemStorage()
             
-            # Nombre de archivo único usando el ID del usuario
             extension = foto_file.name.split('.')[-1]
             nombre_archivo = f"perfiles/{user_id}.{extension}"
 
-            # Si ya existe una foto anterior, la borramos para reemplazarla
             if fs.exists(nombre_archivo):
                 fs.delete(nombre_archivo)
 
             filename = fs.save(nombre_archivo, foto_file)
-            foto_url = fs.url(filename)  # Retorna '/media/perfiles/ID_USUARIO.png'
+            foto_url = fs.url(filename)
 
-        # Actualizar Firestore
         user_ref.update({
             'nombre': nombre,
             'carrera': carrera,
@@ -198,7 +278,6 @@ def perfil_estudiante(request):
         messages.success(request, "¡Perfil y foto actualizados con éxito!")
         return redirect('perfil_estudiante')
 
-    # GET: Cargar datos para llenar el formulario
     doc = user_ref.get()
     estudiante_data = doc.to_dict() if doc.exists else {}
 
@@ -209,7 +288,6 @@ def ofertas_list(request):
         return redirect('login')
         
     db = firestore.client()
-    # Traer todas las ofertas activas
     ofertas_ref = db.collection('ofertas').where('estado', '==', 'activa').stream()
     
     lista_ofertas = []
@@ -251,7 +329,6 @@ def postular_oferta(request, oferta_id):
     oferta_data['id'] = oferta_doc.id
     estudiante_id = request.session.get('user_id')
 
-    # Si se envía el formulario con el CV y mensaje
     if request.method == 'POST':
         mensaje = request.POST.get('mensaje', '')
         cv_url = None
@@ -279,17 +356,15 @@ def postular_oferta(request, oferta_id):
 
             db.collection('postulaciones').add(nueva_postulacion)
 
-            messages.success(request, f"¡Te has postulado con éxito!")
+            messages.success(request, "¡Te has postulado con éxito!")
             return redirect('mis_postulaciones')
 
         except Exception as e:
             messages.error(request, f"Error al procesar la postulación: {str(e)}")
 
-    # Si es GET, muestra el formulario
     return render(request, 'postular_oferta.html', {'oferta': oferta_data})
 
 def mis_postulaciones(request):
-    # Proteger la ruta: solo estudiantes
     if request.session.get('user_rol') != 'estudiante':
         return redirect('login')
 
@@ -297,7 +372,6 @@ def mis_postulaciones(request):
     db = firestore.client()
 
     try:
-        # Buscar en la colección 'postulaciones' las que sean de este usuario
         postulaciones_ref = db.collection('postulaciones').where('estudiante_id', '==', estudiante_id).stream()
         
         lista_postulaciones = []
@@ -315,6 +389,7 @@ def mis_postulaciones(request):
     except Exception as e:
         messages.error(request, f"Error al cargar tus postulaciones: {str(e)}")
         return redirect('home_estudiante')
+
 
 # ==========================================
 # VISTAS DE EMPRESA
@@ -337,8 +412,6 @@ def crear_oferta(request):
         descripcion = request.POST.get('descripcion')
         requisitos = request.POST.get('requisitos')
         modalidad = request.POST.get('modalidad')
-        
-        # NUEVO: Capturar las coordenadas
         latitud = request.POST.get('latitud')
         longitud = request.POST.get('longitud')
 
@@ -352,8 +425,8 @@ def crear_oferta(request):
                 'descripcion': descripcion,
                 'requisitos': requisitos,
                 'modalidad': modalidad,
-                'latitud': latitud,   # Lo guardamos en Firebase
-                'longitud': longitud, # Lo guardamos en Firebase
+                'latitud': latitud,
+                'longitud': longitud,
                 'estado': 'activa',
                 'fecha_creacion': firestore.SERVER_TIMESTAMP
             }
@@ -375,7 +448,6 @@ def mis_ofertas(request):
     empresa_id = request.session.get('user_id')
     db = firestore.client()
     
-    # Filtrar solo las ofertas creadas por esta empresa
     ofertas_ref = db.collection('ofertas').where('empresa_id', '==', empresa_id).stream()
     
     lista_ofertas = []
@@ -392,11 +464,9 @@ def ver_postulantes(request, oferta_id):
 
     db = firestore.client()
     
-    # Obtener oferta
     oferta_doc = db.collection('ofertas').document(oferta_id).get()
     oferta = oferta_doc.to_dict() if oferta_doc.exists else {}
 
-    # Obtener postulantes
     postulaciones_ref = db.collection('postulaciones').where('oferta_id', '==', oferta_id).stream()
     
     postulantes = []
@@ -407,7 +477,7 @@ def ver_postulantes(request, oferta_id):
 
     context = {
         'oferta': oferta,
-        'oferta_id': oferta_id,  # <-- Asegúrate de incluir este campo
+        'oferta_id': oferta_id,
         'postulantes': postulantes,
         'total_postulantes': len(postulantes)
     }
@@ -419,7 +489,7 @@ def cambiar_estado_postulacion(request, postulacion_id):
         return redirect('login')
 
     if request.method == 'POST':
-        nuevo_estado = request.POST.get('nuevo_estado')  # 'aceptado' o 'rechazado'
+        nuevo_estado = request.POST.get('nuevo_estado')
         oferta_id = request.POST.get('oferta_id')
         mensaje_respuesta = request.POST.get('mensaje_respuesta', '').strip()
 
@@ -427,7 +497,6 @@ def cambiar_estado_postulacion(request, postulacion_id):
             db = firestore.client()
             postulacion_ref = db.collection('postulaciones').document(postulacion_id)
 
-            # Actualizamos el estado y el mensaje en la base de datos
             postulacion_ref.update({
                 'estado': nuevo_estado,
                 'mensaje_empresa': mensaje_respuesta
@@ -441,79 +510,39 @@ def cambiar_estado_postulacion(request, postulacion_id):
         return redirect('ver_postulantes', oferta_id=oferta_id)
 
     return redirect('mis_ofertas')
+
 def ver_perfil_estudiante(request, estudiante_id):
-    # Opcional: Proteger la vista para que solo entren empresas
+    """VERSIÓN ÚNICA Y UNIFICADA"""
     if request.session.get('user_rol') != 'empresa':
         messages.error(request, "Acceso denegado. Solo las empresas pueden ver esta página.")
         return redirect('mis_ofertas')
 
     try:
         db = firestore.client()
-        # IMPORTANTE: Cambia 'usuarios' por el nombre real de tu colección si se llama distinto
         estudiante_doc = db.collection('usuarios').document(estudiante_id).get()
 
         if not estudiante_doc.exists:
             messages.error(request, "El perfil del estudiante no fue encontrado.")
-            return redirect('mis_ofertas') # O redirigir a la página anterior
+            return redirect('mis_ofertas')
 
         estudiante_data = estudiante_doc.to_dict()
-        
-        # Le enviamos los datos al nuevo template que creaste
         return render(request, 'ver_perfil_estudiante.html', {'estudiante': estudiante_data})
 
     except Exception as e:
         messages.error(request, f"Error al cargar el perfil: {str(e)}")
         return redirect('mis_ofertas')
+
+
 # ==========================================
 # VISTAS DE ADMINISTRADOR
 # ==========================================
-def ver_perfil_estudiante(request, estudiante_id):
-    rol_actual = request.session.get('user_rol')
-    print(f"\n--- [DEBUG] CARGANDO PERFIL ESTUDIANTE ---")
-    print(f"1. Rol en sesión: '{rol_actual}'")
-    print(f"2. ID recibido: '{estudiante_id}'")
 
-    # Validación 1: Rol de usuario
-    if rol_actual != 'empresa':
-        print("❌ FALLO: El rol de usuario no es 'empresa'. Redirigiendo...")
-        messages.error(request, f"Permiso denegado. Rol actual: {rol_actual}")
-        return redirect('mis_ofertas')
-
-    try:
-        db = firestore.client()
-        
-        # OJO: Verifica si tu colección se llama 'usuarios' o 'estudiantes'
-        doc_ref = db.collection('usuarios').document(estudiante_id)
-        estudiante_doc = doc_ref.get()
-
-        print(f"3. Documento existe en Firestore: {estudiante_doc.exists}")
-
-        # Validación 2: Documento en Firestore
-        if not estudiante_doc.exists:
-            print(f"❌ FALLO: No existe el documento con ID '{estudiante_id}' en la colección 'usuarios'. Redirigiendo...")
-            messages.error(request, "El perfil del estudiante no existe en la base de datos.")
-            return redirect('mis_ofertas')
-
-        estudiante_data = estudiante_doc.to_dict()
-        print(f"4. Datos encontrados: {estudiante_data}")
-
-        # Intentar renderizar la plantilla
-        return render(request, 'ver_perfil_estudiante.html', {'estudiante': estudiante_data})
-
-    except Exception as e:
-        # Validación 3: Error de código o plantilla
-        print(f"❌ EXCEPCIÓN DETECTADA: {type(e).__name__} - {str(e)}")
-        messages.error(request, f"Error interno: {str(e)}")
-        return redirect('mis_ofertas')
-    
-    
 def home_admin(request):
     if request.session.get('user_rol') != 'admin':
         return redirect('login')
     
     db = firestore.client()
     
-    # 1. Obtener y contar Usuarios
     usuarios_ref = db.collection('usuarios').stream()
     lista_usuarios = []
     estudiantes_count = 0
@@ -531,7 +560,6 @@ def home_admin(request):
             
         lista_usuarios.append(user_data)
         
-    # 2. Obtener Publicaciones/Ofertas
     ofertas_ref = db.collection('ofertas').stream()
     lista_ofertas = []
     for doc in ofertas_ref:
@@ -555,13 +583,9 @@ def eliminar_usuario(request, usuario_id):
         return redirect('login')
     
     try:
-        # 1. Eliminar de Firebase Authentication
         auth.delete_user(usuario_id)
-        
-        # 2. Eliminar el documento de Firestore
         db = firestore.client()
         db.collection('usuarios').document(usuario_id).delete()
-        
         messages.success(request, "Usuario eliminado correctamente de la plataforma.")
     except Exception as e:
         messages.error(request, f"Error al eliminar usuario: {str(e)}")
@@ -573,10 +597,8 @@ def eliminar_oferta(request, oferta_id):
         return redirect('login')
         
     try:
-        # Eliminar el documento de la oferta en Firestore
         db = firestore.client()
         db.collection('ofertas').document(oferta_id).delete()
-        
         messages.success(request, "Oferta de práctica eliminada correctamente.")
     except Exception as e:
         messages.error(request, f"Error al eliminar la oferta: {str(e)}")

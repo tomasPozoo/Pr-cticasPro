@@ -7,7 +7,8 @@ from portal.views import (
     home_estudiante, perfil_estudiante, ofertas_list, oferta_detail, mis_postulaciones,
     postular_oferta, ver_postulantes, cambiar_estado_postulacion, ver_perfil_estudiante,
     home_empresa, perfil_empresa, crear_oferta, mis_ofertas,
-    home_admin, eliminar_usuario, eliminar_oferta, quienes_somos
+    home_admin, eliminar_usuario, eliminar_oferta, quienes_somos,
+    probot_ia
 )
 
 urlpatterns = [
@@ -25,7 +26,8 @@ urlpatterns = [
     path('ofertas/<str:oferta_id>/', oferta_detail, name='oferta_detail'),
     path('ofertas/<str:oferta_id>/postular/', postular_oferta, name='postular_oferta'),
     path('estudiante/postulaciones/', mis_postulaciones, name='mis_postulaciones'),
-
+    #ia
+    path('probot-ia/', probot_ia, name='probot_ia'),
     # Rutas Empresa
     path('empresa/', home_empresa, name='home_empresa'),
     path('empresa/perfil/', perfil_empresa, name='perfil_empresa'),
