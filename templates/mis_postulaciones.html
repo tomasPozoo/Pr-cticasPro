@@ -1,52 +1,88 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto px-4 py-8">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Mis Postulaciones</h2>
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Encabezado -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-extrabold text-gray-900 mb-2">Mis Postulaciones</h1>
+        <p class="text-gray-600">Sigue el estado en tiempo real de las prácticas a las que has postulado.</p>
+    </div>
 
     {% if postulaciones %}
-        <div class="grid gap-6">
-            {% for postulacion in postulaciones %}
-            <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <h3 class="text-xl font-bold text-gray-900">
-                            {{ postulacion.oferta_titulo }}
-                        </h3>
-                        <p class="text-gray-600 text-sm">
-                            Empresa: <strong>{{ postulacion.empresa_nombre }}</strong>
-                        </p>
-                    </div>
-
-                    <!-- Insignia de Estado -->
-                    <span class="px-3 py-1 text-xs font-bold rounded-full uppercase
-                        {% if postulacion.estado == 'aceptado' %} bg-green-100 text-green-800
-                        {% elif postulacion.estado == 'rechazado' %} bg-red-100 text-red-800
-                        {% else %} bg-yellow-100 text-yellow-800 {% endif %}">
-                        {{ postulacion.estado }}
-                    </span>
+    <div class="space-y-6">
+        {% for p in postulaciones %}
+        <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-gray-100">
+                <div>
+                    <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">🏢 {{ p.empresa_nombre }}</span>
+                    <h2 class="text-xl font-bold text-gray-900 mt-0.5">{{ p.oferta_titulo }}</h2>
                 </div>
 
-                <!-- Mensaje de Respuesta de la Empresa (si existe) -->
-                {% if postulacion.mensaje_empresa %}
-                <div class="mt-4 p-4 rounded-xl border {% if postulacion.estado == 'aceptado' %} bg-green-50 border-green-200 text-green-900 {% else %} bg-gray-50 border-gray-200 text-gray-800 {% endif %}">
-                    <p class="text-xs font-bold uppercase tracking-wider mb-1">
-                        Mensaje de la empresa:
-                    </p>
-                    <p class="text-sm font-medium whitespace-pre-line">
-                        {{ postulacion.mensaje_empresa }}
-                    </p>
+                <!-- Estado de Postulación -->
+                <div>
+                    {% if p.estado == 'aceptado' %}
+                        <span class="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-800 text-sm font-bold px-4 py-1.5 rounded-full">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            ¡Postulación Aceptada! 🎉
+                        </span>
+                    {% elif p.estado == 'rechazado' %}
+                        <span class="inline-flex items-center gap-1.5 bg-rose-100 text-rose-800 text-sm font-bold px-4 py-1.5 rounded-full">
+                            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                            No Seleccionado
+                        </span>
+                    {% elif p.estado == 'en_revision' %}
+                        <span class="inline-flex items-center gap-1.5 bg-blue-100 text-blue-800 text-sm font-bold px-4 py-1.5 rounded-full">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                            En Revisión por la Empresa
+                        </span>
+                    {% else %}
+                        <span class="inline-flex items-center gap-1.5 bg-amber-100 text-amber-800 text-sm font-bold px-4 py-1.5 rounded-full">
+                            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                            Pendiente de Revisión
+                        </span>
+                    {% endif %}
                 </div>
-                {% endif %}
-
             </div>
-            {% endfor %}
+
+            <!-- Feedback o Mensaje de la Empresa -->
+            {% if p.mensaje_empresa %}
+            <div class="mt-4 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100">
+                <p class="text-xs font-bold text-blue-900 uppercase tracking-wider mb-1">💬 Mensaje de la Empresa:</p>
+                <p class="text-sm text-blue-950 font-medium">{{ p.mensaje_empresa }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Detalles adicionales -->
+            <div class="mt-4 flex flex-wrap justify-between items-center text-xs text-gray-500 gap-2 pt-2">
+                <div>
+                    {% if p.cv_url %}
+                    <a href="{{ p.cv_url }}" target="_blank" class="text-blue-600 font-semibold hover:underline flex items-center gap-1">
+                        📎 Ver CV enviado
+                    </a>
+                    {% endif %}
+                </div>
+
+                <a href="{% url 'oferta_detail' p.oferta_id %}" class="text-gray-700 font-bold hover:text-blue-600 transition">
+                    Ver Detalle de la Oferta →
+                </a>
+            </div>
         </div>
+        {% endfor %}
+    </div>
+
     {% else %}
-        <div class="bg-blue-50 border border-blue-200 text-blue-800 p-6 rounded-2xl text-center">
-            Aún no te has postulado a ninguna oferta.
+    <div class="bg-white rounded-2xl border border-gray-100 p-12 text-center max-w-md mx-auto my-8">
+        <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+            📝
         </div>
+        <h3 class="text-lg font-bold text-gray-900 mb-1">No tienes postulaciones activas</h3>
+        <p class="text-gray-500 text-sm mb-6">Explora el catálogo de ofertas y postula a tu primera práctica profesional.</p>
+        <a href="{% url 'ofertas_list' %}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl text-sm transition">
+            Ver Ofertas Disponibles
+        </a>
+    </div>
     {% endif %}
+
 </div>
 {% endblock %}

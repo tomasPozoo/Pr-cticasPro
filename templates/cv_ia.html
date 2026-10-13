@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Token CSRF oculto para uso de JavaScript -->
+{% csrf_token %}
+
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Encabezado -->
+    <div class="mb-8 text-center sm:text-left flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+            <a href="{% url 'home_estudiante' %}" class="text-xs font-bold text-gray-500 hover:text-blue-600 transition mb-2 inline-block">
+                ← Volver al Panel Estudiante
+            </a>
+            <h1 class="text-3xl font-extrabold text-gray-900 flex items-center gap-2">
+                🤖 Asistente de CV & Carta de Presentación
+            </h1>
+            <p class="text-gray-600 text-sm mt-1">
+                Genera cartas personalizadas o recibe retroalimentación en tiempo real con ProBot IA.
+            </p>
+        </div>
+        <span class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
+            Powered by Gemini IA
+        </span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Formulario (Columna Izquierda) -->
+        <div class="lg:col-span-5 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+            
+            <!-- Selector de Modo -->
+            <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">¿Qué deseas generar?</label>
+                <div class="grid grid-cols-2 gap-2 bg-gray-100 p-1 rounded-xl">
+                    <button type="button" id="btnModoCarta" onclick="cambiarModo('carta')" class="py-2.5 text-xs font-bold rounded-lg transition bg-white text-blue-600 shadow-sm">
+                        ✉️ Carta Presentación
+                    </button>
+                    <button type="button" id="btnModoRevision" onclick="cambiarModo('revision')" class="py-2.5 text-xs font-bold rounded-lg transition text-gray-600 hover:text-gray-900">
+                        🔍 Revisar Perfil / CV
+                    </button>
+                </div>
+            </div>
+
+            <!-- Campo Carrera -->
+            <div>
+                <label for="carrera" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Tu Carrera</label>
+                <select id="carrera" class="w-full py-2.5 px-3 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-blue-500 transition">
+                    {% for c in carreras %}
+                        <option value="{{ c }}" {% if c == estudiante.carrera %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Puesto Objetivo -->
+            <div>
+                <label for="puesto_objetivo" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Cargo o Empresa Objetivo</label>
+                <input type="text" id="puesto_objetivo" placeholder="Ej: Desarrollador Frontend en Banco de Chile" 
+                       class="w-full py-2.5 px-3 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-blue-500 transition">
+            </div>
+
+            <!-- Habilidades Clave -->
+            <div>
+                <label for="habilidades" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Habilidades y Herramientas</label>
+                <input type="text" id="habilidades" placeholder="Ej: Python, Django, SQL, Trabajo en Equipo, Git" 
+                       class="w-full py-2.5 px-3 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-blue-500 transition">
+            </div>
+
+            <!-- Experiencia o Proyectos -->
+            <div>
+                <label for="experiencia" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Proyectos Académicos / Experiencia</label>
+                <textarea id="experiencia" rows="4" placeholder="Describe brevemente tus proyectos destacados, rol en trabajos en equipo o experiencia laboral previa..."
+                          class="w-full py-2.5 px-3 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-blue-500 transition"></textarea>
+            </div>
+
+            <!-- Botón Generar -->
+            <button type="button" id="btnGenerar" onclick="generarContenidoIA('{% url 'asistente_cv_ia' %}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2">
+                <span>✨ Generar con ProBot IA</span>
+            </button>
+
+        </div>
+
+        <!-- Panel de Resultado (Columna Derecha) -->
+        <div class="lg:col-span-7 flex flex-col">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex-1 flex flex-col justify-between min-h-[420px]">
+                
+                <div>
+                    <div class="flex items-center justify-between pb-4 border-b border-gray-100 mb-4">
+                        <h3 id="tituloResultado" class="font-bold text-gray-900 text-base">Carta de Presentación Generada</h3>
+                        <button id="btnCopiar" onclick="copiarResultado()" class="hidden text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-1.5 px-3 rounded-lg transition flex items-center gap-1">
+                            📋 Copiar
+                        </button>
+                    </div>
+
+                    <!-- Estado Inicial / Vacío -->
+                    <div id="estadoVacio" class="text-center py-16 text-gray-400 space-y-3">
+                        <div class="text-4xl">📄</div>
+                        <p class="text-sm font-medium">Ingresa tus datos a la izquierda y presiona <strong>Generar con ProBot IA</strong>.</p>
+                    </div>
+
+                    <!-- Loader Cargando -->
+                    <div id="loaderIA" class="hidden text-center py-16 space-y-4">
+                        <div class="inline-block w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                        <p class="text-sm font-semibold text-gray-600">ProBot IA está redactando tu contenido...</p>
+                    </div>
+
+                    <!-- Contenedor del Texto Generado -->
+                    <div id="contenidoGenerado" class="hidden text-sm text-gray-800 whitespace-pre-line leading-relaxed font-sans">
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-gray-50 text-xs text-gray-400 text-center">
+                    ProBot IA utiliza modelos de lenguaje para asistirte en tu postulación. Revisa el contenido generado antes de enviarlo.
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Carga del JS del Asistente -->
+<script src="{% static 'js/cv_ia.js' %}"></script>
+{% endblock %}

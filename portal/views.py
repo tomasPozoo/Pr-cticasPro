@@ -130,8 +130,36 @@ def quienes_somos(request):
     return render(request, 'quienes_somos.html')
 
 def index(request):
-    return render(request, 'index.html')
+    try:
+        db = firestore.client()
 
+        # 1. Ofertas activas
+        ofertas_ref = db.collection('ofertas').where('estado', '==', 'activa').stream()
+        lista_ofertas = [{**doc.to_dict(), 'id': doc.id} for doc in ofertas_ref]
+        total_ofertas = len(lista_ofertas)
+
+        # 2. Empresas registradas
+        empresas_ref = db.collection('usuarios').where('rol', '==', 'empresa').stream()
+        total_empresas = len(list(empresas_ref))
+
+        # 3. Estudiantes registrados
+        estudiantes_ref = db.collection('usuarios').where('rol', '==', 'estudiante').stream()
+        total_estudiantes = len(list(estudiantes_ref))
+
+    except Exception as e:
+        print(f"⚠️ Error al obtener métricas para index: {e}")
+        lista_ofertas = []
+        total_ofertas = 0
+        total_empresas = 0
+        total_estudiantes = 0
+
+    context = {
+        'total_ofertas': total_ofertas,
+        'total_empresas': total_empresas,
+        'total_estudiantes': total_estudiantes,
+        'ofertas_destacadas': lista_ofertas[:6]
+    }
+    return render(request, 'index.html', context)
 def dashboard_view(request):
     rol = request.session.get('user_rol')
     if rol == 'estudiante':
@@ -1249,3 +1277,94 @@ def eliminar_oferta_admin(request, oferta_id):
             messages.error(request, f'Error al eliminar en Firebase: {e}')
             
     return redirect('home_admin')
+
+
+
+
+#########################
+def asistente_cv_ia(request):
+    """Generador de Cartas de Presentación y Revisor de CV con ProBot IA."""
+    if request.session.get('user_rol') != 'estudiante':
+        return redirect('login')
+
+    user_id = request.session.get('user_id')
+    db = firestore.client()
+    user_doc = db.collection('usuarios').document(user_id).get()
+    estudiante_data = user_doc.to_dict() if user_doc.exists else {}
+
+    # Procesamiento por AJAX / POST
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            tipo = data.get('tipo', 'carta')  # 'carta' o 'revision'
+            carrera = data.get('carrera', estudiante_data.get('carrera', '')).strip()
+            habilidades = data.get('habilidades', '').strip()
+            experiencia = data.get('experiencia', '').strip()
+            puesto_objetivo = data.get('puesto_objetivo', '').strip()
+
+            if not habilidades and not experiencia:
+                return JsonResponse({'success': False, 'error': 'Por favor ingresa tus habilidades o un resumen de tu experiencia/proyectos.'})
+
+            client = genai.Client(api_key=GEMINI_API_KEY)
+
+            if tipo == 'carta':
+                prompt = (
+                    f"Genera una Carta de Presentación profesional, concisa y persuasiva para una postulación de práctica profesional en Chile.\n"
+                    f"- Carrera: {carrera}\n"
+                    f"- Cargo / Área Objetivo: {puesto_objetivo if puesto_objetivo else 'Práctica Profesional'}\n"
+                    f"- Habilidades Clave / Tecnologías: {habilidades}\n"
+                    f"- Proyectos / Experiencia Relevante: {experiencia}\n\n"
+                    f"Instrucciones:\n"
+                    f"1. Estructura la carta en 3 párrafos formales (Saludo/Introducción, Valor Agregado/Proyectos, Cierre/Llamado a la acción).\n"
+                    f"2. Utiliza un tono profesional y motivador.\n"
+                    f"3. Agrega corchetes [ ] en variables opcionales como [Nombre de la Empresa] si aplica."
+                )
+            else:
+                prompt = (
+                    f"Actúa como un reclutador senior y realiza una revisión constructiva de perfil para un estudiante que busca práctica profesional.\n"
+                    f"- Carrera: {carrera}\n"
+                    f"- Puesto Deseado: {puesto_objetivo if puesto_objetivo else 'Práctica Profesional'}\n"
+                    f"- Habilidades / Herramientas: {habilidades}\n"
+                    f"- Proyectos / Experiencia redactada: {experiencia}\n\n"
+                    f"Instrucciones de Respuesta:\n"
+                    f"1. **Fortalezas del Perfil**: Breve análisis de lo más destacado.\n"
+                    f"2. **Palabras Clave Recomendadas**: Términos técnicos o de industria que debe incluir en su CV.\n"
+                    f"3. **Sugerencias de Redacción**: 3 recomendaciones puntuales para hacer su CV más atractivo para los reclutadores."
+                )
+
+            instrucciones = (
+                "Eres ProBot CV Coach, el asistente inteligente de empleabilidad de PrácticasPro en Chile. "
+                "Respondes de forma estructurada, profesional y clara."
+            )
+
+            respuesta_texto = None
+            max_intentos = 3
+            for intento in range(max_intentos):
+                try:
+                    chat = client.chats.create(
+                        model='gemini-3.8-flash',
+                        config=types.GenerateContentConfig(
+                            system_instruction=instrucciones
+                        )
+                    )
+                    response = chat.send_message(prompt)
+                    if response and response.text:
+                        respuesta_texto = response.text
+                        break
+                except Exception as err:
+                    print(f"⚠ Intento {intento+1} en Gemini CV IA: {err}")
+                    time.sleep(1)
+
+            if respuesta_texto:
+                return JsonResponse({'success': True, 'resultado': respuesta_texto})
+            else:
+                return JsonResponse({'success': False, 'error': 'El servicio de IA experimenta alta demanda. Por favor reintenta en unos segundos.'})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': f"Ocurrió un error: {str(e)}"}, status=500)
+
+    context = {
+        'estudiante': estudiante_data,
+        'carreras': CARRERAS_LISTA
+    }
+    return render(request, 'cv_ia.html', context)

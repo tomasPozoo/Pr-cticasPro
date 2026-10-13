@@ -1,181 +1,115 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container my-5" style="max-width: 1000px; padding: 20px;">
-    
-    <!-- Encabezado -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px;">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Cabecera -->
+    <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-            <h2 style="font-size: 1.8rem; font-weight: 700; color: #1e293b; margin: 0;">
-                Postulantes para: <span style="color: #0284c7;">{{ oferta.titulo }}</span>
-            </h2>
-            <p style="color: #64748b; margin: 5px 0 0 0;">
-                Total de postulaciones recibidas: <strong>{{ total_postulantes }}</strong>
-            </p>
+            <a href="{% url 'mis_ofertas' %}" class="text-gray-500 hover:text-gray-700 text-sm font-medium flex items-center gap-1 mb-2 transition">
+                ← Volver a mis ofertas
+            </a>
+            <h1 class="text-2xl font-extrabold text-gray-900">Postulantes para: {{ oferta.titulo }}</h1>
+            <p class="text-gray-500 text-sm">Empresa: <span class="font-semibold text-gray-700">{{ oferta.empresa_nombre }}</span></p>
         </div>
-        <a href="{% url 'mis_ofertas' %}" style="background-color: #f1f5f9; color: #334155; text-decoration: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; transition: all 0.2s;">
-            ← Volver a mis ofertas
-        </a>
+        <div class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-4 py-2 rounded-xl text-sm font-bold">
+            Total Postulantes: {{ total_postulantes }}
+        </div>
     </div>
 
-    <!-- Lista de Postulantes -->
     {% if postulantes %}
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); gap: 20px;">
-            {% for postulante in postulantes %}
-            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; justify-content: space-between;">
+    <div class="space-y-4">
+        {% for p in postulantes %}
+        <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                 
-                <div>
-                    <!-- Encabezado de la Tarjeta del Postulante -->
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-                        <div>
-                            <h4 style="font-size: 1.25rem; font-weight: 700; color: #0f172a; margin: 0;">
-                                {{ postulante.estudiante_nombre }}
-                            </h4>
-                            <span style="color: #64748b; font-size: 0.9rem; display: block; margin-bottom: 6px;">
-                                ✉ {{ postulante.estudiante_email }}
-                            </span>
-
-                            <!-- BOTÓN PARA VER PERFIL COMPLETO -->
-                            {% if postulante.estudiante_id %}
-                            <a href="{% url 'ver_perfil_estudiante' postulante.estudiante_id %}" style="display: inline-block; background-color: #f1f5f9; color: #0f172a; text-decoration: none; padding: 5px 12px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; border: 1px solid #cbd5e1; margin-top: 4px;">
-                                👤 Ver Perfil Completo
-                            </a>
-                            {% endif %}
-                        </div>
-
-                        <!-- Badge de Estado -->
-                        <span style="padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
-                            {% if postulante.estado == 'pendiente' %} background-color: #fef3c7; color: #b45309;
-                            {% elif postulante.estado == 'aceptado' %} background-color: #dcfce7; color: #15803d;
-                            {% elif postulante.estado == 'rechazado' %} background-color: #fee2e2; color: #b91c1c;
-                            {% else %} background-color: #f1f5f9; color: #475569; {% endif %}">
-                            {{ postulante.estado }}
-                        </span>
+                <!-- Datos del Estudiante -->
+                <div class="space-y-2 flex-1">
+                    <div class="flex items-center gap-3">
+                        <h3 class="text-lg font-bold text-gray-900">{{ p.estudiante_nombre }}</h3>
+                        
+                        <!-- Badges de Estado -->
+                        {% if p.estado == 'aceptado' %}
+                            <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">Aceptado</span>
+                        {% elif p.estado == 'rechazado' %}
+                            <span class="bg-rose-100 text-rose-800 text-xs font-bold px-3 py-1 rounded-full">Rechazado</span>
+                        {% elif p.estado == 'en_revision' %}
+                            <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">En Revisión</span>
+                        {% else %}
+                            <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">Pendiente</span>
+                        {% endif %}
                     </div>
 
-                    <!-- Carta de Presentación -->
-                    <div style="margin-bottom: 20px;">
-                        <label style="font-weight: 600; color: #334155; font-size: 0.85rem; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
-                            Carta de Presentación:
-                        </label>
-                        <div style="background-color: #f8fafc; border: 1px solid #f1f5f9; padding: 14px; border-radius: 8px; color: #334155; font-size: 0.95rem; line-height: 1.5; white-space: pre-line;">
-                            {{ postulante.mensaje|default:"El estudiante no adjuntó un mensaje." }}
-                        </div>
-                    </div>
+                    <p class="text-sm text-gray-600">📧 {{ p.estudiante_email }}</p>
 
-                    <!-- Botón para ver/descargar CV Subido -->
-                    {% if postulante.cv_url %}
-                    <div style="margin-bottom: 20px;">
-                        <a href="{{ postulante.cv_url }}" target="_blank" download style="display: inline-block; background-color: #0284c7; color: #ffffff; text-decoration: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; transition: background 0.2s;">
-                            📥 Descargar / Ver CV Adjunto
-                        </a>
-                    </div>
-                    {% elif postulante.cv_link %}
-                    <div style="margin-bottom: 20px;">
-                        <a href="{{ postulante.cv_link }}" target="_blank" style="display: inline-block; background-color: #ffc107; color: #000; text-decoration: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; transition: background 0.2s;">
-                            🔗 Ver CV / Portafolio (Enlace)
-                        </a>
+                    {% if p.mensaje %}
+                    <div class="bg-gray-50 p-3 rounded-xl text-xs text-gray-700 border border-gray-100">
+                        <span class="font-bold text-gray-900 block mb-1">Carta de Presentación / Mensaje:</span>
+                        {{ p.mensaje }}
                     </div>
                     {% endif %}
 
-                    <!-- Mensaje de respuesta guardado previamente -->
-                    {% if postulante.mensaje_empresa %}
-                    <div style="margin-bottom: 20px; background-color: #f0f9ff; border: 1px solid #bae6fd; padding: 12px; border-radius: 8px;">
-                        <label style="font-weight: 700; color: #0369a1; font-size: 0.8rem; display: block; margin-bottom: 4px; text-transform: uppercase;">
-                            Mensaje dejado al postulante:
-                        </label>
-                        <p style="margin: 0; color: #0c4a6e; font-size: 0.9rem;">
-                            {{ postulante.mensaje_empresa }}
-                        </p>
+                    {% if p.mensaje_empresa %}
+                    <div class="bg-emerald-50 p-3 rounded-xl text-xs text-emerald-900 border border-emerald-100">
+                        <span class="font-bold text-emerald-950 block mb-1">Tu Respuesta / Retroalimentación Enviada:</span>
+                        {{ p.mensaje_empresa }}
                     </div>
                     {% endif %}
                 </div>
 
-                <!-- Acciones para abrir el Modal -->
-                <div style="border-top: 1px solid #f1f5f9; padding-top: 15px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Cambiar estado:</span>
+                <!-- Acciones -->
+                <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto shrink-0 border-t lg:border-t-0 pt-4 lg:pt-0 border-gray-100">
                     
-                    <div style="display: flex; gap: 8px;">
-                        <button type="button" 
-                            onclick="abrirModal('{{ postulante.id }}', 'aceptado', '{{ postulante.estudiante_nombre }}')"
-                            style="background-color: #16a34a; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
-                            ✓ Aceptar
-                        </button>
+                    <!-- Botón Descargar CV -->
+                    {% if p.cv_url %}
+                    <a href="{{ p.cv_url }}" target="_blank" download class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold py-2.5 px-4 rounded-xl transition flex items-center gap-2">
+                        📄 Ver / Descargar CV
+                    </a>
+                    {% else %}
+                    <span class="text-xs text-gray-400 bg-gray-50 py-2 px-3 rounded-lg">Sin CV adjunto</span>
+                    {% endif %}
 
-                        <button type="button" 
-                            onclick="abrirModal('{{ postulante.id }}', 'rechazado', '{{ postulante.estudiante_nombre }}')"
-                            style="background-color: #dc2626; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
-                            ✕ Rechazar
+                    <!-- Perfil del Estudiante -->
+                    <a href="{% url 'ver_perfil_estudiante' p.estudiante_id %}" class="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold py-2.5 px-4 rounded-xl transition">
+                        Ver Perfil
+                    </a>
+
+                    <!-- Formulario de Cambio de Estado -->
+                    <form method="POST" action="{% url 'cambiar_estado_postulacion' p.id %}" class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        {% csrf_token %}
+                        <input type="hidden" name="oferta_id" value="{{ oferta_id }}">
+                        
+                        <select name="nuevo_estado" class="text-xs py-2 px-3 border border-gray-300 rounded-xl bg-white focus:ring-emerald-500">
+                            <option value="pendiente" {% if p.estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                            <option value="en_revision" {% if p.estado == 'en_revision' %}selected{% endif %}>En Revisión</option>
+                            <option value="aceptado" {% if p.estado == 'aceptado' %}selected{% endif %}>Aceptar Postulante</option>
+                            <option value="rechazado" {% if p.estado == 'rechazado' %}selected{% endif %}>Rechazar Postulante</option>
+                        </select>
+
+                        <input type="text" name="mensaje_respuesta" value="{{ p.mensaje_empresa|default:'' }}" placeholder="Mensaje para el alumno..." 
+                               class="text-xs py-2 px-3 border border-gray-300 rounded-xl focus:ring-emerald-500 w-full sm:w-48">
+
+                        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 px-4 rounded-xl transition">
+                            Actualizar
                         </button>
-                    </div>
+                    </form>
+
                 </div>
 
             </div>
-            {% endfor %}
         </div>
+        {% endfor %}
+    </div>
+
     {% else %}
-        <div style="background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 40px; text-align: center; color: #0369a1;">
-            <h4 style="margin: 0 0 8px 0; font-weight: 700;">Aún no hay postulaciones</h4>
-            <p style="margin: 0;">Cuando los estudiantes se postulen a esta oferta, aparecerán listados aquí.</p>
+    <div class="bg-white rounded-2xl border border-gray-100 p-12 text-center max-w-md mx-auto my-8">
+        <div class="w-16 h-16 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+            📥
         </div>
+        <h3 class="text-lg font-bold text-gray-900 mb-1">Aún no hay postulantes</h3>
+        <p class="text-gray-500 text-sm">Los alumnos que postulen a esta práctica aparecerán listados aquí.</p>
+    </div>
     {% endif %}
 
 </div>
-
-<!-- VENTANA EMERGENTE (MODAL) -->
-<div id="modalRespuesta" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; justify-content: center; align-items: center;">
-    <div style="background: white; border-radius: 12px; width: 90%; max-width: 500px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
-        
-        <h3 id="modalTitulo" style="font-size: 1.3rem; font-weight: 700; color: #0f172a; margin-top: 0; margin-bottom: 8px;"></h3>
-        <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 16px;">
-            Escribe un mensaje para el estudiante (ej: correo de contacto, fecha de entrevista o motivos):
-        </p>
-
-        <form id="formRespuesta" method="POST" action="">
-            {% csrf_token %}
-            <input type="hidden" name="oferta_id" value="{{ oferta_id }}">
-            <input type="hidden" id="nuevo_estado_input" name="nuevo_estado" value="">
-
-            <textarea id="mensaje_respuesta" name="mensaje_respuesta" rows="4" required
-                placeholder="Ej: ¡Felicidades! Por favor comunícate a contacto@empresa.com para coordinar la entrevista..."
-                style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; margin-bottom: 16px; box-sizing: border-box; resize: vertical;"></textarea>
-
-            <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                <button type="button" onclick="cerrarModal()" 
-                    style="background: #e2e8f0; color: #334155; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer;">
-                    Cancelar
-                </button>
-                <button type="submit" 
-                    style="background: #0284c7; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer;">
-                    Enviar y Confirmar
-                </button>
-            </div>
-        </form>
-
-    </div>
-</div>
-
-<script>
-function abrirModal(postulacionId, estado, nombreEstudiante) {
-    const modal = document.getElementById('modalRespuesta');
-    const form = document.getElementById('formRespuesta');
-    const titulo = document.getElementById('modalTitulo');
-    const estadoInput = document.getElementById('nuevo_estado_input');
-
-    // Asignar ruta dinámica al formulario
-    form.action = `/empresa/postulaciones/${postulacionId}/cambiar-estado/`;
-    
-    // Asignar estado y título
-    estadoInput.value = estado;
-    titulo.innerText = estado === 'aceptado' 
-        ? `Aceptar a ${nombreEstudiante}` 
-        : `Rechazar a ${nombreEstudiante}`;
-
-    modal.style.display = 'flex';
-}
-
-function cerrarModal() {
-    document.getElementById('modalRespuesta').style.display = 'none';
-}
-</script>
 {% endblock %}

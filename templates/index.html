@@ -4,25 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}PrácticasPro - Red de Vinculación Laboral{% endblock %}</title>
+  <title>PrácticasPro - Red de Vinculación Laboral</title>
   <link rel="icon" type="image/png" href="{% static 'img/iconoPracticasPro.png' %}">
-  <!-- Tailwind CSS CDN + Configuración Externa -->
-<!-- Tailwind CSS CDN + Configuración Externa -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="{% static 'js/tailwind.config.js' %}"></script>
-
-  <!-- Leaflet CSS y JS (Mapas) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <!-- Hoja de Estilos Personalizada -->
-  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
-  <!-- Hoja de Estilos Personalizada -->
-  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
-
-  {% block extra_head %}{% endblock %}
-
- <!-- Tailwind CSS CDN + Configuración Inline -->
+  
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -43,6 +28,12 @@
       }
     }
   </script>
+
+  <!-- Leaflet CSS y JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
 </head>
 <body class="flex flex-col min-h-screen text-gray-800 antialiased bg-gray-50">
 
@@ -71,13 +62,14 @@
           <a href="{% url 'index' %}" class="text-gray-200 hover:text-amber-400 transition-colors">Inicio</a>
           <a href="#mapa" class="text-gray-200 hover:text-amber-400 transition-colors">Mapa de Ofertas</a>
           <a href="#herramientas" class="text-gray-200 hover:text-amber-400 transition-colors flex items-center gap-1.5">
-            <span>Asistente IA & Mapa</span>
+            <span>Asistente IA</span>
             <span class="bg-amber-400/20 text-amber-300 text-[10px] px-2 py-0.5 rounded-full border border-amber-400/30">PRO</span>
           </a>
+          <a href="{% url 'quienes_somos' %}" class="text-gray-200 hover:text-amber-400 transition-colors">Nosotros</a>
           <a href="{% url 'login' %}" class="text-gray-200 hover:text-amber-400 transition-colors">Portal Empresas</a>
           
           <a href="{% url 'login' %}" class="bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-brand-950 font-bold px-5 py-2.5 rounded-xl transition-all shadow-md hover:shadow-amber-500/20 hover:-translate-y-0.5">
-            Portal Estudiantes
+            Ingresar / Registrarse
           </a>
         </nav>
 
@@ -94,24 +86,24 @@
         </div>
       </div>
 
-      <!-- MENÚ MÓVIL DESPLEGABLE -->
+      <!-- MENÚ MÓVIL -->
       <div id="mobileMenu" class="hidden md:hidden border-t border-brand-900/80 py-4 space-y-3">
         <a href="{% url 'index' %}" class="block px-3 py-2 rounded-lg text-base font-medium text-gray-200 hover:bg-brand-900 hover:text-amber-400">Inicio</a>
         <a href="#mapa" class="block px-3 py-2 rounded-lg text-base font-medium text-gray-200 hover:bg-brand-900 hover:text-amber-400">Mapa de Ofertas</a>
         <a href="#herramientas" class="block px-3 py-2 rounded-lg text-base font-medium text-gray-200 hover:bg-brand-900 hover:text-amber-400">Asistente IA & Herramientas</a>
-        <a href="#" class="block px-3 py-2 rounded-lg text-base font-medium text-gray-200 hover:bg-brand-900 hover:text-amber-400">Portal Empresas</a>
+        <a href="{% url 'login' %}" class="block px-3 py-2 rounded-lg text-base font-medium text-gray-200 hover:bg-brand-900 hover:text-amber-400">Portal Empresas</a>
         <div class="pt-2">
-          <a href="#" class="block w-full text-center bg-gradient-to-r from-amber-400 to-yellow-500 text-brand-950 font-bold px-4 py-3 rounded-xl shadow-md">
-            Portal Estudiantes
+          <a href="{% url 'login' %}" class="block w-full text-center bg-gradient-to-r from-amber-400 to-yellow-500 text-brand-950 font-bold px-4 py-3 rounded-xl shadow-md">
+            Ingresar / Registrarse
           </a>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- ==================== CARRUSEL PRINCIPAL (HERO SLIDER) ==================== -->
+  <!-- ==================== HERO CARRUSEL ==================== -->
   <section class="relative bg-brand-950 overflow-hidden text-white">
-    <div id="heroCarousel" class="relative min-h-[580px] sm:min-h-[640px] flex items-center">
+    <div id="heroCarousel" class="relative min-h-[580px] sm:min-h-[620px] flex items-center">
       
       <!-- SLIDE 1: Impulso Profesional -->
       <div class="hero-slide absolute inset-0 w-full h-full opacity-100 transition-opacity duration-700 ease-in-out z-10 flex items-center" data-index="0">
@@ -135,7 +127,7 @@
             </h1>
 
             <p class="text-lg text-gray-300 leading-relaxed">
-              Conectamos el talento de nuestros estudiantes con las mejores empresas de Chile. Encuentra ofertas cerca de tu comuna y postula en un solo clic.
+              Conectamos el talento de nuestros estudiantes con las mejores empresas de Chile. Encuentra ofertas cerca de tu comuna y postula con tu perfil optimizado.
             </p>
 
             <div class="flex flex-col sm:flex-row gap-4 pt-2">
@@ -148,18 +140,19 @@
               </a>
             </div>
 
+            <!-- MÉTIRCAS EN TIEMPO REAL -->
             <div class="pt-6 border-t border-white/10 grid grid-cols-3 gap-4">
               <div>
-                <p class="text-2xl font-black text-amber-400">+1,200</p>
+                <p class="text-2xl font-black text-amber-400">{{ total_ofertas|default:0 }}</p>
                 <p class="text-xs text-gray-400">Prácticas Activas</p>
               </div>
               <div>
-                <p class="text-2xl font-black text-white">+500</p>
+                <p class="text-2xl font-black text-white">{{ total_empresas|default:0 }}</p>
                 <p class="text-xs text-gray-400">Empresas Aliadas</p>
               </div>
               <div>
-                <p class="text-2xl font-black text-amber-400">94%</p>
-                <p class="text-xs text-gray-400">Inserción Laboral</p>
+                <p class="text-2xl font-black text-amber-400">{{ total_estudiantes|default:0 }}</p>
+                <p class="text-xs text-gray-400">Estudiantes Registrados</p>
               </div>
             </div>
           </div>
@@ -188,78 +181,30 @@
             </h2>
 
             <p class="text-lg text-gray-300 leading-relaxed">
-              Accede a convenios exclusivos con corporaciones de tecnología, minería, finanzas, ingeniería y diseño. Tu primer paso al mundo laboral respaldado por tu institución.
+              Publica vacantes, revisa los CVs de los postulantes y mantén retroalimentación directa con los alumnos en un solo panel de control.
             </p>
 
             <div class="flex flex-col sm:flex-row gap-4 pt-2">
-              <a href="#" class="inline-flex justify-center items-center px-6 py-3.5 rounded-xl font-bold text-brand-950 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 transition shadow-lg shadow-amber-500/20 hover:scale-[1.02]">
-                Ver Convenios Activos
+              <a href="{% url 'register' %}" class="inline-flex justify-center items-center px-6 py-3.5 rounded-xl font-bold text-brand-950 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 transition shadow-lg shadow-amber-500/20 hover:scale-[1.02]">
+                Registrar Mi Empresa
               </a>
-              <a href="#" class="inline-flex justify-center items-center px-6 py-3.5 rounded-xl font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md transition hover:scale-[1.02]">
-                Portal Empresas
-              </a>
-            </div>
-
-            <div class="pt-6 border-t border-white/10 flex flex-wrap items-center gap-3 text-gray-300 text-xs font-semibold">
-              <span class="px-3 py-1 bg-white/10 rounded-lg border border-white/10">Tecnología & Software</span>
-              <span class="px-3 py-1 bg-white/10 rounded-lg border border-white/10">Minería & Energía</span>
-              <span class="px-3 py-1 bg-white/10 rounded-lg border border-white/10">Banca & Finanzas</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SLIDE 3: Geolocalización -->
-      <div class="hero-slide absolute inset-0 w-full h-full opacity-0 pointer-events-none transition-opacity duration-700 ease-in-out z-10 flex items-center" data-index="2">
-        <div class="absolute inset-0 z-0">
-          <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1920&q=80" 
-               alt="Mapa y geolocalización" 
-               class="w-full h-full object-cover object-center" />
-          <div class="absolute inset-0 bg-gradient-to-r from-brand-950 via-brand-950/90 to-brand-950/40"></div>
-          <div class="absolute inset-0 bg-gradient-to-t from-brand-950 via-transparent to-brand-950/30"></div>
-        </div>
-
-        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
-          <div class="max-w-2xl space-y-6">
-            <div class="inline-flex items-center space-x-2 bg-emerald-500/20 border border-emerald-400/30 px-3.5 py-1.5 rounded-full backdrop-blur-md">
-              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
-              <span class="text-xs font-semibold text-emerald-300 uppercase tracking-wider">Geolocalización Inteligente</span>
-            </div>
-
-            <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
-              Prácticas profesionales <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200">cerca de ti</span>
-            </h2>
-
-            <p class="text-lg text-gray-300 leading-relaxed">
-              Ahorra tiempo de traslado. Encuentra oportunidades filtradas por distancia a tu sede o domicilio gracias a nuestro mapa interactivo de vacantes en tiempo real.
-            </p>
-
-            <div class="flex flex-col sm:flex-row gap-4 pt-2">
-              <a href="#mapa" class="inline-flex justify-center items-center px-6 py-3.5 rounded-xl font-bold text-brand-950 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 transition shadow-lg shadow-amber-500/20 hover:scale-[1.02]">
-                Abrir Mapa Interactivo
+              <a href="{% url 'login' %}" class="inline-flex justify-center items-center px-6 py-3.5 rounded-xl font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md transition hover:scale-[1.02]">
+                Iniciar Sesión Empresa
               </a>
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- FLECHAS DE NAVEGACIÓN -->
-      <button id="heroPrevBtn" aria-label="Slide anterior" class="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-2xl bg-brand-900/60 hover:bg-brand-900/90 text-white border border-white/10 backdrop-blur-md transition hover:scale-110 focus:outline-none">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
-      </button>
-      
-      <button id="heroNextBtn" aria-label="Slide siguiente" class="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-2xl bg-brand-900/60 hover:bg-brand-900/90 text-white border border-white/10 backdrop-blur-md transition hover:scale-110 focus:outline-none">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
-      </button>
-
-      <!-- INDICADORES -->
-      <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex space-x-2.5">
-        <button class="hero-dot w-9 h-2.5 rounded-full bg-amber-400 transition-all duration-300" data-slide="0"></button>
-        <button class="hero-dot w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white/80 transition-all duration-300" data-slide="1"></button>
-        <button class="hero-dot w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white/80 transition-all duration-300" data-slide="2"></button>
       </div>
 
     </div>
+
+    <!-- FLECHAS DE NAVEGACIÓN -->
+    <button id="heroPrevBtn" aria-label="Slide anterior" class="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-2xl bg-brand-900/60 hover:bg-brand-900/90 text-white border border-white/10 backdrop-blur-md transition hover:scale-110 focus:outline-none">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+    </button>
+    <button id="heroNextBtn" aria-label="Slide siguiente" class="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-2xl bg-brand-900/60 hover:bg-brand-900/90 text-white border border-white/10 backdrop-blur-md transition hover:scale-110 focus:outline-none">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+    </button>
   </section>
 
   <!-- ==================== SECCIÓN 1: MAPA DE OFERTAS ==================== -->
@@ -269,7 +214,7 @@
       <div class="text-center max-w-3xl mx-auto mb-10 space-y-2">
         <span class="text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-100 px-3 py-1 rounded-full">Geolocalización</span>
         <h2 class="text-3xl font-extrabold text-brand-950">Explora Prácticas Cerca de Ti</h2>
-        <p class="text-gray-600">Visualiza en tiempo real las empresas que están ofreciendo cupos de práctica en tu comuna o ciudad.</p>
+        <p class="text-gray-600">Visualiza en tiempo real las empresas que están ofreciendo vacantes en la Región Metropolitana y alrededores.</p>
       </div>
 
       <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 grid grid-cols-1 lg:grid-cols-4">
@@ -277,37 +222,20 @@
         <div class="p-6 bg-brand-950 text-white space-y-6 flex flex-col justify-between">
           <div>
             <h3 class="text-lg font-bold text-amber-400 mb-2">Filtro de Ubicación</h3>
-            <p class="text-xs text-blue-200 mb-6">Selecciona un área para centrar las vacantes disponibles.</p>
+            <p class="text-xs text-blue-200 mb-6">Encuentra ofertas cerca de tu domicilio o sede.</p>
             
             <div class="space-y-3">
-              <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300">Región / Zona</label>
-              <select class="w-full bg-brand-900 border border-brand-800 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
-                <option>Todas las regiones</option>
-                <option selected>Región Metropolitana</option>
-                <option>Valparaíso</option>
-                <option>Bío Bío</option>
-              </select>
-            </div>
-
-            <div class="mt-6 space-y-2">
-              <div class="flex items-center justify-between text-xs text-blue-200 py-2 border-b border-brand-900">
-                <span>Santiago Centro</span>
-                <span class="bg-amber-400 text-brand-950 font-bold px-2 py-0.5 rounded-full">14 ofertas</span>
-              </div>
-              <div class="flex items-center justify-between text-xs text-blue-200 py-2 border-b border-brand-900">
-                <span>Providencia</span>
-                <span class="bg-amber-400 text-brand-950 font-bold px-2 py-0.5 rounded-full">8 ofertas</span>
-              </div>
-              <div class="flex items-center justify-between text-xs text-blue-200 py-2">
-                <span>Las Condes</span>
-                <span class="bg-amber-400 text-brand-950 font-bold px-2 py-0.5 rounded-full">12 ofertas</span>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300">Ofertas en Vivo</label>
+              <div class="bg-brand-900 border border-brand-800 text-amber-300 font-bold rounded-xl px-4 py-3 text-sm flex justify-between items-center">
+                <span>Total Vacantes</span>
+                <span class="bg-amber-400 text-brand-950 px-2.5 py-0.5 rounded-full text-xs font-black">{{ total_ofertas }}</span>
               </div>
             </div>
           </div>
 
-          <button class="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-brand-950 font-bold py-3 rounded-xl transition text-sm shadow-md">
-            Usar mi ubicación actual
-          </button>
+          <a href="{% url 'login' %}" class="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-brand-950 font-bold py-3 rounded-xl transition text-center text-sm shadow-md block">
+            Ingresar para Postular
+          </a>
         </div>
 
         <div class="lg:col-span-3 h-[420px] relative">
@@ -317,196 +245,140 @@
     </div>
   </section>
 
-  <!-- ==================== CARRUSEL DE HERRAMIENTAS ==================== -->
+  <!-- ==================== SECCIÓN 2: HERRAMIENTAS Y PROBOT IA ==================== -->
   <section id="herramientas" class="py-16 bg-gradient-to-b from-brand-950 via-brand-900 to-brand-950 text-white overflow-hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-10 pb-6 border-b border-brand-800/60">
-        <div>
-          <span class="text-xs font-bold uppercase tracking-widest text-amber-400">Herramientas Avanzadas</span>
-          <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white mt-1">Explora nuestras soluciones inteligentes</h2>
-        </div>
-        
-        <div class="flex items-center bg-brand-900/90 p-1.5 rounded-2xl border border-brand-800 shadow-inner">
-          <button id="tabFeature0" class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 bg-amber-400 text-brand-950 shadow-md">
-            🤖 Asistente IA ProBot
-          </button>
-          <button id="tabFeature1" class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 text-gray-300 hover:text-white">
-            🗺️ Mapa Interactivo
-          </button>
-        </div>
+      <div class="text-center max-w-3xl mx-auto mb-12 space-y-2">
+        <span class="text-xs font-bold uppercase tracking-widest text-amber-400">Inteligencia Artificial ProBot</span>
+        <h2 class="text-3xl font-black text-white">Asistencia Inteligente para tu Inserción Laboral</h2>
+        <p class="text-gray-300 text-sm">Resuelve dudas sobre tu CV, prepara tus entrevistas de trabajo y optimiza tus postulaciones en segundos.</p>
       </div>
 
-      <div class="relative min-h-[520px]">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         
-        <!-- SLIDE 1: Asistente IA -->
-        <div id="featureSlide0" class="feature-slide transition-all duration-500 opacity-100 scale-100">
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            
-            <div class="lg:col-span-5 space-y-6">
-              <div class="inline-flex items-center space-x-2 bg-amber-400/10 border border-amber-400/30 px-3 py-1 rounded-full">
-                <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                <span class="text-xs font-bold text-amber-300 uppercase tracking-wider">Inteligencia Artificial</span>
+        <div class="lg:col-span-5 space-y-6">
+          <div class="inline-flex items-center space-x-2 bg-amber-400/10 border border-amber-400/30 px-3 py-1 rounded-full">
+            <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+            <span class="text-xs font-bold text-amber-300 uppercase tracking-wider">Coach Personal 24/7</span>
+          </div>
+
+          <h3 class="text-3xl font-extrabold tracking-tight text-white">
+            Prepara tu perfil con <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-200">ProBot IA</span>
+          </h3>
+
+          <p class="text-gray-300 leading-relaxed text-sm">
+            Diseñado especialmente para estudiantes y egresados de Duoc UC. Obtén sugerencias rápidas sobre qué incluir en tu CV según la carrera que estás cursando.
+          </p>
+
+          <div class="space-y-3 pt-2">
+            <div class="flex items-start space-x-3">
+              <div class="p-1 bg-amber-400/20 text-amber-400 rounded-lg mt-0.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
               </div>
-
-              <h3 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
-                Tu coach personal de carrera con <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-200">ProBot IA</span>
-              </h3>
-
-              <p class="text-gray-300 leading-relaxed text-sm">
-                Optimiza tu Currículum Vitae, simula entrevistas técnicas de acuerdo a tu especialidad Duoc UC y recibe recomendaciones personalizadas para encontrar tu práctica ideal.
-              </p>
-
-              <div class="space-y-3 pt-2">
-                <div class="flex items-start space-x-3">
-                  <div class="p-1 bg-amber-400/20 text-amber-400 rounded-lg mt-0.5">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                  </div>
-                  <span class="text-xs text-gray-200">Revisión instantánea y sugerencias para potenciar tu CV.</span>
-                </div>
-                <div class="flex items-start space-x-3">
-                  <div class="p-1 bg-amber-400/20 text-amber-400 rounded-lg mt-0.5">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                  </div>
-                  <span class="text-xs text-gray-200">Preguntas frecuentes de entrevistas por área académica.</span>
-                </div>
-              </div>
-
-              <div class="pt-4">
-                <button class="bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-brand-950 font-bold px-6 py-3 rounded-xl transition shadow-lg text-sm">
-                  Comenzar Chat con ProBot
-                </button>
-              </div>
+              <span class="text-xs text-gray-200">Recomendación de palabras clave técnico-profesionales.</span>
             </div>
-
-            <!-- Interfaz Chat -->
-            <div class="lg:col-span-7">
-              <div class="bg-brand-900/80 border border-brand-800 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-md">
-                <div class="bg-brand-950 px-5 py-4 border-b border-brand-800 flex items-center justify-between">
-                  <div class="flex items-center space-x-3">
-                    <div class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></div>
-                    <span class="font-bold text-sm text-white">ProBot Assistant - En línea</span>
-                  </div>
-                  <span class="text-[10px] bg-brand-800 text-blue-300 px-2.5 py-1 rounded-full font-mono">v2.4 AI-Model</span>
-                </div>
-
-                <div class="p-6 space-y-4 text-xs font-sans max-h-[340px] overflow-y-auto">
-                  <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 rounded-full bg-amber-400 text-brand-950 font-bold flex items-center justify-center flex-shrink-0">
-                      AI
-                    </div>
-                    <div class="bg-brand-800/80 rounded-2xl p-4 text-gray-200 max-w-md border border-brand-700/50">
-                      👋 ¡Hola! Soy ProBot. ¿En qué puedo ayudarte hoy? Puedo revisar tu CV o ayudarte a preparar tu entrevista.
-                    </div>
-                  </div>
-
-                  <div class="flex items-start space-x-3 justify-end">
-                    <div class="bg-blue-600 text-white rounded-2xl p-4 max-w-md shadow">
-                      ¿Qué habilidades debo destacar para una práctica en Desarrollo Web en la Región Metropolitana?
-                    </div>
-                  </div>
-
-                  <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 rounded-full bg-amber-400 text-brand-950 font-bold flex items-center justify-center flex-shrink-0">
-                      AI
-                    </div>
-                    <div class="bg-brand-800/80 rounded-2xl p-4 text-gray-200 max-w-md border border-brand-700/50">
-                      Para este perfil las empresas buscan: <strong>JavaScript ES6+, Django/Python, Git y bases de datos relacionales SQL</strong>. ¡Te sugiero adjuntar proyectos académicos relevantes!
-                    </div>
-                  </div>
-                </div>
-
-                <div class="p-4 bg-brand-950/80 border-t border-brand-800 flex gap-2">
-                  <input type="text" placeholder="Escribe tu consulta laboral..." class="flex-grow bg-brand-900 border border-brand-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-amber-400">
-                  <button class="bg-amber-400 text-brand-950 font-bold px-4 py-2.5 rounded-xl text-xs hover:bg-amber-300 transition">
-                    Enviar
-                  </button>
-                </div>
+            <div class="flex items-start space-x-3">
+              <div class="p-1 bg-amber-400/20 text-amber-400 rounded-lg mt-0.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
               </div>
+              <span class="text-xs text-gray-200">Simulación de preguntas de entrevistas de selección.</span>
             </div>
+          </div>
 
+          <div class="pt-4">
+            <a href="{% url 'login' %}" class="inline-block bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-brand-950 font-bold px-6 py-3 rounded-xl transition shadow-lg text-sm">
+              Probar ProBot IA Ahora
+            </a>
           </div>
         </div>
 
-        <!-- SLIDE 2: Mapa -->
-        <div id="featureSlide1" class="feature-slide transition-all duration-500 opacity-0 scale-95 hidden absolute inset-0">
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center h-full">
-            
-            <div class="lg:col-span-5 space-y-6">
-              <div class="inline-flex items-center space-x-2 bg-blue-500/20 border border-blue-400/30 px-3 py-1 rounded-full">
-                <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
-                <span class="text-xs font-bold text-blue-300 uppercase tracking-wider">Geolocalización en Tiempo Real</span>
+        <!-- Chat Visual ProBot -->
+        <div class="lg:col-span-7">
+          <div class="bg-brand-900/80 border border-brand-800 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-md">
+            <div class="bg-brand-950 px-5 py-4 border-b border-brand-800 flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></div>
+                <span class="font-bold text-sm text-white">ProBot Assistant</span>
               </div>
-
-              <h3 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
-                Encuentra prácticas <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-200">cerca de tu comuna</span>
-              </h3>
-
-              <p class="text-gray-300 leading-relaxed text-sm">
-                Visualiza las ofertas laborales en un mapa interactivo inteligente. Filtra por distancia a tu sede Duoc UC o tu domicilio y minimiza tus tiempos de traslado.
-              </p>
-
-              <div class="grid grid-cols-2 gap-4 pt-2">
-                <div class="bg-brand-900/60 border border-brand-800 p-3.5 rounded-xl">
-                  <p class="text-2xl font-black text-amber-400">+150</p>
-                  <p class="text-xs text-gray-300">Vacantes en Santiago Sur</p>
-                </div>
-                <div class="bg-brand-900/60 border border-brand-800 p-3.5 rounded-xl">
-                  <p class="text-2xl font-black text-blue-400">&lt; 30 min</p>
-                  <p class="text-xs text-gray-300">Promedio de traslado</p>
-                </div>
-              </div>
-
-              <div class="pt-2">
-                <a href="#mapa" class="inline-block bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-lg text-sm">
-                  Ir al Mapa Interactivo
-                </a>
-              </div>
+              <span class="text-[10px] bg-brand-800 text-blue-300 px-2.5 py-1 rounded-full font-mono">Gemini IA Powered</span>
             </div>
 
-            <div class="lg:col-span-7">
-              <div class="relative bg-gradient-to-tr from-brand-900 via-brand-800 to-brand-950 p-8 rounded-3xl border border-brand-700/60 shadow-2xl overflow-hidden">
-                <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl pointer-events-none"></div>
-                
-                <div class="relative z-10 space-y-6">
-                  <div class="flex justify-between items-center">
-                    <span class="text-xs font-mono uppercase text-amber-300 bg-amber-400/20 px-3 py-1 rounded-full border border-amber-400/30">Radar de Empleo Activo</span>
-                    <span class="text-xs text-gray-400">Actualizado hace 5 min</span>
-                  </div>
+            <div class="p-6 space-y-4 text-xs font-sans max-h-[320px] overflow-y-auto">
+              <div class="flex items-start space-x-3">
+                <div class="w-8 h-8 rounded-full bg-amber-400 text-brand-950 font-bold flex items-center justify-center flex-shrink-0">
+                  AI
+                </div>
+                <div class="bg-brand-800/80 rounded-2xl p-4 text-gray-200 max-w-md border border-brand-700/50">
+                  👋 ¡Hola! Soy ProBot IA. Puedo ayudarte a estructurar tu CV para tu primera práctica profesional o simular tu entrevista de selección.
+                </div>
+              </div>
 
-                  <div class="bg-brand-950/80 p-4 rounded-2xl border border-brand-800 flex items-center justify-between hover:border-amber-400/40 transition">
-                    <div class="flex items-center space-x-3">
-                      <div class="p-2.5 bg-blue-500/20 text-blue-400 rounded-xl">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h5"/></svg>
-                      </div>
-                      <div>
-                        <h4 class="text-sm font-bold text-white">Desarrollador Junior (Práctica)</h4>
-                        <p class="text-xs text-gray-400">Sede San Joaquin • A 12 mins de distancia</p>
-                      </div>
-                    </div>
-                    <span class="text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2.5 py-1 rounded-lg">Disponible</span>
-                  </div>
+              <div class="flex items-start space-x-3 justify-end">
+                <div class="bg-blue-600 text-white rounded-2xl p-4 max-w-md shadow">
+                  ¿Qué proyectos académicos me conviene incluir en mi CV de Informática?
+                </div>
+              </div>
 
-                  <div class="bg-brand-950/80 p-4 rounded-2xl border border-brand-800 flex items-center justify-between hover:border-amber-400/40 transition">
-                    <div class="flex items-center space-x-3">
-                      <div class="p-2.5 bg-amber-500/20 text-amber-400 rounded-xl">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                      </div>
-                      <div>
-                        <h4 class="text-sm font-bold text-white">Analista de Datos Trainee</h4>
-                        <p class="text-xs text-gray-400">Providencia • Híbrido</p>
-                      </div>
-                    </div>
-                    <span class="text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2.5 py-1 rounded-lg">Disponible</span>
-                  </div>  
-                  <div class="text-center pt-2">
-                    <p class="text-xs text-gray-400">Filtra por comuna, remuneración y modalidad de trabajo directamente en el mapa.</p>
-                  </div>
+              <div class="flex items-start space-x-3">
+                <div class="w-8 h-8 rounded-full bg-amber-400 text-brand-950 font-bold flex items-center justify-center flex-shrink-0">
+                  AI
+                </div>
+                <div class="bg-brand-800/80 rounded-2xl p-4 text-gray-200 max-w-md border border-brand-700/50">
+                  Destaca proyectos con base de datos, desarrollo web (Django/React) y control de versiones con Git. ¡Menciona los roles que desempeñaste!
                 </div>
               </div>
             </div>
-
           </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== SECCIÓN 3: BENEFICIOS Y PLAN PREMIUM ==================== -->
+  <section class="py-16 bg-white border-t border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <span class="text-xs font-bold text-amber-600 uppercase tracking-widest bg-amber-50 px-3 py-1 rounded-full border border-amber-200">Plan Premium</span>
+        <h2 class="text-3xl font-extrabold text-gray-900 mt-2">Lleva tu Postulación al Siguiente Nivel</h2>
+        <p class="text-gray-600 text-sm mt-1">Accede a funciones avanzadas por solo $2.990 CLP pago único.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <!-- Beneficio 1 -->
+        <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100 hover:shadow-md transition">
+          <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-4">
+            🌍
+          </div>
+          <h3 class="font-bold text-gray-900 text-lg mb-2">Filtro Multirregión Avanzado</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Filtra y busca oportunidades de práctica en cualquier región del país sin restricciones geográficas.
+          </p>
+        </div>
+
+        <!-- Beneficio 2 -->
+        <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100 hover:shadow-md transition">
+          <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center text-2xl mb-4">
+            🤖
+          </div>
+          <h3 class="font-bold text-gray-900 text-lg mb-2">ProBot IA Ilimitado</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Consultas ilimitadas para revisión de CV, redacción de cartas de presentación y simulación de entrevistas.
+          </p>
+        </div>
+
+        <!-- Beneficio 3 -->
+        <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100 hover:shadow-md transition">
+          <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-2xl mb-4">
+            🚀
+          </div>
+          <h3 class="font-bold text-gray-900 text-lg mb-2">Postulación Prioritaria</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Destaca tu perfil en el listado de postulantes visto por las empresas contratantes.
+          </p>
         </div>
 
       </div>
@@ -514,94 +386,106 @@
     </div>
   </section>
 
-  <!-- ==================== CONTENIDO PRINCIPAL HEREDABLE ==================== -->
-  <main class="flex-grow">
-    {% block content %}
-    {% endblock %}
-  </main>
-
   <!-- ==================== FOOTER ==================== -->
-   <footer class="bg-brand-950 text-gray-300 border-t border-brand-900 mt-auto">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+  <footer class="bg-brand-950 text-gray-400 py-12 border-t border-brand-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
         
-        <!-- Columna 1: Info -->
-        <div class="space-y-4">
-          <a href="{% url 'index' %}" class="flex items-center space-x-2">
-            <span class="text-2xl font-black tracking-tight text-white font-sans">
-              Prácticas<span class="text-amber-400">Pro</span>
-            </span>
-          </a>
-          <p class="text-xs text-gray-400 leading-relaxed">
-            Plataforma de vinculación profesional orientada a conectar estudiantes de Duoc UC con oportunidades laborales reales cerca de su entorno.
+        <div class="md:col-span-2 space-y-3">
+          <span class="text-2xl font-black text-white">
+            Prácticas<span class="text-amber-400">Pro</span>
+          </span>
+          <p class="text-xs text-gray-400 leading-relaxed max-w-sm">
+            Plataforma de vinculación laboral y gestión de prácticas profesionales para estudiantes y empresas. Desarrollado para conectar el talento técnico y profesional.
           </p>
-          <div class="inline-flex items-center space-x-2 bg-brand-900/80 border border-brand-800 px-3 py-1.5 rounded-full text-xs text-gray-300">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Sistemas 100% Operativos</span>
-          </div>
         </div>
 
-        <!-- Columna 2: Navegación -->
         <div>
-          <h4 class="text-white text-xs font-bold mb-4 uppercase tracking-wider text-amber-400">Navegación</h4>
-          <ul class="space-y-2.5 text-sm">
-            <li><a href="{% url 'index' %}" class="hover:text-amber-400 transition-colors">Buscar Prácticas</a></li>
-            <li><a href="{% url 'quienes_somos' %}" class="hover:text-amber-400 transition-colors font-semibold text-amber-300">Quiénes Somos</a></li>
-            <li><a href="{% url 'index' %}#mapa" class="hover:text-amber-400 transition-colors">Mapa Interactivo</a></li>
-            <li><a href="{% url 'index' %}#herramientas" class="hover:text-amber-400 transition-colors">Orientación con IA</a></li>
+          <h4 class="text-xs font-bold uppercase text-white tracking-wider mb-3">Navegación</h4>
+          <ul class="space-y-2 text-xs">
+            <li><a href="{% url 'index' %}" class="hover:text-amber-400 transition">Inicio</a></li>
+            <li><a href="#mapa" class="hover:text-amber-400 transition">Mapa de Ofertas</a></li>
+            <li><a href="{% url 'quienes_somos' %}" class="hover:text-amber-400 transition">Quiénes Somos</a></li>
+            <li><a href="{% url 'login' %}" class="hover:text-amber-400 transition">Iniciar Sesión</a></li>
           </ul>
         </div>
 
-        <!-- Columna 3: Soporte & Legal -->
         <div>
-          <h4 class="text-white text-xs font-bold mb-4 uppercase tracking-wider text-amber-400">Soporte & Legal</h4>
-          <ul class="space-y-2.5 text-sm">
-            <li><a href="{% url 'quienes_somos' %}#faq" class="hover:text-amber-400 transition-colors">Preguntas Frecuentes</a></li>
-            <li><a href="{% url 'quienes_somos' %}#terminos" class="hover:text-amber-400 transition-colors">Términos y Condiciones</a></li>
-            <li><a href="{% url 'quienes_somos' %}#privacidad" class="hover:text-amber-400 transition-colors">Políticas de Privacidad</a></li>
-            <li><a href="{% url 'quienes_somos' %}#privacidad" class="hover:text-amber-400 transition-colors">Protección de Datos</a></li>
-          </ul>
+          <h4 class="text-xs font-bold uppercase text-white tracking-wider mb-3">Soporte</h4>
+          <p class="text-xs text-gray-400">Soporte oficial del portal:</p>
+          <p class="text-xs text-amber-400 font-semibold mt-1">contacto@practicaspro.cl</p>
         </div>
 
-        <!-- Columna 4: Alertas -->
-        <div>
-          <h4 class="text-white text-xs font-bold mb-4 uppercase tracking-wider text-amber-400">Alertas de Empleo</h4>
-          <p class="text-xs text-gray-400 mb-3">Recibe nuevas prácticas en tu correo según tu sede y carrera.</p>
-          
-          <form onsubmit="event.preventDefault();" class="space-y-2">
-            <div class="relative">
-              <input type="email" placeholder="tu.correo@duocuc.cl" class="w-full bg-brand-900 border border-brand-800 text-white text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-amber-400 placeholder-gray-500">
-            </div>
-            <button type="submit" class="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-brand-950 font-bold py-2 rounded-xl text-xs transition shadow">
-              Suscribirme
-            </button>
-          </form>
-
-          <div class="flex space-x-3 text-gray-400 pt-4">
-            <a href="#" aria-label="LinkedIn" class="p-2 rounded-lg bg-brand-900 hover:text-white hover:bg-brand-800 transition">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-            </a>
-            <a href="#" aria-label="Instagram" class="p-2 rounded-lg bg-brand-900 hover:text-white hover:bg-brand-800 transition">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-            </a>
-            <a href="#" aria-label="X / Twitter" class="p-2 rounded-lg bg-brand-900 hover:text-white hover:bg-brand-800 transition">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            </a>
-          </div>
-        </div>
       </div>
 
-      <div class="border-t border-brand-900/60 bg-brand-950 py-4 text-xs text-gray-500">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-2">
-          <p>&copy; {% now "Y" %} PrácticasPro. Todos los derechos reservados.</p>
-          <p>Impulsando la empleabilidad estudiantil Duoc UC.</p>
-        </div>
+      <div class="pt-8 border-t border-brand-900 text-center text-xs text-gray-500">
+        &copy; 2026 PrácticasPro. Todos los derechos reservados.
       </div>
+    </div>
   </footer>
 
-  <!-- Scripts JS Externos -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="{% static 'js/main.js' %}"></script>
+  <!-- ==================== SCRIPTS JS ==================== -->
+  <script>
+    // Menú Móvil
+    document.addEventListener('DOMContentLoaded', function() {
+      const mobileBtn = document.getElementById('mobileMenuBtn');
+      const mobileMenu = document.getElementById('mobileMenu');
+      const iconOpen = document.getElementById('menuIconOpen');
+      const iconClose = document.getElementById('menuIconClose');
 
-  {% block extra_js %}{% endblock %}
+      if (mobileBtn && mobileMenu) {
+        mobileBtn.addEventListener('click', function() {
+          mobileMenu.classList.toggle('hidden');
+          iconOpen.classList.toggle('hidden');
+          iconClose.classList.toggle('hidden');
+        });
+      }
+
+      // Carrusel Hero Autoplay
+      const slides = document.querySelectorAll('.hero-slide');
+      let currentSlide = 0;
+
+      function showSlide(index) {
+        slides.forEach((slide, i) => {
+          if (i === index) {
+            slide.classList.remove('opacity-0', 'pointer-events-none');
+            slide.classList.add('opacity-100');
+          } else {
+            slide.classList.remove('opacity-100');
+            slide.classList.add('opacity-0', 'pointer-events-none');
+          }
+        });
+      }
+
+      document.getElementById('heroNextBtn')?.addEventListener('click', () => {
+        currentSlide = (currentSlide + 1) % slides.length;
+        showSlide(currentSlide);
+      });
+
+      document.getElementById('heroPrevBtn')?.addEventListener('click', () => {
+        currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+        showSlide(currentSlide);
+      });
+
+      setInterval(() => {
+        currentSlide = (currentSlide + 1) % slides.length;
+        showSlide(currentSlide);
+      }, 7000);
+
+      // Mapa Leaflet de Demostración
+      var mapContainer = document.getElementById('map');
+      if (mapContainer) {
+        var map = L.map('map', { scrollWheelZoom: false }).setView([-33.4489, -70.6693], 11);
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+          maxZoom: 19,
+          attribution: '&copy; Esri'
+        }).addTo(map);
+
+        L.marker([-33.4489, -70.6693]).addTo(map).bindPopup("<b>Santiago Centro</b><br>Ofertas de práctica activas.");
+        L.marker([-33.4261, -70.6131]).addTo(map).bindPopup("<b>Providencia</b><br>Empresas de tecnología.");
+      }
+    });
+  </script>
+
 </body>
 </html>

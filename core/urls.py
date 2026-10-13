@@ -58,7 +58,7 @@ urlpatterns = [
     path('empresa/<str:empresa_id>/perfil/publico/', views.ver_perfil_empresa_publico, name='ver_perfil_empresa_publico'),
     # IA
     path('probot-ia/', probot_ia, name='probot_ia'),
-    
+    path('estudiante/cv-ia/', views.asistente_cv_ia, name='asistente_cv_ia'),
     # Rutas Empresa
     path('empresa/', home_empresa, name='home_empresa'),
     path('empresa/perfil/', perfil_empresa, name='perfil_empresa'),
