@@ -35,9 +35,21 @@
                 </div>
                 
                 <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-2 leading-tight">{{ oferta.titulo }}</h1>
-                <p class="text-xl text-gray-600 font-medium flex items-center gap-2">
-                    <span class="text-2xl">🏢</span> {{ oferta.empresa_nombre }}
-                </p>
+                
+                <div class="flex flex-wrap items-center justify-between gap-4 pt-2">
+                    <p class="text-xl text-gray-600 font-medium flex items-center gap-2">
+                        <span class="text-2xl">🏢</span> {{ oferta.empresa_nombre }}
+                    </p>
+
+                    <!-- Botón Perfil de Empresa -->
+                    {% if oferta.empresa_id %}
+                    <a href="{% url 'ver_perfil_empresa_publico' oferta.empresa_id %}" 
+                       class="inline-flex items-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold py-2 px-3.5 rounded-xl border border-emerald-200 transition shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                        Ver Perfil de la Empresa
+                    </a>
+                    {% endif %}
+                </div>
             </div>
 
             <!-- Tarjeta de Contenido -->
@@ -86,6 +98,11 @@
                         <div>
                             <p class="text-gray-500 font-medium">Empresa</p>
                             <p class="text-gray-900 font-bold">{{ oferta.empresa_nombre }}</p>
+                            {% if oferta.empresa_id %}
+                            <a href="{% url 'ver_perfil_empresa_publico' oferta.empresa_id %}" class="inline-block text-xs text-emerald-600 hover:text-emerald-700 font-bold hover:underline mt-0.5">
+                                Ver Perfil Institucional →
+                            </a>
+                            {% endif %}
                         </div>
                     </li>
                     <li class="flex items-start gap-3">
@@ -131,18 +148,15 @@
         var lng = parseFloat("{{ oferta.longitud }}".replace(',', '.'));
 
         if (!isNaN(lat) && !isNaN(lng)) {
-            // Inicializar mapa sin zoom con scroll para no molestar al bajar por la página
             var map = L.map('mapa-detalle', {
                 scrollWheelZoom: false
             }).setView([lat, lng], 14);
             
-            // Usar la misma capa Esri que en crear oferta
             L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
                 maxZoom: 19,
                 attribution: '&copy; Esri'
             }).addTo(map);
 
-            // Agregar el marcador estático
             var marker = L.marker([lat, lng]).addTo(map);
             marker.bindPopup("<b>{{ oferta.empresa_nombre }}</b>").openPopup();
         }

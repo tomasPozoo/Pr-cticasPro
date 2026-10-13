@@ -319,21 +319,87 @@ def perfil_estudiante(request):
 
     return render(request, 'perfil_estudiante.html', {'estudiante': estudiante_data})
 
+# Lista global de carreras para usar en filtros y formularios
+CARRERAS_LISTA = [
+    "Ingeniería en Construcción",
+    "Ingeniería en Prevención de Riesgos",
+    "Técnico en Construcción",
+    "Ingeniería en Informática",
+    "Analista Programador",
+    "Ingeniería en Redes y Telecomunicaciones",
+    "Técnico en Desabolladura y Pintura Automotriz",
+    "Técnico en Electricidad y Automatización Industrial",
+    "Ingeniería en Electricidad y Automatización Industrial",
+    "Ingeniería Agrícola",
+    "Ingeniería en Mecánica Automotriz y Autotrónica",
+    "Técnico en Calidad de Alimentos",
+    "Técnico Veterinario y Pecuario",
+    "Técnico en Operación y Supervisión de Procesos Mineros",
+    "Técnico en Mecánica Automotriz y Autotrónica",
+    "Técnico en Geología",
+    "Técnico en Laboratorio Clínico, Banco de Sangre e Imagenología",
+    "Preparador Físico",
+    "Técnico en Enfermería",
+    "Técnico en Química y Farmacia",
+    "Técnico en Odontología",
+    "Ingeniería en Marketing Digital",
+    "Auditoría",
+    "Ingeniería en Gestión Logística",
+    "Ingeniería en Comercio Exterior",
+    "Ingeniería en Administración, mención Gestión de Personas",
+    "Ingeniería en Administración, mención Innovación y Emprendimiento",
+    "Ingeniería en Administración, mención Finanzas",
+    "Técnico en Administración",
+    "Relaciones Públicas y Comunicación Organizacional",
+    "Publicidad"
+]
+
 def ofertas_list(request):
     if request.session.get('user_rol') != 'estudiante':
         return redirect('login')
-        
+
+    # Obtener parámetros de búsqueda del GET
+    q = request.GET.get('q', '').strip()
+    carrera_filtro = request.GET.get('carrera', '').strip()
+    modalidad_filtro = request.GET.get('modalidad', '').strip()
+
     db = firestore.client()
     ofertas_ref = db.collection('ofertas').where('estado', '==', 'activa').stream()
-    
+
     lista_ofertas = []
     for doc in ofertas_ref:
         data = doc.to_dict()
         data['id'] = doc.id
-        lista_ofertas.append(data)
-        
-    return render(request, 'ofertas_list.html', {'ofertas': lista_ofertas})
 
+        # 1. Filtro por Carrera
+        if carrera_filtro and data.get('carrera', '').strip() != carrera_filtro:
+            continue
+
+        # 2. Filtro por Modalidad
+        if modalidad_filtro and data.get('modalidad', '').strip() != modalidad_filtro:
+            continue
+
+        # 3. Filtro por Búsqueda (Título, Empresa o Descripción)
+        if q:
+            q_lower = q.lower()
+            titulo_match = q_lower in data.get('titulo', '').lower()
+            empresa_match = q_lower in data.get('empresa_nombre', '').lower()
+            descripcion_match = q_lower in data.get('descripcion', '').lower()
+            if not (titulo_match or empresa_match or descripcion_match):
+                continue
+
+        lista_ofertas.append(data)
+
+    context = {
+        'ofertas': lista_ofertas,
+        'q': q,
+        'carrera_filtro': carrera_filtro,
+        'modalidad_filtro': modalidad_filtro,
+        'carreras': CARRERAS_LISTA,
+        'total_resultados': len(lista_ofertas)
+    }
+
+    return render(request, 'ofertas_list.html', context)
 def oferta_detail(request, oferta_id):
     if request.session.get('user_rol') != 'estudiante':
         return redirect('login')
@@ -426,7 +492,35 @@ def mis_postulaciones(request):
         messages.error(request, f"Error al cargar tus postulaciones: {str(e)}")
         return redirect('home_estudiante')
 
+def ver_perfil_empresa_publico(request, empresa_id):
+    """Vista pública para que los estudiantes consulten el perfil e historial de una empresa."""
+    if not request.session.get('user_id'):
+        return redirect('login')
 
+    try:
+        db = firestore.client()
+        empresa_doc = db.collection('usuarios').document(empresa_id).get()
+
+        if not empresa_doc.exists:
+            messages.error(request, "El perfil de la empresa no fue encontrado.")
+            return redirect('ofertas_list')
+
+        empresa_data = empresa_doc.to_dict()
+
+        # Cargar ofertas de práctica activas publicadas por esta empresa
+        ofertas_ref = db.collection('ofertas').where('empresa_id', '==', empresa_id).where('estado', '==', 'activa').stream()
+        ofertas_empresa = [{**doc.to_dict(), 'id': doc.id} for doc in ofertas_ref]
+
+        context = {
+            'empresa': empresa_data,
+            'ofertas': ofertas_empresa,
+            'total_ofertas': len(ofertas_empresa)
+        }
+        return render(request, 'ver_perfil_empresa.html', context)
+
+    except Exception as e:
+        messages.error(request, f"Error al cargar el perfil de la empresa: {str(e)}")
+        return redirect('ofertas_list')
 # ==========================================
 # VISTAS DE EMPRESA
 # ==========================================
@@ -434,10 +528,82 @@ def mis_postulaciones(request):
 def home_empresa(request):
     if request.session.get('user_rol') != 'empresa':
         return redirect('login')
-    return render(request, 'home_empresa.html', {'nombre': request.session.get('user_name')})
 
+    empresa_id = request.session.get('user_id')
+    db = firestore.client()
+
+    # Contar ofertas de la empresa
+    ofertas_ref = db.collection('ofertas').where('empresa_id', '==', empresa_id).stream()
+    total_ofertas = len(list(ofertas_ref))
+
+    # Contar postulaciones recibidas
+    postulaciones_ref = db.collection('postulaciones').where('empresa_id', '==', empresa_id).stream()
+    total_postulantes = len(list(postulaciones_ref))
+
+    context = {
+        'nombre': request.session.get('user_name'),
+        'total_ofertas': total_ofertas,
+        'total_postulantes': total_postulantes,
+    }
+    return render(request, 'home_empresa.html', context)
 def perfil_empresa(request):
-    return render(request, 'perfil_empresa.html')
+    user_id = request.session.get('user_id')
+    user_rol = request.session.get('user_rol')
+
+    if not user_id or user_rol != 'empresa':
+        messages.error(request, "Acceso no autorizado.")
+        return redirect('login')
+
+    db = firestore.client()
+    user_ref = db.collection('usuarios').document(user_id)
+
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre')
+        rut = request.POST.get('rut')
+        telefono = request.POST.get('telefono')
+        sitio_web = request.POST.get('sitio_web')
+        rubro = request.POST.get('rubro')
+        descripcion = request.POST.get('descripcion')
+
+        doc_actual = user_ref.get()
+        data_actual = doc_actual.to_dict() if doc_actual.exists else {}
+        logo_url = data_actual.get('logo_url', '')
+
+        # Manejo de la subida del logo corporativo
+        if 'logo' in request.FILES:
+            logo_file = request.FILES['logo']
+            fs = FileSystemStorage()
+            
+            extension = logo_file.name.split('.')[-1]
+            nombre_archivo = f"logos_empresas/{user_id}.{extension}"
+
+            if fs.exists(nombre_archivo):
+                fs.delete(nombre_archivo)
+
+            filename = fs.save(nombre_archivo, logo_file)
+            logo_url = fs.url(filename)
+
+        # Actualizar en Firestore
+        user_ref.update({
+            'nombre': nombre,
+            'rut': rut,
+            'telefono': telefono,
+            'sitio_web': sitio_web,
+            'rubro': rubro,
+            'descripcion': descripcion,
+            'logo_url': logo_url
+        })
+
+        # Sincronizar el nombre en la sesión activa
+        request.session['user_name'] = nombre
+
+        messages.success(request, "¡Perfil de la empresa actualizado exitosamente!")
+        return redirect('home_empresa')
+
+    doc = user_ref.get()
+    empresa_data = doc.to_dict() if doc.exists else {}
+
+    return render(request, 'perfil_empresa.html', {'empresa': empresa_data})
 
 def crear_oferta(request):
     if request.session.get('user_rol') != 'empresa':

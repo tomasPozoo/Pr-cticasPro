@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Header con botón volver -->
+    <div class="mb-6 flex items-center gap-4">
+        <a href="{% url 'home_empresa' %}" class="text-gray-500 hover:text-gray-700 transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        </a>
+        <h1 class="text-2xl font-bold text-gray-800">Perfil de la Empresa</h1>
+    </div>
+
+    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
+        <form method="POST" action="{% url 'perfil_empresa' %}" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- Sección Logo Corporativo -->
+            <div class="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-gray-100">
+                <div class="relative w-28 h-28 rounded-2xl bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center shadow-inner shrink-0">
+                    {% if empresa.logo_url %}
+                        <img src="{{ empresa.logo_url }}" alt="Logo Empresa" class="w-full h-full object-cover">
+                    {% else %}
+                        <span class="text-4xl text-gray-400">🏢</span>
+                    {% endif %}
+                </div>
+                
+                <div class="space-y-2 text-center sm:text-left">
+                    <label class="block text-sm font-bold text-gray-800">Logo Institucional / Corporativo</label>
+                    <p class="text-xs text-gray-500">Sube una imagen PNG o JPG de alta calidad para destacar la marca de tu empresa.</p>
+                    <input type="file" name="logo" accept="image/*" class="text-xs text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition cursor-pointer">
+                </div>
+            </div>
+
+            <!-- Campos del Formulario -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                
+                <!-- Nombre Empresa -->
+                <div class="sm:col-span-2">
+                    <label for="nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre o Razón Social</label>
+                    <input type="text" id="nombre" name="nombre" value="{{ empresa.nombre|default:'' }}" required
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-emerald-500 focus:border-emerald-500 text-sm">
+                </div>
+
+                <!-- RUT -->
+                <div>
+                    <label for="rut" class="block text-sm font-medium text-gray-700 mb-1">RUT Empresa</label>
+                    <input type="text" id="rut" name="rut" value="{{ empresa.rut|default:'' }}" placeholder="Ej: 76.123.456-7"
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-emerald-500 focus:border-emerald-500 text-sm">
+                </div>
+
+                <!-- Teléfono de contacto -->
+                <div>
+                    <label for="telefono" class="block text-sm font-medium text-gray-700 mb-1">Teléfono de Contacto</label>
+                    <input type="text" id="telefono" name="telefono" value="{{ empresa.telefono|default:'' }}" placeholder="+56 9 1234 5678"
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-emerald-500 focus:border-emerald-500 text-sm">
+                </div>
+
+                <!-- Sitio Web -->
+                <div>
+                    <label for="sitio_web" class="block text-sm font-medium text-gray-700 mb-1">Sitio Web Corporativo</label>
+                    <input type="url" id="sitio_web" name="sitio_web" value="{{ empresa.sitio_web|default:'' }}" placeholder="https://www.empresa.cl"
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-emerald-500 focus:border-emerald-500 text-sm">
+                </div>
+
+                <!-- Rubro / Sector -->
+                <div>
+                    <label for="rubro" class="block text-sm font-medium text-gray-700 mb-1">Rubro / Industria</label>
+                    <select id="rubro" name="rubro" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-emerald-500 focus:border-emerald-500 text-sm">
+                        <option value="Tecnología e Informática" {% if empresa.rubro == 'Tecnología e Informática' %}selected{% endif %}>Tecnología e Informática</option>
+                        <option value="Construcción e Ingeniería" {% if empresa.rubro == 'Construcción e Ingeniería' %}selected{% endif %}>Construcción e Ingeniería</option>
+                        <option value="Banca y Servicios Financieros" {% if empresa.rubro == 'Banca y Servicios Financieros' %}selected{% endif %}>Banca y Servicios Financieros</option>
+                        <option value="Salud y Farmacéutica" {% if empresa.rubro == 'Salud y Farmacéutica' %}selected{% endif %}>Salud y Farmacéutica</option>
+                        <option value="Minería y Energía" {% if empresa.rubro == 'Minería y Energía' %}selected{% endif %}>Minería y Energía</option>
+                        <option value="Logística y Transporte" {% if empresa.rubro == 'Logística y Transporte' %}selected{% endif %}>Logística y Transporte</option>
+                        <option value="Educación" {% if empresa.rubro == 'Educación' %}selected{% endif %}>Educación</option>
+                        <option value="Otro" {% if empresa.rubro == 'Otro' or not empresa.rubro %}selected{% endif %}>Otro</option>
+                    </select>
+                </div>
+
+                <!-- Descripción Institucional -->
+                <div class="sm:col-span-2">
+                    <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-1">Descripción de la Empresa</label>
+                    <textarea id="descripcion" name="descripcion" rows="4" placeholder="Breve reseña sobre la cultura de la empresa, lo que hacen y qué buscan en sus estudiantes en práctica..."
+                              class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-emerald-500 focus:border-emerald-500 text-sm">{{ empresa.descripcion|default:'' }}</textarea>
+                </div>
+
+            </div>
+
+            <!-- Botón Guardar -->
+            <div class="pt-4">
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl transition shadow-md">
+                    Guardar Cambios del Perfil
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

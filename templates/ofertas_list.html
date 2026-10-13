@@ -2,39 +2,147 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">Ofertas de Práctica Disponibles</h1>
-        <p class="text-gray-500 mt-2">Encuentra tu primera experiencia profesional.</p>
+
+    <!-- Encabezado -->
+    <div class="mb-8 text-center sm:text-left">
+        <h1 class="text-3xl font-extrabold text-gray-900 mb-2">Ofertas de Práctica Profesional</h1>
+        <p class="text-gray-600">Encuentra y postula a las mejores oportunidades según tu carrera y modalidad preferida.</p>
     </div>
 
+    <!-- Barra de Filtros y Búsqueda -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+        <form method="GET" action="{% url 'ofertas_list' %}" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            
+            <!-- Campo 1: Búsqueda por texto -->
+            <div class="md:col-span-1">
+                <label for="q" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Palabra Clave</label>
+                <div class="relative">
+                    <input type="text" id="q" name="q" value="{{ q }}" placeholder="Ej: Frontend, Banco, Duoc..."
+                           class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Campo 2: Carrera -->
+            <div class="md:col-span-1">
+                <label for="carrera" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Carrera</label>
+                <select id="carrera" name="carrera" class="w-full py-2.5 px-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    <option value="">Todas las carreras</option>
+                    {% for carrera in carreras %}
+                        <option value="{{ carrera }}" {% if carrera == carrera_filtro %}selected{% endif %}>{{ carrera }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Campo 3: Modalidad -->
+            <div class="md:col-span-1">
+                <label for="modalidad" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Modalidad</label>
+                <select id="modalidad" name="modalidad" class="w-full py-2.5 px-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    <option value="">Todas las modalidades</option>
+                    <option value="Presencial" {% if modalidad_filtro == 'Presencial' %}selected{% endif %}>Presencial</option>
+                    <option value="Remoto" {% if modalidad_filtro == 'Remoto' %}selected{% endif %}>Remoto</option>
+                    <option value="Híbrido" {% if modalidad_filtro == 'Híbrido' %}selected{% endif %}>Híbrido</option>
+                </select>
+            </div>
+
+            <!-- Acciones -->
+            <div class="md:col-span-1 flex gap-2">
+                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                    Filtrar
+                </button>
+
+                {% if q or carrera_filtro or modalidad_filtro %}
+                <a href="{% url 'ofertas_list' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-3 rounded-xl text-sm transition flex items-center justify-center" title="Limpiar Filtros">
+                    ✕
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Indicador de Resultados -->
+    <div class="flex items-center justify-between mb-6">
+        <p class="text-sm font-medium text-gray-500">
+            Mostrando <span class="font-bold text-gray-900">{{ total_resultados }}</span> vacante{% if total_resultados != 1 %}s{% endif %} disponible{% if total_resultados != 1 %}s{% endif %}
+        </p>
+
+        {% if q or carrera_filtro or modalidad_filtro %}
+        <div class="flex flex-wrap gap-2">
+            {% if q %}
+                <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs px-2.5 py-1 rounded-lg font-medium">
+                    Búsqueda: "{{ q }}"
+                </span>
+            {% endif %}
+            {% if carrera_filtro %}
+                <span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-xs px-2.5 py-1 rounded-lg font-medium">
+                    {{ carrera_filtro }}
+                </span>
+            {% endif %}
+            {% if modalidad_filtro %}
+                <span class="inline-flex items-center gap-1 bg-purple-50 text-purple-700 text-xs px-2.5 py-1 rounded-lg font-medium">
+                    {{ modalidad_filtro }}
+                </span>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Tarjetas de Ofertas -->
+    {% if ofertas %}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for oferta in ofertas %}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col h-full hover:shadow-md transition">
-            <div class="flex-grow">
-                <div class="flex justify-between items-start mb-4">
-                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-bold tracking-wide">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition flex flex-col justify-between p-6">
+            <div>
+                <!-- Badges -->
+                <div class="flex flex-wrap gap-2 mb-3">
+                    <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">
                         {{ oferta.modalidad }}
                     </span>
+                    {% if oferta.carrera %}
+                    <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-0.5 rounded-full truncate max-w-[200px]">
+                        {{ oferta.carrera }}
+                    </span>
+                    {% endif %}
                 </div>
-                <h2 class="text-xl font-bold text-gray-900 mb-2">{{ oferta.titulo }}</h2>
-                <p class="text-emerald-600 font-medium text-sm mb-4">🏢 {{ oferta.empresa_nombre }}</p>
-                <p class="text-gray-600 text-sm line-clamp-3 mb-4">
+
+                <!-- Título y Empresa -->
+                <h3 class="text-lg font-bold text-gray-900 mb-1 line-clamp-1">{{ oferta.titulo }}</h3>
+                <p class="text-sm text-emerald-600 font-semibold mb-3 flex items-center gap-1">
+                    🏢 {{ oferta.empresa_nombre }}
+                </p>
+
+                <!-- Descripción Resumida -->
+                <p class="text-gray-600 text-sm line-clamp-3 mb-4 leading-relaxed">
                     {{ oferta.descripcion }}
                 </p>
             </div>
-            <div class="pt-4 border-t border-gray-100 mt-auto">
-                <a href="{% url 'oferta_detail' oferta.id %}" class="block w-full text-center bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-lg font-medium transition">
-                    Ver Detalles
+
+            <!-- Botón Ver Oferta -->
+            <div class="pt-4 border-t border-gray-50">
+                <a href="{% url 'oferta_detail' oferta.id %}" class="block w-full bg-gray-50 hover:bg-blue-600 hover:text-white text-gray-700 font-bold py-2.5 px-4 rounded-xl text-center text-sm transition">
+                    Ver Detalles y Postular →
                 </a>
             </div>
         </div>
-        {% empty %}
-        <div class="col-span-full bg-white p-12 text-center rounded-xl border border-gray-100">
-            <p class="text-gray-500 text-lg">Actualmente no hay ofertas de práctica disponibles.</p>
-        </div>
         {% endfor %}
     </div>
+
+    {% else %}
+    <!-- Estado Vacío -->
+    <div class="bg-white rounded-2xl border border-gray-100 p-12 text-center max-w-md mx-auto my-8">
+        <div class="w-16 h-16 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+            🔍
+        </div>
+        <h3 class="text-lg font-bold text-gray-900 mb-1">No se encontraron prácticas</h3>
+        <p class="text-gray-500 text-sm mb-6">No hay ofertas que coincidan con los filtros seleccionados.</p>
+        <a href="{% url 'ofertas_list' %}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl text-sm transition">
+            Limpiar Búsqueda
+        </a>
+    </div>
+    {% endif %}
 
 </div>
 {% endblock %}

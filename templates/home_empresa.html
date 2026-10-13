@@ -17,29 +17,40 @@
                     Publica nuevas ofertas de práctica y gestiona a los postulantes de tu empresa.
                 </p>
             </div>
-            <a href="{% url 'logout' %}" 
-               class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl text-sm font-medium transition backdrop-blur-sm flex items-center gap-2 shrink-0">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                </svg>
-                Cerrar Sesión
-            </a>
+
+            <!-- Botones de Acción de Cabecera -->
+            <div class="flex flex-wrap items-center gap-3 shrink-0">
+                <a href="{% url 'perfil_empresa' %}" 
+                   class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl text-sm font-medium transition backdrop-blur-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    Mi Perfil
+                </a>
+                <a href="{% url 'logout' %}" 
+                   class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl text-sm font-medium transition backdrop-blur-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                    Cerrar Sesión
+                </a>
+            </div>
         </div>
     </div>
 
-    <!-- Contenido del Panel (Estadísticas) -->
+    <!-- Contenido del Panel (Estadísticas Dinámicas) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <h3 class="text-gray-500 text-sm font-medium">Ofertas Publicadas</h3>
-            <p class="text-3xl font-bold text-gray-800 mt-2">0</p>
+            <p class="text-3xl font-bold text-gray-800 mt-2">{{ total_ofertas|default:0 }}</p>
         </div>
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <h3 class="text-gray-500 text-sm font-medium">Postulantes Recibidos</h3>
-            <p class="text-3xl font-bold text-gray-800 mt-2">0</p>
+            <p class="text-3xl font-bold text-emerald-600 mt-2">{{ total_postulantes|default:0 }}</p>
         </div>
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <h3 class="text-gray-500 text-sm font-medium">Vacantes Abiertas</h3>
-            <p class="text-3xl font-bold text-gray-800 mt-2">0</p>
+            <p class="text-3xl font-bold text-blue-600 mt-2">{{ total_ofertas|default:0 }}</p>
         </div>
     </div>
 
@@ -51,8 +62,14 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 Crear Nueva Oferta
             </a>
-            <a href="{% url 'mis_ofertas' %}" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-medium transition shadow-sm">
+            <a href="{% url 'mis_ofertas' %}" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-medium transition shadow-sm flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                 Ver Mis Ofertas
+            </a>
+            <!-- NUEVO: Botón al Perfil de la Empresa -->
+            <a href="{% url 'perfil_empresa' %}" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-medium transition shadow-sm flex items-center gap-2">
+                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                Perfil de Empresa
             </a>
         </div>
     </div>

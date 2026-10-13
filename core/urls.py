@@ -37,6 +37,7 @@ from portal.views import (
     mercadopago_webhook,
     dashboard_suscripciones,
     exportar_reporte_csv,
+    ver_perfil_empresa_publico,
 )
 
 urlpatterns = [
@@ -54,7 +55,7 @@ urlpatterns = [
     path('ofertas/<str:oferta_id>/', oferta_detail, name='oferta_detail'),
     path('ofertas/<str:oferta_id>/postular/', postular_oferta, name='postular_oferta'),
     path('estudiante/postulaciones/', mis_postulaciones, name='mis_postulaciones'),
-    
+    path('empresa/<str:empresa_id>/perfil/publico/', views.ver_perfil_empresa_publico, name='ver_perfil_empresa_publico'),
     # IA
     path('probot-ia/', probot_ia, name='probot_ia'),
     
