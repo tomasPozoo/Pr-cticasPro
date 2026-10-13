@@ -16,6 +16,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from datetime import datetime
 import csv
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
 # ==========================================
 # CONFIGURACIÓN GENERAL Y PRECIO DEL PLAN
 # ==========================================
@@ -98,7 +100,7 @@ def probot_ia(request):
 
                 except Exception as err:
                     err_str = str(err)
-                    print(f"⚠️️ Intento {intento + 1}/{max_intentos} en gemini-3.8-flash: {err_str}")
+                    print(f"⚠ Intento {intento + 1}/{max_intentos} en gemini-3.8-flash: {err_str}")
 
                     if "503" in err_str and intento < max_intentos - 1:
                         time.sleep(tiempos_espera[intento])
@@ -136,6 +138,8 @@ def dashboard_view(request):
         return redirect('home_estudiante')
     elif rol == 'empresa':
         return redirect('home_empresa')
+    elif rol == 'admin':
+        return redirect('home_admin')
     
     return redirect('login')
 
@@ -177,6 +181,19 @@ def register_view(request):
     return render(request, 'register.html')
 
 def login_view(request):
+    # 1. Validar si ya existe una sesión activa y redirigir
+    if request.session.get('user_id'):
+        rol = request.session.get('user_rol')
+        if rol == 'admin':
+            return redirect('home_admin')
+        elif rol == 'empresa':
+            return redirect('home_empresa')
+        elif rol == 'estudiante':
+            return redirect('home_estudiante')
+        else:
+            return redirect('index')
+
+    # 2. Procesamiento normal por POST
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -431,6 +448,8 @@ def crear_oferta(request):
         descripcion = request.POST.get('descripcion')
         requisitos = request.POST.get('requisitos')
         modalidad = request.POST.get('modalidad')
+        # NUEVO: Capturamos la carrera del formulario HTML
+        carrera = request.POST.get('carrera') 
         latitud = request.POST.get('latitud')
         longitud = request.POST.get('longitud')
 
@@ -444,6 +463,7 @@ def crear_oferta(request):
                 'descripcion': descripcion,
                 'requisitos': requisitos,
                 'modalidad': modalidad,
+                'carrera': carrera, # NUEVO: Guardamos la carrera en Firebase
                 'latitud': latitud,
                 'longitud': longitud,
                 'estado': 'activa',
@@ -1046,3 +1066,20 @@ def exportar_reporte_csv(request, tipo_reporte):
             writer.writerow([doc.id, o.get('empresa_nombre'), o.get('titulo'), o.get('modalidad'), o.get('estado')])
 
     return response
+
+
+def eliminar_oferta_admin(request, oferta_id):
+    if request.method == 'POST':
+        print(f"--- INTENTANDO BORRAR LA OFERTA CON ID: {oferta_id} ---")
+        try:
+            db = firestore.client()
+            # Intenta borrar el documento
+            db.collection('ofertas').document(oferta_id).delete()
+            print("--- ¡BORRADO EXITOSO EN FIREBASE! ---")
+            messages.success(request, 'La oferta ha sido eliminada exitosamente.')
+            
+        except Exception as e:
+            print(f"--- ERROR AL BORRAR EN FIREBASE: {e} ---")
+            messages.error(request, f'Error al eliminar en Firebase: {e}')
+            
+    return redirect('home_admin')

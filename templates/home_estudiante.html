@@ -15,7 +15,7 @@
                     Panel de Estudiante
                 </span>
                 <h1 class="text-3xl sm:text-4xl font-extrabold mt-3">
-                    ¡Bienvenido, <span class="text-yellow-300">{{ nombre }}</span>! 👋
+                    ¡Bienvenido, <span class="text-yellow-300">{{ estudiante.nombre }}</span>! 👋
                 </h1>
                 <p class="text-blue-100 mt-2 text-sm sm:text-base">
                     Explora las mejores ofertas de prácticas profesionales y gestiona tus postulaciones desde un solo lugar.
@@ -144,47 +144,88 @@
     </div>
 
     <!-- ==================== SECCIÓN: MAPA DE OFERTAS ==================== -->
-    <section id="mapa" class="py-12 bg-gray-50 border-t border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <div class="text-center max-w-3xl mx-auto mb-10 space-y-2">
-            <span class="text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-100 px-3 py-1 rounded-full">Geolocalización</span>
-            <h2 class="text-3xl font-extrabold text-gray-900">Explora Prácticas Cerca de Ti</h2>
-            <p class="text-gray-600">Visualiza en tiempo real las empresas que están ofreciendo cupos de práctica en tu comuna o ciudad.</p>
-          </div>
+<!-- ==================== SECCIÓN: MAPA DE OFERTAS ==================== -->
+<section id="mapa" class="py-12 bg-gray-50 border-t border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-10 space-y-2">
+        <span class="text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-100 px-3 py-1 rounded-full">Geolocalización</span>
+        <h2 class="text-3xl font-extrabold text-gray-900">Explora Prácticas Cerca de Ti</h2>
+        <p class="text-gray-600">Visualiza en tiempo real las empresas que están ofreciendo cupos de práctica en tu comuna o ciudad.</p>
+      </div>
 
-          <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 grid grid-cols-1 lg:grid-cols-4">
+      <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 grid grid-cols-1 lg:grid-cols-4">
+        
+        <div class="p-6 bg-gray-900 text-white space-y-6 flex flex-col justify-between">
+          <div class="space-y-5">
+            <div>
+              <h3 class="text-lg font-bold text-amber-400 mb-1">Filtros de Búsqueda</h3>
+              <p class="text-xs text-gray-300">Filtra por zona y tu área de especialidad.</p>
+            </div>
             
-            <div class="p-6 bg-gray-900 text-white space-y-6 flex flex-col justify-between">
-              <div>
-                <h3 class="text-lg font-bold text-amber-400 mb-2">Filtro de Ubicación</h3>
-                <p class="text-xs text-gray-300 mb-6">Selecciona una región para consultar vacantes disponibles.</p>
-                
-                <div class="space-y-3">
-                  <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400">Región / Zona</label>
-                  <select id="filtro-region" class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
-                    <option value="Región Metropolitana" data-coords="-33.4489,-70.6693">Región Metropolitana</option>
-                    <option value="Valparaíso" data-coords="-33.0472,-71.6127">Valparaíso</option>
-                    <option value="Biobío" data-coords="-36.8201,-73.0444">Biobío</option>
-                    <option value="Antofagasta" data-coords="-23.6509,-70.3975">Antofagasta</option>
-                  </select>
-                </div>
-              </div>
-
-              <button onclick="centrarMapa()" class="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-gray-900 font-bold py-3 rounded-xl transition text-sm shadow-md">
-                Usar mi ubicación actual
-              </button>
+            <!-- Filtro de Región -->
+            <div class="space-y-2">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400">Región / Zona</label>
+              <select id="filtro-region" class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                <option value="Región Metropolitana" data-coords="-33.4489,-70.6693">Región Metropolitana</option>
+                <option value="Valparaíso" data-coords="-33.0472,-71.6127">Valparaíso</option>
+                <option value="Biobío" data-coords="-36.8201,-73.0444">Biobío</option>
+                <option value="Antofagasta" data-coords="-23.6509,-70.3975">Antofagasta</option>
+              </select>
             </div>
 
-            <!-- Contenedor del Mapa -->
-            <div class="lg:col-span-3 h-[420px] relative">
-              <div id="map" class="w-full h-full z-10"></div>
+            <!-- NUEVO: Filtro por Carrera -->
+            <div class="space-y-2">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400">Carrera / Área</label>
+              <select id="filtro-carrera" class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                <option value="">Todas las carreras</option>
+                <option value="Ingeniería en Construcción">Ingeniería en Construcción</option>
+                <option value="Ingeniería en Prevención de Riesgos">Ingeniería en Prevención de Riesgos</option>
+                <option value="Técnico en Construcción">Técnico en Construcción</option>
+                <option value="Ingeniería en Informática">Ingeniería en Informática</option>
+                <option value="Analista Programador">Analista Programador</option>
+                <option value="Ingeniería en Redes y Telecomunicaciones">Ingeniería en Redes y Telecomunicaciones</option>
+                <option value="Técnico en Desabolladura y Pintura Automotriz">Técnico en Desabolladura y Pintura Automotriz</option>
+                <option value="Técnico en Electricidad y Automatización Industrial">Técnico en Electricidad y Automatización Industrial</option>
+                <option value="Ingeniería en Electricidad y Automatización Industrial">Ingeniería en Electricidad y Automatización Industrial</option>
+                <option value="Ingeniería Agrícola">Ingeniería Agrícola</option>
+                <option value="Ingeniería en Mecánica Automotriz y Autotrónica">Ingeniería en Mecánica Automotriz y Autotrónica</option>
+                <option value="Técnico en Calidad de Alimentos">Técnico en Calidad de Alimentos</option>
+                <option value="Técnico Veterinario y Pecuario">Técnico Veterinario y Pecuario</option>
+                <option value="Técnico en Operación y Supervisión de Procesos Mineros">Técnico en Operación y Supervisión de Procesos Mineros</option>
+                <option value="Técnico en Mecánica Automotriz y Autotrónica">Técnico en Mecánica Automotriz y Autotrónica</option>
+                <option value="Técnico en Geología">Técnico en Geología</option>
+                <option value="Técnico en Laboratorio Clínico, Banco de Sangre e Imagenología">Técnico en Laboratorio Clínico, Banco de Sangre e Imagenología</option>
+                <option value="Preparador Físico">Preparador Físico</option>
+                <option value="Técnico en Enfermería">Técnico en Enfermería</option>
+                <option value="Técnico en Química y Farmacia">Técnico en Química y Farmacia</option>
+                <option value="Técnico en Odontología">Técnico en Odontología</option>
+                <option value="Ingeniería en Marketing Digital">Ingeniería en Marketing Digital</option>
+                <option value="Auditoría">Auditoría</option>
+                <option value="Ingeniería en Gestión Logística">Ingeniería en Gestión Logística</option>
+                <option value="Ingeniería en Comercio Exterior">Ingeniería en Comercio Exterior</option>
+                <option value="Ingeniería en Administración, mención Gestión de Personas">Ingeniería en Administración, mención Gestión de Personas</option>
+                <option value="Ingeniería en Administración, mención Innovación y Emprendimiento">Ingeniería en Administración, mención Innovación y Emprendimiento</option>
+                <option value="Ingeniería en Administración, mención Finanzas">Ingeniería en Administración, mención Finanzas</option>
+                <option value="Técnico en Administración">Técnico en Administración</option>
+                <option value="Relaciones Públicas y Comunicación Organizacional">Relaciones Públicas y Comunicación Organizacional</option>
+                <option value="Publicidad">Publicidad</option>
+              </select>
             </div>
           </div>
-        </div>
-    </section>
 
-</div>
+          <button onclick="centrarMapa()" class="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-gray-900 font-bold py-3 rounded-xl transition text-sm shadow-md mt-4">
+            Usar mi ubicación actual
+          </button>
+        </div>
+
+        <!-- Contenedor del Mapa -->
+        <div class="lg:col-span-3 h-[420px] relative">
+          <div id="map" class="w-full h-full z-10"></div>
+        </div>
+      </div>
+    </div>
+</section>
 
 <!-- Cargar librería Leaflet -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -201,6 +242,7 @@
             {
                 titulo: "{{ oferta.titulo|escapejs }}",
                 empresa_nombre: "{{ oferta.empresa_nombre|escapejs }}",
+                carrera: "{{ oferta.carrera|escapejs }}",
                 latitud: "{{ oferta.latitud|default:'-33.4489' }}",
                 longitud: "{{ oferta.longitud|default:'-70.6693' }}",
                 url_detalle: "{% url 'oferta_detail' oferta.id %}"

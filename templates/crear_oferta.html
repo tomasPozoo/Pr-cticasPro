@@ -25,7 +25,7 @@
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
                 </div>
 
-                <!-- Descripción y Requisitos (Igual que antes) -->
+                <!-- Descripción y Requisitos -->
                 <div>
                     <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-1">Descripción y Funciones</label>
                     <textarea id="descripcion" name="descripcion" rows="4" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"></textarea>
@@ -46,7 +46,46 @@
                     </select>
                 </div>
 
-                <!-- NUEVO: Selector de Ubicación -->
+                <!-- NUEVO: Selector de Carreras -->
+                <div>
+                    <label for="carrera" class="block text-sm font-medium text-gray-700 mb-1">Carrera Orientada</label>
+                    <select id="carrera" name="carrera" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                        <option value="" disabled selected>Selecciona una carrera...</option>
+                        <option value="Ingeniería en Construcción">Ingeniería en Construcción</option>
+                        <option value="Ingeniería en Prevención de Riesgos">Ingeniería en Prevención de Riesgos</option>
+                        <option value="Técnico en Construcción">Técnico en Construcción</option>
+                        <option value="Ingeniería en Informática">Ingeniería en Informática</option>
+                        <option value="Analista Programador">Analista Programador</option>
+                        <option value="Ingeniería en Redes y Telecomunicaciones">Ingeniería en Redes y Telecomunicaciones</option>
+                        <option value="Técnico en Desabolladura y Pintura Automotriz">Técnico en Desabolladura y Pintura Automotriz</option>
+                        <option value="Técnico en Electricidad y Automatización Industrial">Técnico en Electricidad y Automatización Industrial</option>
+                        <option value="Ingeniería en Electricidad y Automatización Industrial">Ingeniería en Electricidad y Automatización Industrial</option>
+                        <option value="Ingeniería Agrícola">Ingeniería Agrícola</option>
+                        <option value="Ingeniería en Mecánica Automotriz y Autotrónica">Ingeniería en Mecánica Automotriz y Autotrónica</option>
+                        <option value="Técnico en Calidad de Alimentos">Técnico en Calidad de Alimentos</option>
+                        <option value="Técnico Veterinario y Pecuario">Técnico Veterinario y Pecuario</option>
+                        <option value="Técnico en Operación y Supervisión de Procesos Mineros">Técnico en Operación y Supervisión de Procesos Mineros</option>
+                        <option value="Técnico en Mecánica Automotriz y Autotrónica">Técnico en Mecánica Automotriz y Autotrónica</option>
+                        <option value="Técnico en Geología">Técnico en Geología</option>
+                        <option value="Técnico en Laboratorio Clínico, Banco de Sangre e Imagenología">Técnico en Laboratorio Clínico, Banco de Sangre e Imagenología</option>
+                        <option value="Preparador Físico">Preparador Físico</option>
+                        <option value="Técnico en Enfermería">Técnico en Enfermería</option>
+                        <option value="Técnico en Química y Farmacia">Técnico en Química y Farmacia</option>
+                        <option value="Técnico en Odontología">Técnico en Odontología</option>
+                        <option value="Ingeniería en Marketing Digital">Ingeniería en Marketing Digital</option>
+                        <option value="Auditoría">Auditoría</option>
+                        <option value="Ingeniería en Gestión Logística">Ingeniería en Gestión Logística</option>
+                        <option value="Ingeniería en Comercio Exterior">Ingeniería en Comercio Exterior</option>
+                        <option value="Ingeniería en Administración, mención Gestión de Personas">Ingeniería en Administración, mención Gestión de Personas</option>
+                        <option value="Ingeniería en Administración, mención Innovación y Emprendimiento">Ingeniería en Administración, mención Innovación y Emprendimiento</option>
+                        <option value="Ingeniería en Administración, mención Finanzas">Ingeniería en Administración, mención Finanzas</option>
+                        <option value="Técnico en Administración">Técnico en Administración</option>
+                        <option value="Relaciones Públicas y Comunicación Organizacional">Relaciones Públicas y Comunicación Organizacional</option>
+                        <option value="Publicidad">Publicidad</option>
+                    </select>
+                </div>
+
+                <!-- Selector de Ubicación -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Ubicación de la Práctica</label>
                     <p class="text-xs text-gray-500 mb-2">Haz clic en el mapa para marcar la ubicación exacta de tu empresa.</p>
@@ -76,8 +115,10 @@
         // Iniciar mapa en Santiago
         var map = L.map('mapa-crear').setView([-33.4489, -70.6693], 12);
         
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap'
+        // Usar la capa de Esri (sin bloqueos)
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 19,
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS'
         }).addTo(map);
 
         // Pin inicial (que se puede mover)
@@ -96,6 +137,11 @@
             document.getElementById('latitud').value = e.latlng.lat;
             document.getElementById('longitud').value = e.latlng.lng;
         });
+        
+        // Asegurar que el mapa se renderice correctamente después de cargar la página
+        setTimeout(function() {
+            map.invalidateSize();
+        }, 100);
     });
 </script>
 {% endblock %}

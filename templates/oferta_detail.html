@@ -1,45 +1,153 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<!-- Cargamos Leaflet para el mapa de ubicación -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     
-    <a href="{% url 'ofertas_list' %}" class="text-gray-500 hover:text-blue-600 flex items-center gap-2 mb-6 transition">
+    <!-- Botón Volver -->
+    <a href="{% url 'ofertas_list' %}" class="inline-flex items-center gap-2 text-gray-500 hover:text-blue-600 mb-6 transition font-medium">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
         Volver a las ofertas
     </a>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <!-- Cabecera -->
-        <div class="bg-gray-50 p-6 sm:p-8 border-b border-gray-100">
-            <div class="flex items-center gap-3 mb-4">
-                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-bold">
-                    {{ oferta.modalidad }}
-                </span>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Columna Izquierda: Detalle principal (Ocupa 2 de 3 columnas) -->
+        <div class="lg:col-span-2 space-y-6">
+            
+            <!-- Tarjeta de Cabecera -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <!-- Etiqueta Modalidad -->
+                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-bold inline-flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        {{ oferta.modalidad }}
+                    </span>
+                    <!-- Etiqueta Carrera (Si existe) -->
+                    {% if oferta.carrera %}
+                    <span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-sm font-bold inline-flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
+                        {{ oferta.carrera }}
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-2 leading-tight">{{ oferta.titulo }}</h1>
+                <p class="text-xl text-gray-600 font-medium flex items-center gap-2">
+                    <span class="text-2xl">🏢</span> {{ oferta.empresa_nombre }}
+                </p>
             </div>
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ oferta.titulo }}</h1>
-            <p class="text-xl text-emerald-600 font-medium">🏢 {{ oferta.empresa_nombre }}</p>
+
+            <!-- Tarjeta de Contenido -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 space-y-8">
+                <!-- Descripción -->
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                        Descripción del Cargo
+                    </h3>
+                    <p class="text-gray-700 whitespace-pre-line leading-relaxed">{{ oferta.descripcion }}</p>
+                </div>
+
+                <!-- Requisitos -->
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Requisitos
+                    </h3>
+                    <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                        <p class="text-gray-700 whitespace-pre-line leading-relaxed">{{ oferta.requisitos }}</p>
+                    </div>
+                </div>
+
+                <!-- Mapa de Ubicación -->
+                {% if oferta.latitud and oferta.longitud %}
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        Ubicación de la Práctica
+                    </h3>
+                    <div id="mapa-detalle" class="w-full h-64 rounded-xl border border-gray-200 shadow-inner z-10"></div>
+                </div>
+                {% endif %}
+            </div>
         </div>
 
-        <!-- Cuerpo -->
-        <div class="p-6 sm:p-8 space-y-8">
-            <div>
-                <h3 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Descripción del Cargo</h3>
-                <p class="text-gray-700 whitespace-pre-line">{{ oferta.descripcion }}</p>
-            </div>
+        <!-- Columna Derecha: Tarjeta de Postulación Flotante (Ocupa 1 de 3 columnas) -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 sticky top-8">
+                <h4 class="font-bold text-gray-900 text-lg mb-4">Resumen de la Oferta</h4>
+                
+                <ul class="space-y-4 mb-6 text-sm">
+                    <li class="flex items-start gap-3">
+                        <div class="bg-gray-100 p-2 rounded-lg text-gray-600"><i class="bi bi-building"></i></div>
+                        <div>
+                            <p class="text-gray-500 font-medium">Empresa</p>
+                            <p class="text-gray-900 font-bold">{{ oferta.empresa_nombre }}</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div class="bg-gray-100 p-2 rounded-lg text-gray-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 font-medium">Modalidad</p>
+                            <p class="text-gray-900 font-bold">{{ oferta.modalidad }}</p>
+                        </div>
+                    </li>
+                    {% if oferta.carrera %}
+                    <li class="flex items-start gap-3">
+                        <div class="bg-gray-100 p-2 rounded-lg text-gray-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 font-medium">Carrera Orientada</p>
+                            <p class="text-gray-900 font-bold">{{ oferta.carrera }}</p>
+                        </div>
+                    </li>
+                    {% endif %}
+                </ul>
 
-            <div>
-                <h3 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Requisitos</h3>
-                <p class="text-gray-700 whitespace-pre-line">{{ oferta.requisitos }}</p>
-            </div>
+                <hr class="border-gray-100 mb-6">
 
-            <div class="pt-6">
-                <!-- Botón de navegación al formulario de postulación -->
-                <a href="{% url 'postular_oferta' oferta.id %}" class="inline-block w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition shadow-md text-center">
+                <a href="{% url 'postular_oferta' oferta.id %}" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition shadow-md text-center transform hover:-translate-y-0.5">
                     Postular a esta práctica
                 </a>
+                <p class="text-xs text-center text-gray-400 mt-3">Al postular, tu perfil será enviado directamente a la empresa.</p>
             </div>
         </div>
-    </div>
 
+    </div>
 </div>
+
+<!-- Script del Mapa Leaflet -->
+{% if oferta.latitud and oferta.longitud %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var lat = parseFloat("{{ oferta.latitud }}".replace(',', '.'));
+        var lng = parseFloat("{{ oferta.longitud }}".replace(',', '.'));
+
+        if (!isNaN(lat) && !isNaN(lng)) {
+            // Inicializar mapa sin zoom con scroll para no molestar al bajar por la página
+            var map = L.map('mapa-detalle', {
+                scrollWheelZoom: false
+            }).setView([lat, lng], 14);
+            
+            // Usar la misma capa Esri que en crear oferta
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+                maxZoom: 19,
+                attribution: '&copy; Esri'
+            }).addTo(map);
+
+            // Agregar el marcador estático
+            var marker = L.marker([lat, lng]).addTo(map);
+            marker.bindPopup("<b>{{ oferta.empresa_nombre }}</b>").openPopup();
+        }
+    });
+</script>
+{% endif %}
+
 {% endblock %}

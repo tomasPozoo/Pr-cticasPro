@@ -37,8 +37,6 @@ from portal.views import (
     mercadopago_webhook,
     dashboard_suscripciones,
     exportar_reporte_csv,
-
-
 )
 
 urlpatterns = [
@@ -71,10 +69,13 @@ urlpatterns = [
 
     path('quienes-somos/', quienes_somos, name='quienes_somos'),
     
-    # Rutas Admin Panel
+    # Rutas Admin Panel (Ahora todas usan admin-panel/)
     path('admin-panel/', home_admin, name='home_admin'),
     path('admin-panel/eliminar-usuario/<str:usuario_id>/', eliminar_usuario, name='eliminar_usuario'),
     path('admin-panel/eliminar-oferta/<str:oferta_id>/', eliminar_oferta, name='eliminar_oferta'),
+    path('admin-panel/suscripciones/', dashboard_suscripciones, name='dashboard_suscripciones'),
+    path('admin-panel/exportar/<str:tipo_reporte>/', views.exportar_reporte_csv, name='exportar_reporte_csv'),
+    path('panel/oferta/eliminar/<str:oferta_id>/', views.eliminar_oferta_admin, name='eliminar_oferta_admin'),
 
     # Rutas API de Pago y Filtro Regional Premium
     path('api/verificar-region/', verificar_filtro_region, name='verificar_filtro_region'),
@@ -87,9 +88,6 @@ urlpatterns = [
     path('suscripcion/fallo/', pago_fallido, name='pago_fallido'),
     path('suscripcion/pendiente/', pago_pendiente, name='pago_pendiente'),
     path('api/mercadopago-webhook/', views.mercadopago_webhook, name='mercadopago_webhook'),
-    path('admin/suscripciones/', dashboard_suscripciones, name='dashboard_suscripciones'),
-
-    path('admin/exportar/<str:tipo_reporte>/', views.exportar_reporte_csv, name='exportar_reporte_csv'),
 ]
 
 if settings.DEBUG:
