@@ -1,0 +1,81 @@
+Este es el script SQL en dialecto estándar (PostgreSQL / MySQL compatible) estructurado a partir del modelo Entidad-Relación en tercera forma normal (3FN) de PrácticasPro:   SQL-- 1. Tabla Principal: USUARIOS
+CREATE TABLE usuarios (
+    id VARCHAR(128) PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    rol VARCHAR(20) NOT NULL,
+    es_premium BOOLEAN DEFAULT FALSE,
+    region VARCHAR(100),
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. Especialización: PERFIL_ESTUDIANTE (Relación 1:0..1 con USUARIOS)
+CREATE TABLE perfil_estudiante (
+    usuario_id VARCHAR(128) PRIMARY KEY,
+    carrera VARCHAR(150),
+    telefono VARCHAR(20),
+    bio TEXT,
+    foto_url VARCHAR(255),
+    CONSTRAINT fk_perfil_estudiante_usuario 
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
+-- 3. Especialización: PERFIL_EMPRESA (Relación 1:0..1 con USUARIOS)
+CREATE TABLE perfil_empresa (
+    usuario_id VARCHAR(128) PRIMARY KEY,
+    rut VARCHAR(20),
+    telefono VARCHAR(20),
+    sitio_web VARCHAR(255),
+    rubro VARCHAR(100),
+    descripcion TEXT,
+    logo_url VARCHAR(255),
+    CONSTRAINT fk_perfil_empresa_usuario 
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
+-- 4. Tabla: SUSCRIPCIONES (Relación 1:N con USUARIOS)
+CREATE TABLE suscripciones (
+    id VARCHAR(128) PRIMARY KEY,
+    usuario_id VARCHAR(128) NOT NULL,
+    monto DECIMAL(10,2) NOT NULL,
+    payment_id VARCHAR(100),
+    estado VARCHAR(20) NOT NULL,
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_suscripciones_usuario 
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
+-- 5. Tabla: OFERTAS (Relación 1:N con USUARIOS)
+CREATE TABLE ofertas (
+    id VARCHAR(128) PRIMARY KEY,
+    empresa_id VARCHAR(128) NOT NULL,
+    titulo VARCHAR(200) NOT NULL,
+    descripcion TEXT,
+    requisitos TEXT,
+    modalidad VARCHAR(50),
+    carrera VARCHAR(150),
+    latitud VARCHAR(50),
+    longitud VARCHAR(50),
+    estado VARCHAR(20) NOT NULL,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_ofertas_empresa 
+        FOREIGN KEY (empresa_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
+-- 6. Tabla: POSTULACIONES (Relación entre OFERTAS y USUARIOS)
+CREATE TABLE postulaciones (
+    id VARCHAR(128) PRIMARY KEY,
+    oferta_id VARCHAR(128) NOT NULL,
+    estudiante_id VARCHAR(128) NOT NULL,
+    empresa_id VARCHAR(128) NOT NULL,
+    mensaje TEXT,
+    cv_url VARCHAR(255),
+    estado VARCHAR(20) NOT NULL,
+    mensaje_empresa TEXT,
+    fecha_postulacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_postulaciones_oferta 
+        FOREIGN KEY (oferta_id) REFERENCES ofertas(id) ON DELETE CASCADE,
+    CONSTRAINT fk_postulaciones_estudiante 
+        FOREIGN KEY (estudiante_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    CONSTRAINT fk_postulaciones_empresa 
+        FOREIGN KEY (empresa_id) REFERENCES usuarios(id) ON DELETE CASCADE
