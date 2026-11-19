@@ -33,9 +33,12 @@ MERCADOPAGO_ACCESS_TOKEN = os.environ.get('MERCADOPAGO_ACCESS_TOKEN')
 # ==========================================
 
 def _consultar_gemini_con_respaldo(prompt, instrucciones):
-    """Consulta Gemini usando generate_content (bajo consumo de RAM) con fallback de modelos."""
-    client = genai.Client(api_key=GEMINI_API_KEY)
-    modelos = ['gemini-3.8-flash', 'gemini-2.5-flash']
+    """Consulta Gemini con timeout corto de 15s y gemini-2.5-flash como principal."""
+    client = genai.Client(
+        api_key=GEMINI_API_KEY,
+        http_options={'timeout': 15000}  # Corta a los 15 segundos si un modelo se queda pegado
+    )
+    modelos = ['gemini-2.5-flash', 'gemini-3.8-flash']
 
     for modelo in modelos:
         for intento in range(2):
