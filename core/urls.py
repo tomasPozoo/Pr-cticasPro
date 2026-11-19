@@ -38,6 +38,8 @@ from portal.views import (
     dashboard_suscripciones,
     exportar_reporte_csv,
     ver_perfil_empresa_publico,
+    forgot_password_view,
+    solicitar_cambio_password,
 )
 
 urlpatterns = [
@@ -47,6 +49,8 @@ urlpatterns = [
     path('registro/', register_view, name='register'),
     path('dashboard/', dashboard_view, name='dashboard'),
     path('logout/', logout_view, name='logout'),
+    path('recuperar-contrasena/', views.forgot_password_view, name='forgot_password'),
+    path('solicitar-cambio-password/', views.solicitar_cambio_password, name='solicitar_cambio_password'),
 
     # Rutas Estudiante
     path('estudiante/', home_estudiante, name='home_estudiante'),

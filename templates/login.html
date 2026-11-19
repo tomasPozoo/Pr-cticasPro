@@ -36,6 +36,10 @@
                 <input type="password" name="password" required 
                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                        placeholder="••••••••">
+                <!-- ENLACE DE RECUPERACIÓN CORREGIDO -->
+                <div class="text-right mt-1">
+                    <a href="{% url 'forgot_password' %}" class="text-sm font-medium text-blue-600 hover:text-blue-500">¿Olvidaste tu contraseña?</a>
+                </div>
             </div>
 
             <button type="submit" 

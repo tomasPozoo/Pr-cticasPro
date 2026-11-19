@@ -23,38 +23,9 @@ from django.contrib import messages
 # ==========================================
 PRECIO_PLAN = 2990.0  # <--- PRECIO OFICIAL EN CLP DEL PLAN PREMIUM
 
-FIREBASE_KEY_PATH = os.path.join(settings.BASE_DIR, 'firebase_key.json')
-FIREBASE_WEB_API_KEY = ""
-
-if os.path.exists(FIREBASE_KEY_PATH):
-    try:
-        with open(FIREBASE_KEY_PATH, 'r', encoding='utf-8') as f:
-            fb_data = json.load(f)
-            FIREBASE_WEB_API_KEY = fb_data.get('FIREBASE_WEB_API_KEY', '')
-    except Exception as e:
-        print(f"⚠️ Error al cargar firebase_key.json: {e}")
-
-KEY_FILE_PATH = os.path.join(settings.BASE_DIR, 'gemini_key.json')
-GEMINI_API_KEY = ""
-
-if os.path.exists(KEY_FILE_PATH):
-    try:
-        with open(KEY_FILE_PATH, 'r', encoding='utf-8') as f:
-            key_data = json.load(f)
-            GEMINI_API_KEY = key_data.get('GEMINI_API_KEY', '')
-    except Exception as e:
-        print(f"⚠️ Error al leer gemini_key.json: {e}")
-
-MP_KEY_PATH = os.path.join(settings.BASE_DIR, 'mercadopago_key.json')
-MERCADOPAGO_ACCESS_TOKEN = ""
-
-if os.path.exists(MP_KEY_PATH):
-    try:
-        with open(MP_KEY_PATH, 'r', encoding='utf-8') as f:
-            mp_data = json.load(f)
-            MERCADOPAGO_ACCESS_TOKEN = mp_data.get('MERCADOPAGO_ACCESS_TOKEN', '')
-    except Exception as e:
-        print(f"⚠️ Error al leer mercadopago_key.json: {e}")
+FIREBASE_WEB_API_KEY = os.environ.get('FIREBASE_WEB_API_KEY')
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+MERCADOPAGO_ACCESS_TOKEN = os.environ.get('MERCADOPAGO_ACCESS_TOKEN')
 
 
 # ==========================================
@@ -175,21 +146,28 @@ def dashboard_view(request):
 # ==========================================
 # AUTENTICACIÓN Y REGISTRO
 # ==========================================
-
 def register_view(request):
     if request.method == 'POST':
-        email = request.POST.get('email')
+        email = request.POST.get('email').strip()
         password = request.POST.get('password')
-        nombre = request.POST.get('nombre')
+        nombre = request.POST.get('nombre').strip()
         rol = request.POST.get('rol')
 
+        # 1. Validación de dominio SÓLO para estudiantes
+        if rol == 'estudiante':
+            if not (email.endswith('@duocuc.cl') or email.endswith('@alumnos.duoc.cl')):
+                messages.error(request, 'Los estudiantes deben registrarse con su correo institucional (@duocuc.cl o @alumnos.duoc.cl).')
+                return render(request, 'register.html')
+
         try:
+            # 2. Crear usuario en Firebase Auth
             user = auth.create_user(
                 email=email,
                 password=password,
                 display_name=nombre
             )
 
+            # 3. Guardar en Firestore
             db = firestore.client()
             db.collection('usuarios').document(user.uid).set({
                 'nombre': nombre,
@@ -200,30 +178,38 @@ def register_view(request):
                 'creado_en': firestore.SERVER_TIMESTAMP
             })
 
-            messages.success(request, 'Cuenta creada exitosamente. Inicia sesión.')
+            # 4. Iniciar sesión temporalmente vía API REST para obtener el idToken y enviar el correo de verificación
+            login_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_WEB_API_KEY}"
+            login_res = requests.post(login_url, json={"email": email, "password": password, "returnSecureToken": True})
+            
+            if login_res.ok:
+                id_token = login_res.json().get('idToken')
+                verify_url = f"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={FIREBASE_WEB_API_KEY}"
+                requests.post(verify_url, json={"requestType": "VERIFY_EMAIL", "idToken": id_token})
+
+            messages.success(request, 'Cuenta creada. Por favor, revisa tu correo para verificar tu cuenta antes de iniciar sesión.')
             return redirect('login')
 
         except Exception as e:
-            messages.error(request, f'Error al registrar: {str(e)}')
+            error_msg = str(e)
+            if "EMAIL_EXISTS" in error_msg:
+                messages.error(request, 'Este correo ya está registrado.')
+            else:
+                messages.error(request, f'Error al registrar: {error_msg}')
 
     return render(request, 'register.html')
 
+
 def login_view(request):
-    # 1. Validar si ya existe una sesión activa y redirigir
     if request.session.get('user_id'):
         rol = request.session.get('user_rol')
-        if rol == 'admin':
-            return redirect('home_admin')
-        elif rol == 'empresa':
-            return redirect('home_empresa')
-        elif rol == 'estudiante':
-            return redirect('home_estudiante')
-        else:
-            return redirect('index')
+        if rol == 'admin': return redirect('home_admin')
+        elif rol == 'empresa': return redirect('home_empresa')
+        elif rol == 'estudiante': return redirect('home_estudiante')
+        else: return redirect('index')
 
-    # 2. Procesamiento normal por POST
     if request.method == 'POST':
-        email = request.POST.get('email')
+        email = request.POST.get('email').strip()
         password = request.POST.get('password')
 
         url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_WEB_API_KEY}"
@@ -235,6 +221,12 @@ def login_view(request):
             messages.error(request, "Correo o contraseña incorrectos.")
         else:
             uid = data['localId']
+
+       #     # Validar si el correo está verificado a través de Firebase Admin
+       #     firebase_user = auth.get_user(uid)
+       #     if not firebase_user.email_verified:
+       #         messages.error(request, "Tu cuenta aún no está verificada. Por favor, revisa tu correo electrónico.")
+       #         return render(request, 'login.html')
 
             db = firestore.client()
             doc = db.collection('usuarios').document(uid).get()
@@ -250,18 +242,48 @@ def login_view(request):
                 request.session['es_premium'] = user_data.get('es_premium', False)
                 request.session['region'] = user_data.get('region', 'Región Metropolitana')
 
-                if rol == 'estudiante':
-                    return redirect('home_estudiante')
-                elif rol == 'empresa':
-                    return redirect('home_empresa')
-                elif rol == 'admin':
-                    return redirect('home_admin')
-                else:
-                    return redirect('index') 
+                if rol == 'estudiante': return redirect('home_estudiante')
+                elif rol == 'empresa': return redirect('home_empresa')
+                elif rol == 'admin': return redirect('home_admin')
+                else: return redirect('index') 
             else:
                 messages.error(request, "El usuario no tiene un perfil registrado.")
 
     return render(request, 'login.html')
+
+
+# --- NUEVAS VISTAS: AGREGAR AL FINAL DE views.py ---
+
+def forgot_password_view(request):
+    """Vista para solicitar el restablecimiento de contraseña"""
+    if request.method == 'POST':
+        email = request.POST.get('email').strip()
+        
+        url = f"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={FIREBASE_WEB_API_KEY}"
+        payload = {"requestType": "PASSWORD_RESET", "email": email}
+        requests.post(url, json=payload)
+        
+        messages.success(request, "Si el correo está registrado, recibirás un enlace seguro para restablecer tu contraseña.")
+        return redirect('login')
+
+    return render(request, 'forgot_password.html')
+
+def solicitar_cambio_password(request):
+    """Permite al usuario logueado solicitar un cambio de contraseña por correo"""
+    if not request.session.get('user_id'):
+        return redirect('login')
+        
+    email = request.session.get('user_email')
+    
+    url = f"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={FIREBASE_WEB_API_KEY}"
+    payload = {"requestType": "PASSWORD_RESET", "email": email}
+    requests.post(url, json=payload)
+    
+    messages.success(request, "Se ha enviado un enlace seguro a tu correo para cambiar tu contraseña.")
+    
+    rol = request.session.get('user_rol')
+    if rol == 'empresa': return redirect('perfil_empresa')
+    return redirect('perfil_estudiante')
 
 def logout_view(request):
     request.session.flush()
