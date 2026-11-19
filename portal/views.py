@@ -33,27 +33,25 @@ MERCADOPAGO_ACCESS_TOKEN = os.environ.get('MERCADOPAGO_ACCESS_TOKEN')
 # ==========================================
 
 def _consultar_gemini_con_respaldo(prompt, instrucciones):
-    """Consulta Gemini rotando modelos vigentes y claves API ante límites 429."""
+    """Consulta gemini-3.8-flash rotando entre claves API disponibles."""
     claves = [k for k in [GEMINI_API_KEY, os.environ.get('GEMINI_API_KEY_2')] if k]
-    modelos = ['gemini-3.8-flash', 'gemini-3.8-flash-lite']
 
     for clave in claves:
         client = genai.Client(api_key=clave)
-        for modelo in modelos:
-            try:
-                response = client.models.generate_content(
-                    model=modelo,
-                    contents=prompt,
-                    config=types.GenerateContentConfig(
-                        system_instruction=instrucciones
-                    )
+        try:
+            response = client.models.generate_content(
+                model='gemini-3.8-flash',
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=instrucciones
                 )
-                if response and response.text:
-                    print(f"🚀 IA respondió con {modelo}")
-                    return response.text
-            except Exception as err:
-                print(f"⚠ Fallo en {modelo}: {str(err)}")
-                continue
+            )
+            if response and response.text:
+                print("🚀 IA respondió con gemini-3.8-flash")
+                return response.text
+        except Exception as err:
+            print(f"⚠ Fallo con clave actual: {str(err)}")
+            continue
     return None
 
 def probot_ia(request):
