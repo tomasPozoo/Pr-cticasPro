@@ -32,6 +32,34 @@ MERCADOPAGO_ACCESS_TOKEN = os.environ.get('MERCADOPAGO_ACCESS_TOKEN')
 # CHATBOT PROBOT IA
 # ==========================================
 
+def _consultar_gemini_con_respaldo(prompt, instrucciones):
+    """Consulta Gemini usando generate_content (bajo consumo de RAM) con fallback de modelos."""
+    client = genai.Client(api_key=GEMINI_API_KEY)
+    modelos = ['gemini-3.8-flash', 'gemini-2.5-flash']
+
+    for modelo in modelos:
+        for intento in range(2):
+            try:
+                response = client.models.generate_content(
+                    model=modelo,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        system_instruction=instrucciones
+                    )
+                )
+                if response and response.text:
+                    print(f"🚀 IA respondió con {modelo} (intento {intento + 1})")
+                    return response.text
+            except Exception as err:
+                err_str = str(err)
+                print(f"⚠ Fallo en {modelo} (intento {intento + 1}): {err_str}")
+                if "503" in err_str or "429" in err_str:
+                    time.sleep(1)
+                else:
+                    break
+    return None
+
+
 def probot_ia(request):
     if request.method == 'POST':
         try:
@@ -41,8 +69,6 @@ def probot_ia(request):
             if not mensaje_usuario:
                 return JsonResponse({'respuesta': 'Por favor escribe una pregunta.'})
 
-            client = genai.Client(api_key=GEMINI_API_KEY)
-
             instrucciones = (
                 "Eres ProBot IA, el asistente virtual oficial del portal PrácticasPro. "
                 "Tu objetivo es ayudar a estudiantes a encontrar su primera práctica profesional, "
@@ -50,46 +76,90 @@ def probot_ia(request):
                 "Responde en español de forma profesional, cercana y breve (máximo 2 párrafos)."
             )
 
-            respuesta_texto = None
-            max_intentos = 4
-            tiempos_espera = [1.5, 2.5, 3.5]
-
-            for intento in range(max_intentos):
-                try:
-                    chat = client.chats.create(
-                        model='gemini-3.8-flash',
-                        config=types.GenerateContentConfig(
-                            system_instruction=instrucciones
-                        )
-                    )
-                    response = chat.send_message(mensaje_usuario)
-
-                    if response and response.text:
-                        respuesta_texto = response.text
-                        print(f"🚀 ¡ProBot IA respondió exitosamente en el intento {intento + 1}!")
-                        break
-
-                except Exception as err:
-                    err_str = str(err)
-                    print(f"⚠ Intento {intento + 1}/{max_intentos} en gemini-3.8-flash: {err_str}")
-
-                    if "503" in err_str and intento < max_intentos - 1:
-                        time.sleep(tiempos_espera[intento])
-                    else:
-                        break
+            respuesta_texto = _consultar_gemini_con_respaldo(mensaje_usuario, instrucciones)
 
             if respuesta_texto:
                 return JsonResponse({'respuesta': respuesta_texto})
-            else:
-                return JsonResponse({
-                    'respuesta': '🤖 Los servidores de la IA experimentan una alta demanda en este instante. Por favor reintenta tu pregunta en unos segundos.'
-                })
+            return JsonResponse({
+                'respuesta': '🤖 Los servidores de la IA experimentan una alta demanda en este instante. Por favor reintenta tu pregunta en unos segundos.'
+            })
 
         except Exception as e:
             print("❌ ERROR CRÍTICO EN PROBOT IA:", str(e))
             return JsonResponse({'respuesta': f"🤖 Ocurrió un error: {str(e)}"}, status=200)
 
     return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
+def asistente_cv_ia(request):
+    """Generador de Cartas de Presentación y Revisor de CV con ProBot IA."""
+    if request.session.get('user_rol') != 'estudiante':
+        if request.method == 'POST':
+            return JsonResponse({'success': False, 'error': 'Sesión expirada. Recarga la página e inicia sesión.'}, status=401)
+        return redirect('login')
+
+    user_id = request.session.get('user_id')
+    db = firestore.client()
+    user_doc = db.collection('usuarios').document(user_id).get()
+    estudiante_data = user_doc.to_dict() if user_doc.exists else {}
+
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            tipo = data.get('tipo', 'carta')
+            carrera = data.get('carrera', estudiante_data.get('carrera', '')).strip()
+            habilidades = data.get('habilidades', '').strip()
+            experiencia = data.get('experiencia', '').strip()
+            puesto_objetivo = data.get('puesto_objetivo', '').strip()
+
+            if not habilidades and not experiencia:
+                return JsonResponse({'success': False, 'error': 'Por favor ingresa tus habilidades o un resumen de tu experiencia/proyectos.'})
+
+            if tipo == 'carta':
+                prompt = (
+                    f"Genera una Carta de Presentación profesional, concisa y persuasiva para una postulación de práctica profesional en Chile.\n"
+                    f"- Carrera: {carrera}\n"
+                    f"- Cargo / Área Objetivo: {puesto_objetivo if puesto_objetivo else 'Práctica Profesional'}\n"
+                    f"- Habilidades Clave / Tecnologías: {habilidades}\n"
+                    f"- Proyectos / Experiencia Relevante: {experiencia}\n\n"
+                    f"Instrucciones:\n"
+                    f"1. Estructura la carta en 3 párrafos formales (Saludo/Introducción, Valor Agregado/Proyectos, Cierre/Llamado a la acción).\n"
+                    f"2. Utiliza un tono profesional y motivador.\n"
+                    f"3. Agrega corchetes [ ] en variables opcionales como [Nombre de la Empresa] si aplica."
+                )
+            else:
+                prompt = (
+                    f"Actúa como un reclutador senior y realiza una revisión constructiva de perfil para un estudiante que busca práctica profesional.\n"
+                    f"- Carrera: {carrera}\n"
+                    f"- Puesto Deseado: {puesto_objetivo if puesto_objetivo else 'Práctica Profesional'}\n"
+                    f"- Habilidades / Herramientas: {habilidades}\n"
+                    f"- Proyectos / Experiencia redactada: {experiencia}\n\n"
+                    f"Instrucciones de Respuesta:\n"
+                    f"1. **Fortalezas del Perfil**: Breve análisis de lo más destacado.\n"
+                    f"2. **Palabras Clave Recomendadas**: Términos técnicos o de industria que debe incluir en su CV.\n"
+                    f"3. **Sugerencias de Redacción**: 3 recomendaciones puntuales para hacer su CV más atractivo para los reclutadores."
+                )
+
+            instrucciones = (
+                "Eres ProBot CV Coach, el asistente inteligente de empleabilidad de PrácticasPro en Chile. "
+                "Respondes de forma estructurada, profesional y clara."
+            )
+
+            respuesta_texto = _consultar_gemini_con_respaldo(prompt, instrucciones)
+
+            if respuesta_texto:
+                return JsonResponse({'success': True, 'resultado': respuesta_texto})
+            return JsonResponse({'success': False, 'error': 'El servicio de IA experimenta alta demanda. Por favor reintenta en unos segundos.'})
+
+        except Exception as e:
+            print("❌ ERROR EN ASISTENTE CV IA:", str(e))
+            return JsonResponse({'success': False, 'error': f"Ocurrió un error: {str(e)}"}, status=500)
+
+    context = {
+        'estudiante': estudiante_data,
+        'carreras': CARRERAS_LISTA
+    }
+    return render(request, 'cv_ia.html', context)
 
 
 # ==========================================
@@ -1304,89 +1374,3 @@ def eliminar_oferta_admin(request, oferta_id):
 
 
 #########################
-def asistente_cv_ia(request):
-    """Generador de Cartas de Presentación y Revisor de CV con ProBot IA."""
-    if request.session.get('user_rol') != 'estudiante':
-        return redirect('login')
-
-    user_id = request.session.get('user_id')
-    db = firestore.client()
-    user_doc = db.collection('usuarios').document(user_id).get()
-    estudiante_data = user_doc.to_dict() if user_doc.exists else {}
-
-    # Procesamiento por AJAX / POST
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            tipo = data.get('tipo', 'carta')  # 'carta' o 'revision'
-            carrera = data.get('carrera', estudiante_data.get('carrera', '')).strip()
-            habilidades = data.get('habilidades', '').strip()
-            experiencia = data.get('experiencia', '').strip()
-            puesto_objetivo = data.get('puesto_objetivo', '').strip()
-
-            if not habilidades and not experiencia:
-                return JsonResponse({'success': False, 'error': 'Por favor ingresa tus habilidades o un resumen de tu experiencia/proyectos.'})
-
-            client = genai.Client(api_key=GEMINI_API_KEY)
-
-            if tipo == 'carta':
-                prompt = (
-                    f"Genera una Carta de Presentación profesional, concisa y persuasiva para una postulación de práctica profesional en Chile.\n"
-                    f"- Carrera: {carrera}\n"
-                    f"- Cargo / Área Objetivo: {puesto_objetivo if puesto_objetivo else 'Práctica Profesional'}\n"
-                    f"- Habilidades Clave / Tecnologías: {habilidades}\n"
-                    f"- Proyectos / Experiencia Relevante: {experiencia}\n\n"
-                    f"Instrucciones:\n"
-                    f"1. Estructura la carta en 3 párrafos formales (Saludo/Introducción, Valor Agregado/Proyectos, Cierre/Llamado a la acción).\n"
-                    f"2. Utiliza un tono profesional y motivador.\n"
-                    f"3. Agrega corchetes [ ] en variables opcionales como [Nombre de la Empresa] si aplica."
-                )
-            else:
-                prompt = (
-                    f"Actúa como un reclutador senior y realiza una revisión constructiva de perfil para un estudiante que busca práctica profesional.\n"
-                    f"- Carrera: {carrera}\n"
-                    f"- Puesto Deseado: {puesto_objetivo if puesto_objetivo else 'Práctica Profesional'}\n"
-                    f"- Habilidades / Herramientas: {habilidades}\n"
-                    f"- Proyectos / Experiencia redactada: {experiencia}\n\n"
-                    f"Instrucciones de Respuesta:\n"
-                    f"1. **Fortalezas del Perfil**: Breve análisis de lo más destacado.\n"
-                    f"2. **Palabras Clave Recomendadas**: Términos técnicos o de industria que debe incluir en su CV.\n"
-                    f"3. **Sugerencias de Redacción**: 3 recomendaciones puntuales para hacer su CV más atractivo para los reclutadores."
-                )
-
-            instrucciones = (
-                "Eres ProBot CV Coach, el asistente inteligente de empleabilidad de PrácticasPro en Chile. "
-                "Respondes de forma estructurada, profesional y clara."
-            )
-
-            respuesta_texto = None
-            max_intentos = 3
-            for intento in range(max_intentos):
-                try:
-                    chat = client.chats.create(
-                        model='gemini-3.8-flash',
-                        config=types.GenerateContentConfig(
-                            system_instruction=instrucciones
-                        )
-                    )
-                    response = chat.send_message(prompt)
-                    if response and response.text:
-                        respuesta_texto = response.text
-                        break
-                except Exception as err:
-                    print(f"⚠ Intento {intento+1} en Gemini CV IA: {err}")
-                    time.sleep(1)
-
-            if respuesta_texto:
-                return JsonResponse({'success': True, 'resultado': respuesta_texto})
-            else:
-                return JsonResponse({'success': False, 'error': 'El servicio de IA experimenta alta demanda. Por favor reintenta en unos segundos.'})
-
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': f"Ocurrió un error: {str(e)}"}, status=500)
-
-    context = {
-        'estudiante': estudiante_data,
-        'carreras': CARRERAS_LISTA
-    }
-    return render(request, 'cv_ia.html', context)
