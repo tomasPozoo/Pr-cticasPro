@@ -33,15 +33,13 @@ MERCADOPAGO_ACCESS_TOKEN = os.environ.get('MERCADOPAGO_ACCESS_TOKEN')
 # ==========================================
 
 def _consultar_gemini_con_respaldo(prompt, instrucciones):
-    """Consulta Gemini con timeout corto de 15s y gemini-2.5-flash como principal."""
-    client = genai.Client(
-        api_key=GEMINI_API_KEY,
-        http_options={'timeout': 15000}  # Corta a los 15 segundos si un modelo se queda pegado
-    )
-    modelos = ['gemini-2.5-flash', 'gemini-3.8-flash']
+    """Consulta Gemini rotando modelos vigentes y claves API ante límites 429."""
+    claves = [k for k in [GEMINI_API_KEY, os.environ.get('GEMINI_API_KEY_2')] if k]
+    modelos = ['gemini-3.8-flash', 'gemini-3.8-flash-lite']
 
-    for modelo in modelos:
-        for intento in range(2):
+    for clave in claves:
+        client = genai.Client(api_key=clave)
+        for modelo in modelos:
             try:
                 response = client.models.generate_content(
                     model=modelo,
@@ -51,17 +49,12 @@ def _consultar_gemini_con_respaldo(prompt, instrucciones):
                     )
                 )
                 if response and response.text:
-                    print(f"🚀 IA respondió con {modelo} (intento {intento + 1})")
+                    print(f"🚀 IA respondió con {modelo}")
                     return response.text
             except Exception as err:
-                err_str = str(err)
-                print(f"⚠ Fallo en {modelo} (intento {intento + 1}): {err_str}")
-                if "503" in err_str or "429" in err_str:
-                    time.sleep(1)
-                else:
-                    break
+                print(f"⚠ Fallo en {modelo}: {str(err)}")
+                continue
     return None
-
 
 def probot_ia(request):
     if request.method == 'POST':
