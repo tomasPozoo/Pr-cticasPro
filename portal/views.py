@@ -176,7 +176,7 @@ def _consultar_gemini_con_respaldo(prompt, instrucciones):
     claves = [k for k in [os.environ.get('GEMINI_API_KEY_2'), GEMINI_API_KEY] if k]
     
     # Si gemini-3.8-flash está congestionado (503/504), salta a gemini-3.5-flash-lite
-    modelos = ['gemini-3.8-flash', 'gemini-3.5-flash-lite']
+    modelos = ['gemini-3.5-flash-lite', 'gemini-3.8-flash']
     
     opciones_http = types.HttpOptions(timeout=18000)
 
