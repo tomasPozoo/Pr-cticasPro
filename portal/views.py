@@ -18,6 +18,7 @@ from datetime import datetime
 import csv
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
+import unicodedata
 # ==========================================
 # CONFIGURACIÓN GENERAL Y PRECIO DEL PLAN
 # ==========================================
@@ -171,13 +172,12 @@ def _generar_fallback_cv_ia(tipo: str, carrera: str, puesto_objetivo: str, habil
 
 
 def _consultar_gemini_con_respaldo(prompt, instrucciones):
-    """Consulta Gemini rotando modelos (principal + estables) y claves API con timeout estricto."""
+    """Consulta Gemini rotando modelos (principal + ligero vigente) y claves API con timeout estricto."""
     claves = [k for k in [os.environ.get('GEMINI_API_KEY_2'), GEMINI_API_KEY] if k]
     
-    # Si gemini-3.8-flash está saturado (503/504), salta inmediatamente a modelos estables y rápidos
-    modelos = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite']
+    # Si gemini-3.8-flash está congestionado (503/504), salta a gemini-3.5-flash-lite
+    modelos = ['gemini-3.8-flash', 'gemini-3.5-flash-lite']
     
-    # Timeout de 18 segundos por intento (máximo ~108s en el peor caso, siempre bajo los 120s de Gunicorn)
     opciones_http = types.HttpOptions(timeout=18000)
 
     for modelo in modelos:
@@ -200,7 +200,6 @@ def _consultar_gemini_con_respaldo(prompt, instrucciones):
 
     print("❌ Todos los intentos con Gemini fallaron. Activando respaldo local.")
     return None
-
 
 def probot_ia(request):
     if request.method == 'POST':
