@@ -31,30 +31,174 @@ MERCADOPAGO_ACCESS_TOKEN = os.environ.get('MERCADOPAGO_ACCESS_TOKEN')
 # ==========================================
 # CHATBOT PROBOT IA
 # ==========================================
+def _normalizar_texto(texto: str) -> str:
+    """Convierte a minúsculas y elimina tildes para coincidencia exacta de palabras clave."""
+    texto = texto.lower().strip()
+    return ''.join(
+        c for c in unicodedata.normalize('NFD', texto)
+        if unicodedata.category(c) != 'Mn'
+    )
+
+
+def _respuesta_fallback_probot(mensaje_usuario: str) -> str:
+    """Diccionario completo de respaldo por palabras clave adaptado a PrácticasPro (Chile)."""
+    msg = _normalizar_texto(mensaje_usuario)
+
+    # 1. Saludos y presentación
+    saludos = ['hola', 'buenos dias', 'buenas tardes', 'buenas noches', 'hey', 'que tal', 'saludos', 'holi', 'alo']
+    if any(msg == s or msg.startswith(s + ' ') or msg.startswith(s + ',') for s in saludos):
+        return (
+            "¡Hola! 👋 Soy **ProBot IA**, el asistente virtual de **PrácticasPro**.\n\n"
+            "¿En qué te puedo ayudar hoy? Puedes preguntarme sobre cómo postular a prácticas profesionales, "
+            "cómo mejorar tu CV, tips para entrevistas, cartas de presentación, remuneración o el seguro escolar en Chile."
+        )
+
+    # 2. Qué puedes hacer / Ayuda
+    if any(p in msg for p in ['ayuda', 'que haces', 'como funcionas', 'opciones', 'menu', 'que puedes hacer']):
+        return (
+            "Estoy aquí para impulsarte en la búsqueda de tu primera práctica profesional en Chile. Puedo orientarte en:\n"
+            "• **Postulaciones:** Cómo buscar y postular en PrácticasPro.\n"
+            "• **Currículum y Carta:** Cómo destacar tus ramos, proyectos y habilidades sin experiencia previa.\n"
+            "• **Entrevistas y Legal:** Consejos para entrevistas, asignaciones de movilización/colación y seguro escolar."
+        )
+
+    # 3. Diccionario temático para estudiantes en Chile
+    base_conocimiento = [
+        (
+            ['cv', 'curriculum', 'curriculo', 'hoja de vida', 'resumen'],
+            "Para un buen CV de práctica en Chile (idealmente de 1 página), destaca tu **carrera, institución y semestre**, "
+            "seguido de tus **proyectos académicos, ayudantías, voluntariados y manejo de herramientas** (Excel, Python, etc.). "
+            "¡Tip! Usa nuestra herramienta **Asistente CV IA** en tu panel para optimizarlo automáticamente."
+        ),
+        (
+            ['carta', 'presentacion', 'motivos', 'motivacion'],
+            "Una buena carta de presentación debe ser breve (3 párrafos): quién eres y qué carrera estudias, "
+            "qué habilidades o proyectos puedes aportar al equipo, y tu disponibilidad horaria (práctica profesional o técnico-profesional). "
+            "Puedes generar una personalizada en la sección **Asistente CV IA** de tu cuenta."
+        ),
+        (
+            ['postular', 'postulacion', 'oferta', 'ofertas', 'buscar practica', 'encontrar practica', 'como funciona'],
+            "Para postular en **PrácticasPro**: 1) Completa tu perfil y sube tu CV actualizado en PDF; "
+            "2) Filtra las ofertas según tu carrera, comuna o modalidad (presencial, híbrida o remota); "
+            "3) Haz clic en **Postular** y haz seguimiento desde tu panel de estudiante."
+        ),
+        (
+            ['entrevista', 'reclutador', 'preguntas', 'nervios', 'seleccion'],
+            "En una entrevista de práctica buscan **actitud, ganas de aprender y responsabilidad** más que años de experiencia. "
+            "Investiga a la empresa antes de entrar, prepara un ejemplo de un trabajo en equipo o proyecto universitario que hayas resuelto, "
+            "y ten listas 1 o 2 preguntas sobre las tareas del área."
+        ),
+        (
+            ['sueldo', 'pago', 'remuneracion', 'pagan', 'gratis', 'bono', 'movilizacion', 'colacion', 'plata', 'dinero'],
+            "En Chile, según el Código del Trabajo (Art. 8°), las prácticas profesionales **no constituyen contrato de trabajo**, "
+            "por lo que no tienen sueldo mínimo obligatorio. Sin embargo, la mayoría de las empresas en PrácticasPro ofrecen "
+            "una **asignación compensatoria** para cubrir gastos de colación y movilización."
+        ),
+        (
+            ['seguro', 'escolar', 'accidente', 'certificado', 'alumno regular', 'inscripcion'],
+            "Para iniciar tu práctica en Chile es obligatorio contar con el **Seguro Escolar** (Ley 16.744), que te cubre en el trayecto "
+            "y dentro de la empresa. Debes solicitar la **carta o certificado de práctica** en la dirección de carrera o portal de tu universidad/CFT/IP antes de empezar."
+        ),
+        (
+            ['sin experiencia', 'no tengo experiencia', 'primera vez', 'nunca he trabajado'],
+            "¡No te preocupes! Las empresas que publican prácticas saben que estás comenzando. "
+            "Reemplaza la experiencia laboral por **proyectos de título, trabajos de ramos complejos, ayudantías, certificaciones online** "
+            "y habilidades blandas como trabajo en equipo y proactividad."
+        ),
+        (
+            ['duracion', 'horas', 'meses', 'tiempo', 'cuanto dura'],
+            "La duración de la práctica depende de la malla curricular de tu institución (generalmente entre **360 y 720 horas**, "
+            "equivalentes a 2 a 6 meses). Asegúrate de revisar las horas exigidas por tu jefe de carrera antes de confirmar la fecha de término."
+        ),
+        (
+            ['remoto', 'teletrabajo', 'hibrido', 'presencial', 'online', 'casa'],
+            "En PrácticasPro contamos con ofertas **presenciales, híbridas y 100% remotas**. "
+            "Usa los filtros del buscador principal para seleccionar la modalidad que mejor se adapte a tus horarios de estudio."
+        ),
+        (
+            ['gracias', 'muchas gracias', 'vale', 'te pasaste', 'genial', 'super', 'bkn', 'bacan'],
+            "¡De nada! Mucho éxito en tu búsqueda y postulaciones. Si necesitas revisar tu perfil o preparar tu carta, aquí estoy para ayudarte. 🚀"
+        ),
+    ]
+
+    for palabras_clave, respuesta in base_conocimiento:
+        if any(palabra in msg for palabra in palabras_clave):
+            return respuesta
+
+    # 4. Respuesta por defecto si no coincide con ninguna palabra clave
+    return (
+        "¡Hola! Soy **ProBot IA** de PrácticasPro. En este momento tengo alta demanda en mi motor avanzado, "
+        "pero puedo ayudarte de inmediato si me preguntas sobre: **cómo mejorar tu CV, cartas de presentación, "
+        "entrevistas, cómo postular, remuneración/movilización o el seguro escolar en Chile**. ¿Sobre cuál de estos temas te gustaría saber?"
+    )
+
+
+def _generar_fallback_cv_ia(tipo: str, carrera: str, puesto_objetivo: str, habilidades: str, experiencia: str) -> str:
+    """Genera una carta o revisión de CV estructurada usando los datos del estudiante si Gemini falla."""
+    carrera_txt = carrera if carrera else "mi carrera profesional"
+    puesto_txt = puesto_objetivo if puesto_objetivo else "Práctica Profesional"
+    hab_txt = habilidades if habilidades else "trabajo en equipo, aprendizaje rápido y herramientas digitales"
+    exp_txt = experiencia if experiencia else "proyectos académicos desarrollados durante mi formación"
+
+    if tipo == 'carta':
+        return (
+            f"Estimado/a [Nombre del Reclutador/a o Equipo de Selección] de [Nombre de la Empresa]:\n\n"
+            f"Junto con saludar, me dirijo a ustedes para postular al cargo de **{puesto_txt}**. "
+            f"Actualmente soy estudiante de **{carrera_txt}** y busco una oportunidad donde pueda aplicar mis conocimientos "
+            f"académicos y seguir desarrollándome profesionalmente en un entorno dinámico.\n\n"
+            f"Durante mi formación he fortalecido competencias clave en **{hab_txt}**, además de participar en **{exp_txt}**, "
+            f"instancias que me han permitido desarrollar capacidad analítica, compromiso y orientación al logro de objetivos.\n\n"
+            f"Agradezco de antemano su tiempo y consideración. Quedo a su entera disposición para coordinar una entrevista y "
+            f"conversar sobre cómo puedo aportar valor al equipo.\n\n"
+            f"Atentamente,\n"
+            f"[Tu Nombre Completo]\n"
+            f"[Tu Teléfono / Correo Electrónico]"
+        )
+
+    return (
+        f"### 1. Fortalezas del Perfil\n"
+        f"Como estudiante de **{carrera_txt}** apuntando a **{puesto_txt}**, tu principal ventaja es la combinación de formación "
+        f"actualizada y conocimientos en **{hab_txt}**. Destacar tu experiencia en **{exp_txt}** demuestra iniciativa y aplicación práctica.\n\n"
+        f"### 2. Palabras Clave Recomendadas para tu CV\n"
+        f"• **Competencias Técnicas:** {hab_txt}\n"
+        f"• **Habilidades Transversales:** Trabajo colaborativo, resolución de problemas, adaptabilidad, cumplimiento de plazos.\n"
+        f"• **Enfoque:** {puesto_txt}, Mejora continua, Gestión de proyectos.\n\n"
+        f"### 3. Sugerencias de Redacción\n"
+        f"1. **Cuantifica tus logros:** En lugar de describir tareas genéricas en tus proyectos, indica qué problema resolviste y qué herramienta usaste.\n"
+        f"2. **Encabezado claro:** Incluye tu disponibilidad horaria y las horas requeridas de práctica según tu institución.\n"
+        f"3. **Formato limpio:** Mantén tu CV en una sola página en formato PDF y adapta tu perfil profesional al área de **{puesto_txt}**."
+    )
+
 
 def _consultar_gemini_con_respaldo(prompt, instrucciones):
-    """Consulta gemini-3.8-flash rotando claves API con timeout estricto de 25s."""
+    """Consulta Gemini rotando modelos (principal + estables) y claves API con timeout estricto."""
     claves = [k for k in [os.environ.get('GEMINI_API_KEY_2'), GEMINI_API_KEY] if k]
-    opciones_http = types.HttpOptions(timeout=25000)
+    
+    # Si gemini-3.8-flash está saturado (503/504), salta inmediatamente a modelos estables y rápidos
+    modelos = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite']
+    
+    # Timeout de 18 segundos por intento (máximo ~108s en el peor caso, siempre bajo los 120s de Gunicorn)
+    opciones_http = types.HttpOptions(timeout=18000)
 
-    for idx, clave in enumerate(claves, start=1):
-        client = genai.Client(api_key=clave, http_options=opciones_http)
-        try:
-            response = client.models.generate_content(
-                model='gemini-3.8-flash',
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    system_instruction=instrucciones
+    for modelo in modelos:
+        for idx, clave in enumerate(claves, start=1):
+            client = genai.Client(api_key=clave, http_options=opciones_http)
+            try:
+                response = client.models.generate_content(
+                    model=modelo,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        system_instruction=instrucciones
+                    )
                 )
-            )
-            if response and response.text:
-                print(f"🚀 IA respondió con gemini-3.8-flash (Clave #{idx})")
-                return response.text
-        except Exception as err:
-            print(f"⚠ Fallo con Clave #{idx}: {str(err)}")
-            continue
+                if response and response.text:
+                    print(f"🚀 IA respondió con {modelo} (Clave #{idx})")
+                    return response.text
+            except Exception as err:
+                print(f"⚠ Fallo con {modelo} (Clave #{idx}): {str(err)}")
+                continue
 
-    print("❌ Todos los intentos con Gemini fallaron o superaron el tiempo límite.")
+    print("❌ Todos los intentos con Gemini fallaron. Activando respaldo local.")
     return None
 
 
@@ -65,26 +209,28 @@ def probot_ia(request):
             mensaje_usuario = data.get('mensaje', '').strip()
 
             if not mensaje_usuario:
-                return JsonResponse({'respuesta': 'Por favor escribe una pregunta.'})
+                return JsonResponse({'respuesta': 'Por favor escribe una pregunta para poder ayudarte.'})
 
             instrucciones = (
-                "Eres ProBot IA, el asistente virtual oficial del portal PrácticasPro. "
+                "Eres ProBot IA, el asistente virtual oficial del portal PrácticasPro en Chile. "
                 "Tu objetivo es ayudar a estudiantes a encontrar su primera práctica profesional, "
-                "revisar o mejorar su CV, dar tips para entrevistas de trabajo y resolver dudas. "
+                "revisar o mejorar su CV, dar tips para entrevistas de trabajo y resolver dudas sobre prácticas en Chile. "
                 "Responde en español de forma profesional, cercana y breve (máximo 2 párrafos)."
             )
 
             respuesta_texto = _consultar_gemini_con_respaldo(mensaje_usuario, instrucciones)
 
-            if respuesta_texto:
-                return JsonResponse({'respuesta': respuesta_texto})
-            return JsonResponse({
-                'respuesta': '🤖 Los servidores de la IA experimentan una alta demanda en este instante. Por favor reintenta tu pregunta en unos segundos.'
-            })
+            # Si Gemini responde, devolvemos su respuesta; si no, usamos el diccionario de palabras clave
+            if not respuesta_texto:
+                respuesta_texto = _respuesta_fallback_probot(mensaje_usuario)
+
+            return JsonResponse({'respuesta': respuesta_texto})
 
         except Exception as e:
             print("❌ ERROR CRÍTICO EN PROBOT IA:", str(e))
-            return JsonResponse({'respuesta': f"🤖 Ocurrió un error: {str(e)}"}, status=200)
+            return JsonResponse({
+                'respuesta': '¡Hola! Soy ProBot IA. En este momento estoy procesando muchas consultas, pero dime: ¿necesitas ayuda con tu CV, carta de presentación o tips para tu entrevista?'
+            }, status=200)
 
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
@@ -145,9 +291,17 @@ def asistente_cv_ia(request):
 
             respuesta_texto = _consultar_gemini_con_respaldo(prompt, instrucciones)
 
-            if respuesta_texto:
-                return JsonResponse({'success': True, 'resultado': respuesta_texto})
-            return JsonResponse({'success': False, 'error': 'El servicio de IA experimenta alta demanda. Por favor reintenta en unos segundos.'})
+            # Si Gemini falla por completo, generamos el resultado con los datos del formulario
+            if not respuesta_texto:
+                respuesta_texto = _generar_fallback_cv_ia(
+                    tipo=tipo,
+                    carrera=carrera,
+                    puesto_objetivo=puesto_objetivo,
+                    habilidades=habilidades,
+                    experiencia=experiencia
+                )
+
+            return JsonResponse({'success': True, 'resultado': respuesta_texto})
 
         except Exception as e:
             print("❌ ERROR EN ASISTENTE CV IA:", str(e))
@@ -158,6 +312,9 @@ def asistente_cv_ia(request):
         'carreras': CARRERAS_LISTA
     }
     return render(request, 'cv_ia.html', context)
+# ==========================================
+# CHATBOT PROBOT IA
+# ==========================================
 
 
 # ==========================================
