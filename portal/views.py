@@ -770,6 +770,43 @@ def oferta_detail(request, oferta_id):
     
     return render(request, 'oferta_detail.html', context)
 
+def descargar_cv_postulacion(request, postulacion_id):
+    """Sirve el CV guardado en Base64 dentro de Firestore para verlo o descargarlo."""
+    user_id = request.session.get('user_id')
+    user_rol = request.session.get('user_rol')
+    if not user_id:
+        return redirect('login')
+
+    db = firestore.client()
+    doc = db.collection('postulaciones').document(postulacion_id).get()
+    if not doc.exists:
+        return HttpResponse("El currículum solicitado no existe.", status=404)
+
+    data = doc.to_dict()
+    if user_rol == 'estudiante' and data.get('estudiante_id') != user_id:
+        return HttpResponse("Acceso denegado.", status=403)
+    if user_rol == 'empresa' and data.get('empresa_id') != user_id:
+        return HttpResponse("Acceso denegado.", status=403)
+
+    cv_base64 = data.get('cv_base64')
+    if not cv_base64:
+        if data.get('cv_url') and str(data.get('cv_url')).startswith('http'):
+            return redirect(data.get('cv_url'))
+        return HttpResponse("Este postulante no tiene un archivo de CV guardado en la nube.", status=404)
+
+    try:
+        header, encoded = cv_base64.split(',', 1)
+        mime_type = header.split(';')[0].replace('data:', '') or 'application/pdf'
+        archivo_bytes = base64.b64decode(encoded)
+        nombre_archivo = data.get('cv_nombre', 'Curriculum_Vitae.pdf')
+
+        response = HttpResponse(archivo_bytes, content_type=mime_type)
+        response['Content-Disposition'] = f'inline; filename="{nombre_archivo}"'
+        return response
+    except Exception as e:
+        return HttpResponse(f"Error al leer el archivo: {str(e)}", status=500)
+
+
 def postular_oferta(request, oferta_id):
     if request.session.get('user_rol') != 'estudiante':
         return redirect('login')
@@ -785,15 +822,50 @@ def postular_oferta(request, oferta_id):
     oferta_data['id'] = oferta_doc.id
     estudiante_id = request.session.get('user_id')
 
+    # Evitar postulaciones duplicadas
+    ya_postulo_query = (
+        db.collection('postulaciones')
+        .where('oferta_id', '==', oferta_id)
+        .where('estudiante_id', '==', estudiante_id)
+        .limit(1)
+        .get()
+    )
+    if len(ya_postulo_query) > 0:
+        messages.info(request, "Ya habías postulado anteriormente a esta oferta.")
+        return redirect('mis_postulaciones')
+
+    # Traer logo de la empresa para mostrarlo en el resumen
+    empresa_id = oferta_data.get('empresa_id')
+    if empresa_id:
+        emp_doc = db.collection('usuarios').document(empresa_id).get()
+        emp_data = emp_doc.to_dict() if emp_doc.exists else {}
+        oferta_data['logo_url'] = emp_data.get('logo_url', '')
+    else:
+        oferta_data['logo_url'] = ''
+
     if request.method == 'POST':
-        mensaje = request.POST.get('mensaje', '')
-        cv_url = None
+        mensaje = request.POST.get('mensaje', '').strip()
+        cv_enlace = request.POST.get('cv_enlace', '').strip()
+        cv_base64 = ''
+        cv_nombre = ''
+        cv_url = ''
 
         if 'cv_file' in request.FILES:
             archivo = request.FILES['cv_file']
-            fs = FileSystemStorage()
-            filename = fs.save(f"cvs/{estudiante_id}_{archivo.name}", archivo)
-            cv_url = fs.url(filename)
+            if archivo.size > 700 * 1024:
+                messages.error(request, "El archivo supera los 700 KB. Comprímelo o pega un enlace de Google Drive.")
+                return render(request, 'postular_oferta.html', {'oferta': oferta_data})
+
+            contenido_bytes = archivo.read()
+            mime_type = archivo.content_type or 'application/pdf'
+            encoded_str = base64.b64encode(contenido_bytes).decode('utf-8')
+            cv_base64 = f"data:{mime_type};base64,{encoded_str}"
+            cv_nombre = archivo.name
+        elif cv_enlace:
+            cv_url = cv_enlace
+        else:
+            messages.error(request, "Debes subir tu CV en PDF/DOCX o pegar un enlace a tu CV.")
+            return render(request, 'postular_oferta.html', {'oferta': oferta_data})
 
         try:
             nueva_postulacion = {
@@ -806,11 +878,16 @@ def postular_oferta(request, oferta_id):
                 'estudiante_email': request.session.get('user_email', ''),
                 'mensaje': mensaje,
                 'cv_url': cv_url,
+                'cv_base64': cv_base64,
+                'cv_nombre': cv_nombre,
                 'estado': 'pendiente',
                 'fecha_postulacion': firestore.SERVER_TIMESTAMP
             }
 
-            db.collection('postulaciones').add(nueva_postulacion)
+            _, doc_ref = db.collection('postulaciones').add(nueva_postulacion)
+
+            if cv_base64:
+                doc_ref.update({'cv_url': f"/postulaciones/{doc_ref.id}/cv/"})
 
             messages.success(request, "¡Te has postulado con éxito!")
             return redirect('mis_postulaciones')

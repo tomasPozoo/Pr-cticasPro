@@ -40,6 +40,7 @@ from portal.views import (
     ver_perfil_empresa_publico,
     forgot_password_view,
     solicitar_cambio_password,
+    descargar_cv_postulacion,
 )
 
 urlpatterns = [
@@ -60,6 +61,7 @@ urlpatterns = [
     path('ofertas/<str:oferta_id>/postular/', postular_oferta, name='postular_oferta'),
     path('estudiante/postulaciones/', mis_postulaciones, name='mis_postulaciones'),
     path('empresa/<str:empresa_id>/perfil/publico/', views.ver_perfil_empresa_publico, name='ver_perfil_empresa_publico'),
+    path('postulaciones/<str:postulacion_id>/cv/', views.descargar_cv_postulacion, name='descargar_cv_postulacion'),
     # IA
     path('probot-ia/', probot_ia, name='probot_ia'),
     path('estudiante/cv-ia/', views.asistente_cv_ia, name='asistente_cv_ia'),
