@@ -556,8 +556,25 @@ def home_estudiante(request):
     postulaciones_ref = db.collection('postulaciones').where('estudiante_id', '==', user_id).get()
     total_postulaciones = len(postulaciones_ref)
 
-    ofertas_ref = db.collection('ofertas').stream()
-    ofertas = [{'id': doc.id, **doc.to_dict()} for doc in ofertas_ref]
+    ofertas_ref = db.collection('ofertas').where('estado', '==', 'activa').stream()
+    ofertas = []
+    logos_cache = {}
+
+    for doc in ofertas_ref:
+        data = doc.to_dict()
+        data['id'] = doc.id
+
+        empresa_id = data.get('empresa_id')
+        if empresa_id:
+            if empresa_id not in logos_cache:
+                emp_doc = db.collection('usuarios').document(empresa_id).get()
+                emp_data = emp_doc.to_dict() if emp_doc.exists else {}
+                logos_cache[empresa_id] = emp_data.get('logo_url', '')
+            data['logo_url'] = logos_cache[empresa_id]
+        else:
+            data['logo_url'] = ''
+
+        ofertas.append(data)
 
     context = {
         'estudiante': estudiante_data,
@@ -566,7 +583,6 @@ def home_estudiante(request):
         'ofertas': ofertas[:6],
     }
     return render(request, 'home_estudiante.html', context)
-
 
 
 def perfil_estudiante(request):

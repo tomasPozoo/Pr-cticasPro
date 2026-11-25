@@ -54,7 +54,6 @@
     <!-- MODAL PLAN PREMIUM -->
     <div id="modal-premium" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center transform transition-all">
-            <!-- Ícono Encabezado -->
             <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold">
                 ⭐
             </div>
@@ -64,7 +63,6 @@
                 Actualmente estás registrado en <strong id="texto-region-base" class="text-indigo-600">tu región base</strong>. Para acceder al mapa y ofertas de prácticas en todo Chile, suscríbete al Plan Premium.
             </p>
 
-            <!-- Beneficios -->
             <div class="bg-gray-50 rounded-xl p-4 text-left mb-6 space-y-2 text-sm text-gray-700">
                 <div class="flex items-center gap-2">
                     <span class="text-green-500 font-bold">✓</span> Búsqueda ilimitada en todas las regiones.
@@ -77,7 +75,6 @@
                 </div>
             </div>
 
-            <!-- Botones de Acción -->
             <div class="flex gap-3">
                 <button onclick="cerrarModalPremium()" type="button" class="w-1/2 py-2.5 px-4 border border-gray-300 rounded-xl text-gray-700 font-semibold hover:bg-gray-100 transition">
                     Cancelar
@@ -89,147 +86,195 @@
         </div>
     </div>
 
-    <!-- Acciones Rápidas -->
+    <!-- Acciones Rápidas (ahora incluye Asistente CV IA bien alineado) -->
     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
         <h2 class="text-xl font-bold text-gray-800 mb-4">Acciones Rápidas</h2>
-        <div class="flex flex-wrap gap-4">
-            <a href="{% url 'ofertas_list' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition shadow-sm flex items-center gap-2">
+        <div class="flex flex-wrap gap-3">
+            <a href="{% url 'ofertas_list' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-medium transition shadow-sm flex items-center gap-2 text-sm">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                 Explorar Todas las Ofertas
             </a>
-            <a href="{% url 'mis_postulaciones' %}" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-medium transition shadow-sm">
+            <a href="{% url 'mis_postulaciones' %}" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-5 py-3 rounded-xl font-medium transition shadow-sm text-sm">
                 Ver Mis Postulaciones
             </a>
-            <a href="{% url 'perfil_estudiante' %}" class="bg-slate-800 hover:bg-slate-900 text-white px-6 py-3 rounded-xl font-medium transition shadow-sm flex items-center gap-2">
+            <a href="{% url 'perfil_estudiante' %}" class="bg-slate-800 hover:bg-slate-900 text-white px-5 py-3 rounded-xl font-medium transition shadow-sm flex items-center gap-2 text-sm">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                 Mi Perfil / Editar Datos
+            </a>
+            <a href="{% url 'asistente_cv_ia' %}" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-5 py-3 rounded-xl font-bold transition shadow-sm flex items-center gap-2 text-sm">
+                🤖 Asistente de CV ProBot IA
             </a>
         </div>
     </div>
 
-    <!-- Ofertas Recientes -->
+    <!-- Ofertas Recientes (Diseño Mejorado con Logo + Mini-Mapa) -->
     <div class="mb-12">
-        <div class="flex justify-between items-end mb-4">
-            <h2 class="text-2xl font-bold text-gray-800">Ofertas Recientes</h2>
-            <a href="{% url 'ofertas_list' %}" class="text-blue-600 hover:text-blue-800 font-medium text-sm transition">Ver todas &rarr;</a>
+        <div class="flex justify-between items-end mb-5">
+            <div>
+                <h2 class="text-2xl font-extrabold text-gray-900">Ofertas Recientes</h2>
+                <p class="text-sm text-gray-500">Últimas oportunidades publicadas con ubicación en mapa</p>
+            </div>
+            <a href="{% url 'ofertas_list' %}" class="text-blue-600 hover:text-blue-800 font-bold text-sm transition">
+                Ver todas las ofertas →
+            </a>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for oferta in ofertas %}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col h-full hover:shadow-md transition">
-                <div class="flex-grow">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-bold tracking-wide">
-                            {{ oferta.modalidad }}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full hover:shadow-lg hover:-translate-y-0.5 transition duration-200">
+                
+                <!-- Cabecera de la Tarjeta: Logo + Empresa + Modalidad -->
+                <div class="p-5 pb-3 flex items-start justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-12 h-12 rounded-xl bg-gray-50 border border-gray-200 overflow-hidden flex items-center justify-center shrink-0 shadow-xs">
+                            {% if oferta.logo_url %}
+                                <img src="{{ oferta.logo_url }}" alt="Logo {{ oferta.empresa_nombre }}" class="w-full h-full object-cover">
+                            {% else %}
+                                <span class="text-xl text-gray-400">🏢</span>
+                            {% endif %}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-xs font-bold text-emerald-700 truncate">{{ oferta.empresa_nombre }}</p>
+                            <h3 class="text-base font-extrabold text-gray-900 truncate" title="{{ oferta.titulo }}">
+                                {{ oferta.titulo }}
+                            </h3>
+                        </div>
+                    </div>
+
+                    <span class="bg-blue-50 text-blue-700 border border-blue-100 px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0">
+                        {{ oferta.modalidad }}
+                    </span>
+                </div>
+
+                <!-- Cuerpo: Carrera + Descripción -->
+                <div class="px-5 flex-grow">
+                    {% if oferta.carrera %}
+                    <div class="mb-2.5">
+                        <span class="inline-block bg-slate-100 text-slate-700 text-[11px] font-semibold px-2.5 py-0.5 rounded-md truncate max-w-full">
+                            🎓 {{ oferta.carrera }}
                         </span>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-1">{{ oferta.titulo }}</h3>
-                    <p class="text-emerald-600 font-medium text-sm mb-3">🏢 {{ oferta.empresa_nombre }}</p>
-                    <p class="text-gray-600 text-sm line-clamp-2 mb-4">
-                        {{ oferta.descripcion|truncatechars:100 }}
+                    {% endif %}
+
+                    <p class="text-gray-600 text-xs leading-relaxed line-clamp-2 mb-3">
+                        {{ oferta.descripcion|truncatechars:110 }}
                     </p>
                 </div>
-                <div class="pt-4 border-t border-gray-100 mt-auto">
-                    <a href="{% url 'oferta_detail' oferta.id %}" class="block w-full text-center bg-gray-900 hover:bg-gray-800 text-white py-2 rounded-lg font-medium transition text-sm">
-                        Ver Detalles
+
+                <!-- Mini-Mapa de Ubicación de la Oferta -->
+                <div class="px-5 pb-3">
+                    {% if oferta.latitud and oferta.longitud %}
+                        <div class="relative rounded-xl overflow-hidden border border-gray-200 h-28 bg-gray-100">
+                            <div id="mini-map-{{ forloop.counter }}" class="w-full h-full z-10"></div>
+                            <span class="absolute bottom-1.5 right-1.5 z-20 bg-white/90 backdrop-blur-xs text-[10px] font-bold text-gray-700 px-2 py-0.5 rounded-md shadow-xs border border-gray-200">
+                                📍 Ubicación
+                            </span>
+                        </div>
+                    {% else %}
+                        <div class="rounded-xl border border-dashed border-gray-200 h-28 bg-slate-50 flex flex-col items-center justify-center text-gray-400 text-xs">
+                            <span class="text-lg mb-1">🌐</span>
+                            <span>Modalidad {{ oferta.modalidad }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Botón Ver Detalles -->
+                <div class="px-5 pb-5 pt-1 mt-auto">
+                    <a href="{% url 'oferta_detail' oferta.id %}" class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl font-bold transition text-xs shadow-xs">
+                        Ver Detalles y Postular →
                     </a>
                 </div>
             </div>
             {% empty %}
-            <div class="col-span-full bg-white p-8 text-center rounded-xl border border-gray-100">
+            <div class="col-span-full bg-white p-8 text-center rounded-2xl border border-gray-100">
                 <p class="text-gray-500">Aún no hay ofertas de práctica publicadas.</p>
             </div>
             {% endfor %}
         </div>
     </div>
 
-    <!-- ==================== SECCIÓN: MAPA DE OFERTAS ==================== -->
-<a href="{% url 'asistente_cv_ia' %}" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-3 rounded-xl font-bold transition shadow-sm flex items-center gap-2 text-sm">
-    🤖 Asistente de CV ProBot IA
-</a>
-
-    <!-- ==================== SECCIÓN: MAPA DE OFERTAS ==================== -->
-<section id="mapa" class="py-12 bg-gray-50 border-t border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="text-center max-w-3xl mx-auto mb-10 space-y-2">
-        <span class="text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-100 px-3 py-1 rounded-full">Geolocalización</span>
-        <h2 class="text-3xl font-extrabold text-gray-900">Explora Prácticas Cerca de Ti</h2>
-        <p class="text-gray-600">Visualiza en tiempo real las empresas que están ofreciendo cupos de práctica en tu comuna o ciudad.</p>
-      </div>
-
-      <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 grid grid-cols-1 lg:grid-cols-4">
-        
-        <div class="p-6 bg-gray-900 text-white space-y-6 flex flex-col justify-between">
-          <div class="space-y-5">
-            <div>
-              <h3 class="text-lg font-bold text-amber-400 mb-1">Filtros de Búsqueda</h3>
-              <p class="text-xs text-gray-300">Filtra por zona y tu área de especialidad.</p>
-            </div>
-            
-            <!-- Filtro de Región -->
-            <div class="space-y-2">
-              <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400">Región / Zona</label>
-              <select id="filtro-region" class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
-                <option value="Región Metropolitana" data-coords="-33.4489,-70.6693">Región Metropolitana</option>
-                <option value="Valparaíso" data-coords="-33.0472,-71.6127">Valparaíso</option>
-                <option value="Biobío" data-coords="-36.8201,-73.0444">Biobío</option>
-                <option value="Antofagasta" data-coords="-23.6509,-70.3975">Antofagasta</option>
-              </select>
-            </div>
-
-            <!-- NUEVO: Filtro por Carrera -->
-            <div class="space-y-2">
-              <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400">Carrera / Área</label>
-              <select id="filtro-carrera" class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
-                <option value="">Todas las carreras</option>
-                <option value="Ingeniería en Construcción">Ingeniería en Construcción</option>
-                <option value="Ingeniería en Prevención de Riesgos">Ingeniería en Prevención de Riesgos</option>
-                <option value="Técnico en Construcción">Técnico en Construcción</option>
-                <option value="Ingeniería en Informática">Ingeniería en Informática</option>
-                <option value="Analista Programador">Analista Programador</option>
-                <option value="Ingeniería en Redes y Telecomunicaciones">Ingeniería en Redes y Telecomunicaciones</option>
-                <option value="Técnico en Desabolladura y Pintura Automotriz">Técnico en Desabolladura y Pintura Automotriz</option>
-                <option value="Técnico en Electricidad y Automatización Industrial">Técnico en Electricidad y Automatización Industrial</option>
-                <option value="Ingeniería en Electricidad y Automatización Industrial">Ingeniería en Electricidad y Automatización Industrial</option>
-                <option value="Ingeniería Agrícola">Ingeniería Agrícola</option>
-                <option value="Ingeniería en Mecánica Automotriz y Autotrónica">Ingeniería en Mecánica Automotriz y Autotrónica</option>
-                <option value="Técnico en Calidad de Alimentos">Técnico en Calidad de Alimentos</option>
-                <option value="Técnico Veterinario y Pecuario">Técnico Veterinario y Pecuario</option>
-                <option value="Técnico en Operación y Supervisión de Procesos Mineros">Técnico en Operación y Supervisión de Procesos Mineros</option>
-                <option value="Técnico en Mecánica Automotriz y Autotrónica">Técnico en Mecánica Automotriz y Autotrónica</option>
-                <option value="Técnico en Geología">Técnico en Geología</option>
-                <option value="Técnico en Laboratorio Clínico, Banco de Sangre e Imagenología">Técnico en Laboratorio Clínico, Banco de Sangre e Imagenología</option>
-                <option value="Preparador Físico">Preparador Físico</option>
-                <option value="Técnico en Enfermería">Técnico en Enfermería</option>
-                <option value="Técnico en Química y Farmacia">Técnico en Química y Farmacia</option>
-                <option value="Técnico en Odontología">Técnico en Odontología</option>
-                <option value="Ingeniería en Marketing Digital">Ingeniería en Marketing Digital</option>
-                <option value="Auditoría">Auditoría</option>
-                <option value="Ingeniería en Gestión Logística">Ingeniería en Gestión Logística</option>
-                <option value="Ingeniería en Comercio Exterior">Ingeniería en Comercio Exterior</option>
-                <option value="Ingeniería en Administración, mención Gestión de Personas">Ingeniería en Administración, mención Gestión de Personas</option>
-                <option value="Ingeniería en Administración, mención Innovación y Emprendimiento">Ingeniería en Administración, mención Innovación y Emprendimiento</option>
-                <option value="Ingeniería en Administración, mención Finanzas">Ingeniería en Administración, mención Finanzas</option>
-                <option value="Técnico en Administración">Técnico en Administración</option>
-                <option value="Relaciones Públicas y Comunicación Organizacional">Relaciones Públicas y Comunicación Organizacional</option>
-                <option value="Publicidad">Publicidad</option>
-              </select>
-            </div>
+    <!-- ==================== SECCIÓN: MAPA GENERAL DE OFERTAS ==================== -->
+    <section id="mapa" class="py-12 bg-gray-50 border-t border-gray-200 rounded-2xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div class="text-center max-w-3xl mx-auto mb-10 space-y-2">
+            <span class="text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-100 px-3 py-1 rounded-full">Geolocalización</span>
+            <h2 class="text-3xl font-extrabold text-gray-900">Explora Prácticas Cerca de Ti</h2>
+            <p class="text-gray-600">Visualiza en tiempo real las empresas que están ofreciendo cupos de práctica en tu comuna o ciudad.</p>
           </div>
 
-          <button onclick="centrarMapa()" class="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-gray-900 font-bold py-3 rounded-xl transition text-sm shadow-md mt-4">
-            Usar mi ubicación actual
-          </button>
-        </div>
+          <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 grid grid-cols-1 lg:grid-cols-4">
+            
+            <div class="p-6 bg-gray-900 text-white space-y-6 flex flex-col justify-between">
+              <div class="space-y-5">
+                <div>
+                  <h3 class="text-lg font-bold text-amber-400 mb-1">Filtros de Búsqueda</h3>
+                  <p class="text-xs text-gray-300">Filtra por zona y tu área de especialidad.</p>
+                </div>
+                
+                <!-- Filtro de Región -->
+                <div class="space-y-2">
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400">Región / Zona</label>
+                  <select id="filtro-region" class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                    <option value="Región Metropolitana" data-coords="-33.4489,-70.6693">Región Metropolitana</option>
+                    <option value="Valparaíso" data-coords="-33.0472,-71.6127">Valparaíso</option>
+                    <option value="Biobío" data-coords="-36.8201,-73.0444">Biobío</option>
+                    <option value="Antofagasta" data-coords="-23.6509,-70.3975">Antofagasta</option>
+                  </select>
+                </div>
 
-        <!-- Contenedor del Mapa -->
-        <div class="lg:col-span-3 h-[420px] relative">
-          <div id="map" class="w-full h-full z-10"></div>
+                <!-- Filtro por Carrera -->
+                <div class="space-y-2">
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400">Carrera / Área</label>
+                  <select id="filtro-carrera" class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                    <option value="">Todas las carreras</option>
+                    <option value="Ingeniería en Construcción">Ingeniería en Construcción</option>
+                    <option value="Ingeniería en Prevención de Riesgos">Ingeniería en Prevención de Riesgos</option>
+                    <option value="Técnico en Construcción">Técnico en Construcción</option>
+                    <option value="Ingeniería en Informática">Ingeniería en Informática</option>
+                    <option value="Analista Programador">Analista Programador</option>
+                    <option value="Ingeniería en Redes y Telecomunicaciones">Ingeniería en Redes y Telecomunicaciones</option>
+                    <option value="Técnico en Desabolladura y Pintura Automotriz">Técnico en Desabolladura y Pintura Automotriz</option>
+                    <option value="Técnico en Electricidad y Automatización Industrial">Técnico en Electricidad y Automatización Industrial</option>
+                    <option value="Ingeniería en Electricidad y Automatización Industrial">Ingeniería en Electricidad y Automatización Industrial</option>
+                    <option value="Ingeniería Agrícola">Ingeniería Agrícola</option>
+                    <option value="Ingeniería en Mecánica Automotriz y Autotrónica">Ingeniería en Mecánica Automotriz y Autotrónica</option>
+                    <option value="Técnico en Calidad de Alimentos">Técnico en Calidad de Alimentos</option>
+                    <option value="Técnico Veterinario y Pecuario">Técnico Veterinario y Pecuario</option>
+                    <option value="Técnico en Operación y Supervisión de Procesos Mineros">Técnico en Operación y Supervisión de Procesos Mineros</option>
+                    <option value="Técnico en Mecánica Automotriz y Autotrónica">Técnico en Mecánica Automotriz y Autotrónica</option>
+                    <option value="Técnico en Geología">Técnico en Geología</option>
+                    <option value="Técnico en Laboratorio Clínico, Banco de Sangre e Imagenología">Técnico en Laboratorio Clínico, Banco de Sangre e Imagenología</option>
+                    <option value="Preparador Físico">Preparador Físico</option>
+                    <option value="Técnico en Enfermería">Técnico en Enfermería</option>
+                    <option value="Técnico en Química y Farmacia">Técnico en Química y Farmacia</option>
+                    <option value="Técnico en Odontología">Técnico en Odontología</option>
+                    <option value="Ingeniería en Marketing Digital">Ingeniería en Marketing Digital</option>
+                    <option value="Auditoría">Auditoría</option>
+                    <option value="Ingeniería en Gestión Logística">Ingeniería en Gestión Logística</option>
+                    <option value="Ingeniería en Comercio Exterior">Ingeniería en Comercio Exterior</option>
+                    <option value="Ingeniería en Administración, mención Gestión de Personas">Ingeniería en Administración, mención Gestión de Personas</option>
+                    <option value="Ingeniería en Administración, mención Innovación y Emprendimiento">Ingeniería en Administración, mención Innovación y Emprendimiento</option>
+                    <option value="Ingeniería en Administración, mención Finanzas">Ingeniería en Administración, mención Finanzas</option>
+                    <option value="Técnico en Administración">Técnico en Administración</option>
+                    <option value="Relaciones Públicas y Comunicación Organizacional">Relaciones Públicas y Comunicación Organizacional</option>
+                    <option value="Publicidad">Publicidad</option>
+                  </select>
+                </div>
+              </div>
+
+              <button onclick="centrarMapa()" class="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-gray-900 font-bold py-3 rounded-xl transition text-sm shadow-md mt-4">
+                Usar mi ubicación actual
+              </button>
+            </div>
+
+            <!-- Contenedor del Mapa -->
+            <div class="lg:col-span-3 h-[420px] relative">
+              <div id="map" class="w-full h-full z-10"></div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-</section>
+    </section>
 
 <!-- Cargar librería Leaflet -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -238,23 +283,56 @@
 <script src="{% static 'js/mapa.js' %}"></script>
 <script src="{% static 'js/premium.js' %}"></script>
 
-<!-- Inicialización del mapa -->
+<!-- Inicialización del mapa general + mini-mapas de cada tarjeta -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const ofertasData = [
             {% for oferta in ofertas %}
             {
+                id_card: "mini-map-{{ forloop.counter }}",
                 titulo: "{{ oferta.titulo|escapejs }}",
                 empresa_nombre: "{{ oferta.empresa_nombre|escapejs }}",
                 carrera: "{{ oferta.carrera|escapejs }}",
-                latitud: "{{ oferta.latitud|default:'-33.4489' }}",
-                longitud: "{{ oferta.longitud|default:'-70.6693' }}",
+                latitud: "{{ oferta.latitud|default:'' }}",
+                longitud: "{{ oferta.longitud|default:'' }}",
                 url_detalle: "{% url 'oferta_detail' oferta.id %}"
             }{% if not forloop.last %},{% endif %}
             {% endfor %}
         ];
 
-        initMapa(ofertasData);
+        // 1. Inicializar cada mini-mapa en las tarjetas
+        ofertasData.forEach(function (item) {
+            const contenedor = document.getElementById(item.id_card);
+            if (contenedor && item.latitud && item.longitud) {
+                const lat = parseFloat(item.latitud.replace(',', '.'));
+                const lng = parseFloat(item.longitud.replace(',', '.'));
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    const miniMap = L.map(item.id_card, {
+                        zoomControl: false,
+                        attributionControl: false,
+                        dragging: false,
+                        scrollWheelZoom: false,
+                        doubleClickZoom: false,
+                        boxZoom: false
+                    }).setView([lat, lng], 14);
+
+                    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+                        maxZoom: 18
+                    }).addTo(miniMap);
+
+                    L.marker([lat, lng]).addTo(miniMap);
+                }
+            }
+        });
+
+        // 2. Inicializar mapa general de exploración (con coordenadas por defecto si falta alguna)
+        const ofertasMapaGeneral = ofertasData.map(o => ({
+            ...o,
+            latitud: o.latitud || '-33.4489',
+            longitud: o.longitud || '-70.6693'
+        }));
+        initMapa(ofertasMapaGeneral);
     });
 </script>
 {% endblock %}
