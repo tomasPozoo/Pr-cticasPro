@@ -760,6 +760,7 @@ def postular_oferta(request, oferta_id):
 
     return render(request, 'postular_oferta.html', {'oferta': oferta_data})
 
+
 def mis_postulaciones(request):
     if request.session.get('user_rol') != 'estudiante':
         return redirect('login')
@@ -771,9 +772,28 @@ def mis_postulaciones(request):
         postulaciones_ref = db.collection('postulaciones').where('estudiante_id', '==', estudiante_id).stream()
         
         lista_postulaciones = []
+        logos_cache = {}
+
         for doc in postulaciones_ref:
             data = doc.to_dict()
             data['id'] = doc.id
+
+            empresa_id = data.get('empresa_id')
+            # Respaldo por si la postulación es antigua y no guardó empresa_id
+            if not empresa_id and data.get('oferta_id'):
+                of_doc = db.collection('ofertas').document(data.get('oferta_id')).get()
+                if of_doc.exists:
+                    empresa_id = of_doc.to_dict().get('empresa_id', '')
+
+            if empresa_id:
+                if empresa_id not in logos_cache:
+                    emp_doc = db.collection('usuarios').document(empresa_id).get()
+                    emp_data = emp_doc.to_dict() if emp_doc.exists else {}
+                    logos_cache[empresa_id] = emp_data.get('logo_url', '')
+                data['logo_url'] = logos_cache[empresa_id]
+            else:
+                data['logo_url'] = ''
+
             lista_postulaciones.append(data)
 
         context = {
@@ -785,6 +805,9 @@ def mis_postulaciones(request):
     except Exception as e:
         messages.error(request, f"Error al cargar tus postulaciones: {str(e)}")
         return redirect('home_estudiante')
+
+
+
 
 def ver_perfil_empresa_publico(request, empresa_id):
     """Vista pública para que los estudiantes consulten el perfil e historial de una empresa."""

@@ -14,9 +14,20 @@
         {% for p in postulaciones %}
         <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-gray-100">
-                <div>
-                    <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">🏢 {{ p.empresa_nombre }}</span>
-                    <h2 class="text-xl font-bold text-gray-900 mt-0.5">{{ p.oferta_titulo }}</h2>
+                
+                <!-- Logo de la Empresa + Título -->
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-xl bg-gray-50 border border-gray-200 overflow-hidden flex items-center justify-center shrink-0 shadow-sm">
+                        {% if p.logo_url %}
+                            <img src="{{ p.logo_url }}" alt="Logo {{ p.empresa_nombre }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <span class="text-2xl text-gray-400">🏢</span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">{{ p.empresa_nombre }}</span>
+                        <h2 class="text-xl font-bold text-gray-900 mt-0.5">{{ p.oferta_titulo }}</h2>
+                    </div>
                 </div>
 
                 <!-- Estado de Postulación -->
