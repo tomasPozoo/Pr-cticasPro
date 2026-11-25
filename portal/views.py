@@ -773,17 +773,28 @@ def mis_postulaciones(request):
         
         lista_postulaciones = []
         logos_cache = {}
+        ofertas_cache = {}
 
         for doc in postulaciones_ref:
             data = doc.to_dict()
             data['id'] = doc.id
 
-            empresa_id = data.get('empresa_id')
-            # Respaldo por si la postulación es antigua y no guardó empresa_id
-            if not empresa_id and data.get('oferta_id'):
-                of_doc = db.collection('ofertas').document(data.get('oferta_id')).get()
-                if of_doc.exists:
-                    empresa_id = of_doc.to_dict().get('empresa_id', '')
+            # 1. Obtener detalles completos de la oferta
+            oferta_id = data.get('oferta_id')
+            oferta_data = {}
+            if oferta_id:
+                if oferta_id not in ofertas_cache:
+                    of_doc = db.collection('ofertas').document(oferta_id).get()
+                    ofertas_cache[oferta_id] = of_doc.to_dict() if of_doc.exists else {}
+                oferta_data = ofertas_cache[oferta_id]
+
+            data['oferta_modalidad'] = oferta_data.get('modalidad', '')
+            data['oferta_carrera'] = oferta_data.get('carrera', '')
+            data['oferta_descripcion'] = oferta_data.get('descripcion', '')
+
+            # 2. Obtener logo de la empresa
+            empresa_id = data.get('empresa_id') or oferta_data.get('empresa_id', '')
+            data['empresa_id'] = empresa_id
 
             if empresa_id:
                 if empresa_id not in logos_cache:

@@ -13,9 +13,10 @@
     <div class="space-y-6">
         {% for p in postulaciones %}
         <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition">
+            
+            <!-- Cabecera: Logo + Empresa + Título + Estado -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-gray-100">
                 
-                <!-- Logo de la Empresa + Título -->
                 <div class="flex items-center gap-4">
                     <div class="w-14 h-14 rounded-xl bg-gray-50 border border-gray-200 overflow-hidden flex items-center justify-center shrink-0 shadow-sm">
                         {% if p.logo_url %}
@@ -25,13 +26,25 @@
                         {% endif %}
                     </div>
                     <div>
-                        <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">{{ p.empresa_nombre }}</span>
-                        <h2 class="text-xl font-bold text-gray-900 mt-0.5">{{ p.oferta_titulo }}</h2>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">{{ p.empresa_nombre }}</span>
+                            {% if p.oferta_modalidad %}
+                                <span class="bg-slate-100 text-slate-700 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+                                    {{ p.oferta_modalidad }}
+                                </span>
+                            {% endif %}
+                            {% if p.oferta_carrera %}
+                                <span class="bg-emerald-50 text-emerald-700 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+                                    {{ p.oferta_carrera }}
+                                </span>
+                            {% endif %}
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-900 mt-1">{{ p.oferta_titulo }}</h2>
                     </div>
                 </div>
 
                 <!-- Estado de Postulación -->
-                <div>
+                <div class="shrink-0">
                     {% if p.estado == 'aceptado' %}
                         <span class="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-800 text-sm font-bold px-4 py-1.5 rounded-full">
                             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
@@ -56,26 +69,47 @@
                 </div>
             </div>
 
+            <!-- Resumen de la Oferta Publicada -->
+            {% if p.oferta_descripcion %}
+            <div class="mt-4 p-4 rounded-xl bg-gray-50 border border-gray-100">
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">📋 Resumen de la Práctica:</p>
+                <p class="text-sm text-gray-700 leading-relaxed">{{ p.oferta_descripcion|truncatechars:220 }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Tu Mensaje Enviado al Postular -->
+            {% if p.mensaje %}
+            <div class="mt-3 px-4 py-3 rounded-xl bg-slate-50/70 border border-slate-100">
+                <p class="text-xs font-bold text-slate-600 mb-0.5">✉️ Tu carta de presentación:</p>
+                <p class="text-xs text-slate-600 italic">"{{ p.mensaje|truncatechars:180 }}"</p>
+            </div>
+            {% endif %}
+
             <!-- Feedback o Mensaje de la Empresa -->
             {% if p.mensaje_empresa %}
-            <div class="mt-4 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100">
-                <p class="text-xs font-bold text-blue-900 uppercase tracking-wider mb-1">💬 Mensaje de la Empresa:</p>
+            <div class="mt-3 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100">
+                <p class="text-xs font-bold text-blue-900 uppercase tracking-wider mb-1">💬 Respuesta de la Empresa:</p>
                 <p class="text-sm text-blue-950 font-medium">{{ p.mensaje_empresa }}</p>
             </div>
             {% endif %}
 
-            <!-- Detalles adicionales -->
-            <div class="mt-4 flex flex-wrap justify-between items-center text-xs text-gray-500 gap-2 pt-2">
-                <div>
+            <!-- Acciones y Enlaces -->
+            <div class="mt-4 flex flex-wrap justify-between items-center text-xs text-gray-500 gap-3 pt-3 border-t border-gray-100">
+                <div class="flex items-center gap-4">
                     {% if p.cv_url %}
                     <a href="{{ p.cv_url }}" target="_blank" class="text-blue-600 font-semibold hover:underline flex items-center gap-1">
                         📎 Ver CV enviado
                     </a>
                     {% endif %}
+                    {% if p.empresa_id %}
+                    <a href="{% url 'ver_perfil_empresa_publico' p.empresa_id %}" class="text-emerald-700 font-semibold hover:underline">
+                        🏢 Ver Perfil de la Empresa
+                    </a>
+                    {% endif %}
                 </div>
 
-                <a href="{% url 'oferta_detail' p.oferta_id %}" class="text-gray-700 font-bold hover:text-blue-600 transition">
-                    Ver Detalle de la Oferta →
+                <a href="{% url 'oferta_detail' p.oferta_id %}" class="bg-gray-900 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-xl transition">
+                    Ver Oferta Completa →
                 </a>
             </div>
         </div>
