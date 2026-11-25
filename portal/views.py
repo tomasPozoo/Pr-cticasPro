@@ -1073,21 +1073,15 @@ def ver_perfil_estudiante(request, estudiante_id):
         messages.error(request, "Acceso denegado. Solo las empresas pueden ver esta página.")
         return redirect('mis_ofertas')
 
-    try:
-        db = firestore.client()
-        estudiante_doc = db.collection('usuarios').document(estudiante_id).get()
+    db = firestore.client()
+    estudiante_doc = db.collection('usuarios').document(estudiante_id).get()
 
-        if not estudiante_doc.exists:
-            messages.error(request, "El perfil del estudiante no fue encontrado.")
-            return redirect('mis_ofertas')
-
-        estudiante_data = estudiante_doc.to_dict()
-        return render(request, 'ver_perfil_estudiante.html', {'estudiante': estudiante_data})
-
-    except Exception as e:
-        messages.error(request, f"Error al cargar el perfil: {str(e)}")
+    if not estudiante_doc.exists:
+        messages.error(request, "El perfil del estudiante no fue encontrado.")
         return redirect('mis_ofertas')
 
+    estudiante_data = estudiante_doc.to_dict()
+    return render(request, 'ver_perfil_estudiante.html', {'estudiante': estudiante_data})
 
 # ==========================================
 # VISTAS DE ADMINISTRADOR
