@@ -1,55 +1,52 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<!-- Cargamos Leaflet para el mini-mapa -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
     
-    <div class="mb-6 flex items-center gap-4">
-        <a href="{% url 'home_empresa' %}" class="text-gray-500 hover:text-gray-700">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-        </a>
-        <h1 class="text-2xl font-bold text-gray-800">Crear Oferta de Práctica</h1>
+    <div class="mb-6">
+        <h1 class="text-2xl font-extrabold text-gray-900">Publicar Nueva Oferta de Práctica</h1>
+        <p class="text-sm text-gray-500 mt-1">Completa los datos de la vacante y ubica la dirección en el mapa.</p>
     </div>
 
     <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
-        <form method="POST" action="{% url 'crear_oferta' %}">
+        <form method="POST" action="{% url 'crear_oferta' %}" class="space-y-6">
             {% csrf_token %}
             
-            <div class="space-y-6">
-                <!-- Título -->
-                <div>
-                    <label for="titulo" class="block text-sm font-medium text-gray-700 mb-1">Título de la Práctica</label>
-                    <input type="text" id="titulo" name="titulo" required placeholder="Ej: Desarrollador Frontend Trainee"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
-                </div>
+            <!-- Título -->
+            <div>
+                <label for="titulo" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Título de la Práctica</label>
+                <input type="text" id="titulo" name="titulo" required placeholder="Ej: Desarrollador Frontend Trainee"
+                       class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition">
+            </div>
 
-                <!-- Descripción y Requisitos -->
-                <div>
-                    <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-1">Descripción y Funciones</label>
-                    <textarea id="descripcion" name="descripcion" rows="4" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"></textarea>
-                </div>
+            <!-- Descripción y Requisitos -->
+            <div>
+                <label for="descripcion" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Descripción y Funciones</label>
+                <textarea id="descripcion" name="descripcion" rows="4" required placeholder="Describe las tareas principales que realizará el estudiante..."
+                          class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition"></textarea>
+            </div>
 
-                <div>
-                    <label for="requisitos" class="block text-sm font-medium text-gray-700 mb-1">Requisitos</label>
-                    <textarea id="requisitos" name="requisitos" rows="3" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"></textarea>
-                </div>
+            <div>
+                <label for="requisitos" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Requisitos</label>
+                <textarea id="requisitos" name="requisitos" rows="3" required placeholder="Conocimientos técnicos, herramientas, disponibilidad horaria..."
+                          class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition"></textarea>
+            </div>
 
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <!-- Modalidad -->
                 <div>
-                    <label for="modalidad" class="block text-sm font-medium text-gray-700 mb-1">Modalidad de Trabajo</label>
-                    <select id="modalidad" name="modalidad" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                    <label for="modalidad" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Modalidad de Trabajo</label>
+                    <select id="modalidad" name="modalidad" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition">
                         <option value="Presencial">Presencial</option>
-                        <option value="Remoto">Remoto</option>
                         <option value="Híbrido">Híbrido</option>
+                        <option value="Remoto">Remoto</option>
                     </select>
                 </div>
 
-                <!-- NUEVO: Selector de Carreras -->
+                <!-- Carrera Orientada (sin duplicados) -->
                 <div>
-                    <label for="carrera" class="block text-sm font-medium text-gray-700 mb-1">Carrera Orientada</label>
-                    <select id="carrera" name="carrera" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                    <label for="carrera" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Carrera Orientada</label>
+                    <select id="carrera" name="carrera" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition">
                         <option value="" disabled selected>Selecciona una carrera...</option>
                         <option value="Ingeniería en Construcción">Ingeniería en Construcción</option>
                         <option value="Ingeniería en Prevención de Riesgos">Ingeniería en Prevención de Riesgos</option>
@@ -62,10 +59,10 @@
                         <option value="Ingeniería en Electricidad y Automatización Industrial">Ingeniería en Electricidad y Automatización Industrial</option>
                         <option value="Ingeniería Agrícola">Ingeniería Agrícola</option>
                         <option value="Ingeniería en Mecánica Automotriz y Autotrónica">Ingeniería en Mecánica Automotriz y Autotrónica</option>
+                        <option value="Técnico en Mecánica Automotriz y Autotrónica">Técnico en Mecánica Automotriz y Autotrónica</option>
                         <option value="Técnico en Calidad de Alimentos">Técnico en Calidad de Alimentos</option>
                         <option value="Técnico Veterinario y Pecuario">Técnico Veterinario y Pecuario</option>
                         <option value="Técnico en Operación y Supervisión de Procesos Mineros">Técnico en Operación y Supervisión de Procesos Mineros</option>
-                        <option value="Técnico en Mecánica Automotriz y Autotrónica">Técnico en Mecánica Automotriz y Autotrónica</option>
                         <option value="Técnico en Geología">Técnico en Geología</option>
                         <option value="Técnico en Laboratorio Clínico, Banco de Sangre e Imagenología">Técnico en Laboratorio Clínico, Banco de Sangre e Imagenología</option>
                         <option value="Preparador Físico">Preparador Físico</option>
@@ -84,64 +81,101 @@
                         <option value="Publicidad">Publicidad</option>
                     </select>
                 </div>
+            </div>
 
-                <!-- Selector de Ubicación -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Ubicación de la Práctica</label>
-                    <p class="text-xs text-gray-500 mb-2">Haz clic en el mapa para marcar la ubicación exacta de tu empresa.</p>
-                    
-                    <!-- Campos ocultos para enviar a views.py -->
-                    <input type="hidden" id="latitud" name="latitud" value="-33.4489">
-                    <input type="hidden" id="longitud" name="longitud" value="-70.6693">
-                    
-                    <!-- Contenedor del mini mapa -->
-                    <div id="mapa-crear" class="w-full h-64 rounded-lg border border-gray-300 z-10"></div>
-                </div>
-
-                <!-- Botón de Envío -->
-                <div class="pt-4">
-                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl transition shadow-md">
-                        Publicar Oferta
+            <!-- Selector de Ubicación con Buscador -->
+            <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Ubicación de la Práctica</label>
+                <p class="text-xs text-gray-500 mb-3">Busca una dirección o comuna, o haz clic directamente en el mapa para ajustar el marcador.</p>
+                
+                <div class="flex gap-2 mb-3">
+                    <input type="text" id="buscarDireccion" placeholder="Ej: Av. Providencia 1234, Santiago"
+                           onkeypress="if(event.key==='Enter'){ event.preventDefault(); buscarEnMapa(); }"
+                           class="flex-1 px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                    <button type="button" onclick="buscarEnMapa()"
+                            class="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-xs font-bold rounded-xl transition shrink-0">
+                        🔍 Ubicar
                     </button>
                 </div>
+
+                <!-- Campos ocultos para enviar a views.py -->
+                <input type="hidden" id="latitud" name="latitud" value="-33.4489">
+                <input type="hidden" id="longitud" name="longitud" value="-70.6693">
+                
+                <!-- Contenedor del mini mapa -->
+                <div id="mapa-crear" class="w-full h-64 rounded-xl border border-gray-200 z-10 overflow-hidden"></div>
+                <p id="coordTexto" class="text-[11px] text-gray-400 mt-1.5 font-mono">
+                    Coordenadas seleccionadas: -33.4489, -70.6693
+                </p>
+            </div>
+
+            <!-- Botón de Envío -->
+            <div class="pt-2">
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl text-sm transition shadow-md">
+                    Publicar Oferta de Práctica
+                </button>
             </div>
         </form>
     </div>
 </div>
+{% endblock %}
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{% block extra_js %}
 <script>
+    let mapCrear, markerCrear;
+
+    function actualizarCoords(lat, lng) {
+        const latFix = Number(lat).toFixed(6);
+        const lngFix = Number(lng).toFixed(6);
+        document.getElementById('latitud').value = latFix;
+        document.getElementById('longitud').value = lngFix;
+        document.getElementById('coordTexto').textContent = `Coordenadas seleccionadas: ${latFix}, ${lngFix}`;
+    }
+
+    async function buscarEnMapa() {
+        const query = document.getElementById('buscarDireccion').value.trim();
+        if (!query) return;
+        try {
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Chile')}&limit=1`;
+            const res = await fetch(url);
+            const data = await res.json();
+            if (data && data.length > 0) {
+                const lat = parseFloat(data[0].lat);
+                const lon = parseFloat(data[0].lon);
+                mapCrear.setView([lat, lon], 15);
+                markerCrear.setLatLng([lat, lon]);
+                actualizarCoords(lat, lon);
+            } else {
+                alert('No se encontró esa dirección. Prueba con una comuna o calle principal.');
+            }
+        } catch (e) {
+            alert('No se pudo consultar el buscador de direcciones.');
+        }
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
-        // Iniciar mapa en Santiago
-        var map = L.map('mapa-crear').setView([-33.4489, -70.6693], 12);
+        mapCrear = L.map('mapa-crear').setView([-33.4489, -70.6693], 12);
         
-        // Usar la capa de Esri (sin bloqueos)
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
             maxZoom: 19,
-            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS'
-        }).addTo(map);
+            attribution: '&copy; Esri'
+        }).addTo(mapCrear);
 
-        // Pin inicial (que se puede mover)
-        var marker = L.marker([-33.4489, -70.6693], {draggable: true}).addTo(map);
+        markerCrear = L.marker([-33.4489, -70.6693], {draggable: true}).addTo(mapCrear);
 
-        // Actualizar coordenadas si el usuario arrastra el pin
-        marker.on('dragend', function(e) {
-            var latLng = marker.getLatLng();
-            document.getElementById('latitud').value = latLng.lat;
-            document.getElementById('longitud').value = latLng.lng;
+        markerCrear.on('dragend', function() {
+            const latLng = markerCrear.getLatLng();
+            actualizarCoords(latLng.lat, latLng.lng);
         });
 
-        // Actualizar coordenadas si el usuario hace clic en otro lado del mapa
-        map.on('click', function(e) {
-            marker.setLatLng(e.latlng);
-            document.getElementById('latitud').value = e.latlng.lat;
-            document.getElementById('longitud').value = e.latlng.lng;
+        mapCrear.on('click', function(e) {
+            markerCrear.setLatLng(e.latlng);
+            actualizarCoords(e.latlng.lat, e.latlng.lng);
         });
         
-        // Asegurar que el mapa se renderice correctamente después de cargar la página
         setTimeout(function() {
-            map.invalidateSize();
-        }, 100);
+            mapCrear.invalidateSize();
+        }, 150);
     });
 </script>
 {% endblock %}
