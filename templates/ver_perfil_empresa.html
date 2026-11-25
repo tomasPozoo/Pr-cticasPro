@@ -1,13 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-    <!-- Botón Volver -->
-    <a href="javascript:history.back()" class="inline-flex items-center gap-2 text-gray-500 hover:text-blue-600 mb-6 transition font-medium text-sm">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-        Volver
-    </a>
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
     <!-- Tarjeta Principal de la Empresa -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-8">
@@ -39,9 +33,12 @@
 
                 <div class="flex flex-wrap justify-center sm:justify-start gap-4 text-xs font-medium text-gray-500 pt-2">
                     {% if empresa.sitio_web %}
-                    <a href="{{ empresa.sitio_web }}" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">
+                    <a href="{{ empresa.sitio_web }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline flex items-center gap-1">
                         🌐 {{ empresa.sitio_web }}
                     </a>
+                    {% endif %}
+                    {% if empresa.email %}
+                    <span class="flex items-center gap-1">✉️ {{ empresa.email }}</span>
                     {% endif %}
                     {% if empresa.telefono %}
                     <span class="flex items-center gap-1">📞 {{ empresa.telefono }}</span>
@@ -67,15 +64,17 @@
                     <div class="flex justify-between items-start gap-2 mb-2">
                         <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">{{ o.modalidad }}</span>
                         {% if o.carrera %}
-                        <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-0.5 rounded-full truncate max-w-[150px]">{{ o.carrera }}</span>
+                        <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-0.5 rounded-full truncate max-w-[180px]">{{ o.carrera }}</span>
                         {% endif %}
                     </div>
                     <h3 class="font-bold text-gray-900 text-base mb-1">{{ o.titulo }}</h3>
                     <p class="text-gray-500 text-xs line-clamp-2 mb-4">{{ o.descripcion }}</p>
                 </div>
+                {% if request.session.user_rol == 'estudiante' %}
                 <a href="{% url 'oferta_detail' o.id %}" class="block text-center bg-gray-50 hover:bg-blue-600 hover:text-white text-gray-700 font-bold py-2 rounded-xl text-xs transition">
                     Ver Oferta →
                 </a>
+                {% endif %}
             </div>
             {% endfor %}
         </div>

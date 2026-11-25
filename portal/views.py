@@ -997,18 +997,35 @@ def home_empresa(request):
     empresa_id = request.session.get('user_id')
     db = firestore.client()
 
-    # Contar ofertas de la empresa
-    ofertas_ref = db.collection('ofertas').where('empresa_id', '==', empresa_id).stream()
-    total_ofertas = len(list(ofertas_ref))
+    # Datos completos de la empresa (logo, rubro, nombre)
+    emp_doc = db.collection('usuarios').document(empresa_id).get()
+    empresa_data = emp_doc.to_dict() if emp_doc.exists else {}
 
-    # Contar postulaciones recibidas
+    # Contar ofertas totales y activas de la empresa
+    ofertas_ref = db.collection('ofertas').where('empresa_id', '==', empresa_id).stream()
+    total_ofertas = 0
+    ofertas_activas = 0
+    for doc in ofertas_ref:
+        total_ofertas += 1
+        if doc.to_dict().get('estado') == 'activa':
+            ofertas_activas += 1
+
+    # Contar postulaciones recibidas y pendientes
     postulaciones_ref = db.collection('postulaciones').where('empresa_id', '==', empresa_id).stream()
-    total_postulantes = len(list(postulaciones_ref))
+    total_postulantes = 0
+    postulantes_pendientes = 0
+    for doc in postulaciones_ref:
+        total_postulantes += 1
+        if doc.to_dict().get('estado', 'pendiente') == 'pendiente':
+            postulantes_pendientes += 1
 
     context = {
-        'nombre': request.session.get('user_name'),
+        'nombre': empresa_data.get('nombre') or request.session.get('user_name'),
+        'empresa': empresa_data,
         'total_ofertas': total_ofertas,
+        'ofertas_activas': ofertas_activas,
         'total_postulantes': total_postulantes,
+        'postulantes_pendientes': postulantes_pendientes,
     }
     return render(request, 'home_empresa.html', context)
 
@@ -1106,6 +1123,7 @@ def crear_oferta(request):
 
     return render(request, 'crear_oferta.html')
 
+
 def mis_ofertas(request):
     if request.session.get('user_rol') != 'empresa':
         return redirect('login')
@@ -1113,15 +1131,24 @@ def mis_ofertas(request):
     empresa_id = request.session.get('user_id')
     db = firestore.client()
     
+    # Contar postulantes por oferta
+    postulaciones_ref = db.collection('postulaciones').where('empresa_id', '==', empresa_id).stream()
+    conteo_postulantes = {}
+    for p_doc in postulaciones_ref:
+        oid = p_doc.to_dict().get('oferta_id')
+        if oid:
+            conteo_postulantes[oid] = conteo_postulantes.get(oid, 0) + 1
+
     ofertas_ref = db.collection('ofertas').where('empresa_id', '==', empresa_id).stream()
-    
     lista_ofertas = []
     for doc in ofertas_ref:
         data = doc.to_dict()
         data['id'] = doc.id
+        data['num_postulantes'] = conteo_postulantes.get(doc.id, 0)
         lista_ofertas.append(data)
         
     return render(request, 'mis_ofertas.html', {'ofertas': lista_ofertas})
+
 
 def ver_postulantes(request, oferta_id):
     if request.session.get('user_rol') != 'empresa':
@@ -1702,17 +1729,16 @@ def exportar_reporte_csv(request, tipo_reporte):
 
 
 def eliminar_oferta_admin(request, oferta_id):
+    if request.session.get('user_rol') != 'admin':
+        messages.error(request, 'Acceso denegado.')
+        return redirect('login')
+
     if request.method == 'POST':
-        print(f"--- INTENTANDO BORRAR LA OFERTA CON ID: {oferta_id} ---")
         try:
             db = firestore.client()
-            # Intenta borrar el documento
             db.collection('ofertas').document(oferta_id).delete()
-            print("--- ¡BORRADO EXITOSO EN FIREBASE! ---")
             messages.success(request, 'La oferta ha sido eliminada exitosamente.')
-            
         except Exception as e:
-            print(f"--- ERROR AL BORRAR EN FIREBASE: {e} ---")
             messages.error(request, f'Error al eliminar en Firebase: {e}')
             
     return redirect('home_admin')
