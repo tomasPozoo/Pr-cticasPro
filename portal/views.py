@@ -964,9 +964,22 @@ def ver_postulantes(request, oferta_id):
     postulaciones_ref = db.collection('postulaciones').where('oferta_id', '==', oferta_id).stream()
     
     postulantes = []
+    fotos_cache = {}
+
     for doc in postulaciones_ref:
         data = doc.to_dict()
         data['id'] = doc.id
+        
+        estudiante_id = data.get('estudiante_id')
+        if estudiante_id:
+            if estudiante_id not in fotos_cache:
+                est_doc = db.collection('usuarios').document(estudiante_id).get()
+                est_data = est_doc.to_dict() if est_doc.exists else {}
+                fotos_cache[estudiante_id] = est_data.get('foto_url', '')
+            data['foto_url'] = fotos_cache[estudiante_id]
+        else:
+            data['foto_url'] = ''
+
         postulantes.append(data)
 
     context = {

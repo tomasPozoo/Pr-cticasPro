@@ -23,38 +23,50 @@
         <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition">
             <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                 
-                <!-- Datos del Estudiante -->
-                <div class="space-y-2 flex-1">
-                    <div class="flex items-center gap-3">
-                        <h3 class="text-lg font-bold text-gray-900">{{ p.estudiante_nombre }}</h3>
-                        
-                        <!-- Badges de Estado -->
-                        {% if p.estado == 'aceptado' %}
-                            <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">Aceptado</span>
-                        {% elif p.estado == 'rechazado' %}
-                            <span class="bg-rose-100 text-rose-800 text-xs font-bold px-3 py-1 rounded-full">Rechazado</span>
-                        {% elif p.estado == 'en_revision' %}
-                            <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">En Revisión</span>
+                <!-- Datos del Estudiante con Foto de Perfil -->
+                <div class="flex items-start gap-4 flex-1 w-full">
+                    <!-- Avatar del Estudiante -->
+                    <div class="w-14 h-14 rounded-full overflow-hidden bg-gray-100 border-2 border-emerald-500/30 flex items-center justify-center shrink-0 shadow-sm">
+                        {% if p.foto_url %}
+                            <img src="{{ p.foto_url }}" alt="Foto de {{ p.estudiante_nombre }}" class="w-full h-full object-cover">
                         {% else %}
-                            <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">Pendiente</span>
+                            <span class="text-2xl text-gray-400">👤</span>
                         {% endif %}
                     </div>
 
-                    <p class="text-sm text-gray-600">📧 {{ p.estudiante_email }}</p>
+                    <!-- Información y Mensajes -->
+                    <div class="space-y-2 flex-1">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <h3 class="text-lg font-bold text-gray-900">{{ p.estudiante_nombre }}</h3>
+                            
+                            <!-- Badges de Estado -->
+                            {% if p.estado == 'aceptado' %}
+                                <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">Aceptado</span>
+                            {% elif p.estado == 'rechazado' %}
+                                <span class="bg-rose-100 text-rose-800 text-xs font-bold px-3 py-1 rounded-full">Rechazado</span>
+                            {% elif p.estado == 'en_revision' %}
+                                <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">En Revisión</span>
+                            {% else %}
+                                <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">Pendiente</span>
+                            {% endif %}
+                        </div>
 
-                    {% if p.mensaje %}
-                    <div class="bg-gray-50 p-3 rounded-xl text-xs text-gray-700 border border-gray-100">
-                        <span class="font-bold text-gray-900 block mb-1">Carta de Presentación / Mensaje:</span>
-                        {{ p.mensaje }}
-                    </div>
-                    {% endif %}
+                        <p class="text-sm text-gray-600">📧 {{ p.estudiante_email }}</p>
 
-                    {% if p.mensaje_empresa %}
-                    <div class="bg-emerald-50 p-3 rounded-xl text-xs text-emerald-900 border border-emerald-100">
-                        <span class="font-bold text-emerald-950 block mb-1">Tu Respuesta / Retroalimentación Enviada:</span>
-                        {{ p.mensaje_empresa }}
+                        {% if p.mensaje %}
+                        <div class="bg-gray-50 p-3 rounded-xl text-xs text-gray-700 border border-gray-100">
+                            <span class="font-bold text-gray-900 block mb-1">Carta de Presentación / Mensaje:</span>
+                            {{ p.mensaje }}
+                        </div>
+                        {% endif %}
+
+                        {% if p.mensaje_empresa %}
+                        <div class="bg-emerald-50 p-3 rounded-xl text-xs text-emerald-900 border border-emerald-100">
+                            <span class="font-bold text-emerald-950 block mb-1">Tu Respuesta / Retroalimentación Enviada:</span>
+                            {{ p.mensaje_empresa }}
+                        </div>
+                        {% endif %}
                     </div>
-                    {% endif %}
                 </div>
 
                 <!-- Acciones -->
