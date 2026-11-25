@@ -10,58 +10,41 @@
         </a>
     </div>
 
-    <!-- Encabezado de Perfil -->
-    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 25px 30px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: center;">
-        <div>
-            <h2 style="font-size: 2rem; font-weight: 800; color: #0f172a; margin: 0;">
-                {{ estudiante.nombre }} {{ estudiante.apellido|default:"" }}
-            </h2>
-            <p style="color: #0284c7; font-weight: 600; margin: 5px 0 0 0; font-size: 1.05rem;">
-                🎓 {{ estudiante.carrera|default:"Estudiante Duoc UC" }}
-            </p>
+    <!-- Encabezado Único de Perfil con Foto -->
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 25px 30px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+        
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <!-- Foto de Perfil / Avatar -->
+            {% if estudiante.foto_url %}
+                <img src="{{ estudiante.foto_url }}" alt="Foto de {{ estudiante.nombre }}" style="width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid #0284c7; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            {% elif estudiante.foto %}
+                <img src="{{ estudiante.foto }}" alt="Foto de {{ estudiante.nombre }}" style="width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid #0284c7; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            {% elif estudiante.imagen_perfil %}
+                <img src="{{ estudiante.imagen_perfil }}" alt="Foto de {{ estudiante.nombre }}" style="width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid #0284c7; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            {% else %}
+                <div style="width: 85px; height: 85px; border-radius: 50%; background: linear-gradient(135deg, #0284c7, #0369a1); color: white; display: flex; justify-content: center; align-items: center; font-size: 2.2rem; font-weight: 800; border: 3px solid #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    {{ estudiante.nombre|slice:":1"|upper }}
+                </div>
+            {% endif %}
+
+            <div>
+                <h2 style="font-size: 1.8rem; font-weight: 800; color: #0f172a; margin: 0; text-transform: capitalize;">
+                    {{ estudiante.nombre }} {{ estudiante.apellido|default:"" }}
+                </h2>
+                <p style="color: #0284c7; font-weight: 600; margin: 4px 0 0 0; font-size: 1rem;">
+                    🎓 {{ estudiante.carrera|default:"Estudiante Duoc UC"|title }}
+                </p>
+            </div>
         </div>
+
         <div>
-            <span style="background-color: #e0f2fe; color: #0369a1; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem;">
-                📍 {{ estudiante.sede|default:"Sede no registrada" }}
+            <span style="background-color: #e0f2fe; color: #0369a1; padding: 8px 16px; border-radius: 20px; font-weight: 700; font-size: 0.85rem;">
+                📍 {{ estudiante.region|default:"Región Metropolitana" }}
             </span>
         </div>
     </div>
 
     <!-- Rejilla Principal de Datos -->
-     <!-- Encabezado de Perfil con Foto -->
-<div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 25px 30px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
-    
-    <div style="display: flex; align-items: center; gap: 20px;">
-        <!-- Foto de Perfil / Avatar -->
-        {% if estudiante.foto_url %}
-            <img src="{{ estudiante.foto_url }}" alt="Foto de {{ estudiante.nombre }}" style="width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid #0284c7; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-        {% elif estudiante.foto %}
-            <img src="{{ estudiante.foto }}" alt="Foto de {{ estudiante.nombre }}" style="width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid #0284c7; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-        {% elif estudiante.imagen_perfil %}
-            <img src="{{ estudiante.imagen_perfil }}" alt="Foto de {{ estudiante.nombre }}" style="width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid #0284c7; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-        {% else %}
-            <!-- Avatar por defecto con la inicial del nombre -->
-            <div style="width: 85px; height: 85px; border-radius: 50%; background: linear-gradient(135deg, #0284c7, #0369a1); color: white; display: flex; justify-content: center; align-items: center; font-size: 2.2rem; font-weight: 800; border: 3px solid #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                {{ estudiante.nombre|slice:":1"|upper }}
-            </div>
-        {% endif %}
-
-        <div>
-            <h2 style="font-size: 1.8rem; font-weight: 800; color: #0f172a; margin: 0;">
-                {{ estudiante.nombre }} {{ estudiante.apellido|default:"" }}
-            </h2>
-            <p style="color: #0284c7; font-weight: 600; margin: 4px 0 0 0; font-size: 1rem;">
-                🎓 {{ estudiante.carrera|default:"Estudiante Duoc UC" }}
-            </p>
-        </div>
-    </div>
-
-    <div>
-        <span style="background-color: #e0f2fe; color: #0369a1; padding: 8px 16px; border-radius: 20px; font-weight: 700; font-size: 0.85rem;">
-            📍 {{ estudiante.sede|default:"Sede no registrada" }}
-        </span>
-    </div>
-</div>
     <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px;">
         
         <!-- Columna Izquierda: Contacto e Información Personal -->
@@ -111,13 +94,13 @@
         <!-- Columna Derecha: Presentación y Habilidades -->
         <div style="display: flex; flex-direction: column; gap: 20px;">
             
-            <!-- Resumen / Sobre mí -->
+            <!-- Resumen / Sobre mí (lee estudiante.bio) -->
             <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
                 <h4 style="font-size: 0.85rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0; margin-bottom: 12px;">
                     Sobre el estudiante
                 </h4>
                 <div style="background-color: #f8fafc; border: 1px solid #f1f5f9; padding: 15px; border-radius: 8px; color: #334155; font-size: 0.95rem; line-height: 1.6; white-space: pre-line;">
-                    {{ estudiante.descripcion|default:"El estudiante aún no ha añadido una descripción a su perfil." }}
+                    {{ estudiante.bio|default:estudiante.descripcion|default:"El estudiante aún no ha añadido una descripción a su perfil." }}
                 </div>
             </div>
 
