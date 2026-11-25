@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+}{% extends 'base.html' %}
 
 {% block content %}
 <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -53,37 +53,130 @@
     </div>
 
     <!-- Ofertas Activas de esta Empresa -->
-    <div class="space-y-4">
-        <h2 class="text-xl font-bold text-gray-900">Prácticas Disponibles en {{ empresa.nombre }} ({{ total_ofertas }})</h2>
+    <div class="space-y-5">
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-extrabold text-gray-900">
+                Prácticas Disponibles en {{ empresa.nombre }} ({{ total_ofertas }})
+            </h2>
+        </div>
 
         {% if ofertas %}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {% for o in ofertas %}
-            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+            <div class="bg-white rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col justify-between group">
+                
                 <div>
-                    <div class="flex justify-between items-start gap-2 mb-2">
-                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">{{ o.modalidad }}</span>
-                        {% if o.carrera %}
-                        <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-0.5 rounded-full truncate max-w-[180px]">{{ o.carrera }}</span>
-                        {% endif %}
+                    <!-- Mini Mapa de Ubicación (si tiene coordenadas) o Cabecera Visual -->
+                    {% if o.latitud and o.longitud %}
+                    <div class="relative h-40 w-full bg-gray-100 border-b border-gray-100">
+                        <div id="empresa-oferta-map-{{ forloop.counter }}" 
+                             class="w-full h-full z-10 mini-mapa-empresa"
+                             data-lat="{{ o.latitud }}" 
+                             data-lng="{{ o.longitud }}"
+                             data-titulo="{{ o.titulo }}"
+                             data-empresa="{{ empresa.nombre }}">
+                        </div>
+                        <span class="absolute bottom-2 right-2 z-20 bg-white/90 backdrop-blur-xs text-gray-700 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-xs border border-gray-200">
+                            📍 Ubicación de práctica
+                        </span>
                     </div>
-                    <h3 class="font-bold text-gray-900 text-base mb-1">{{ o.titulo }}</h3>
-                    <p class="text-gray-500 text-xs line-clamp-2 mb-4">{{ o.descripcion }}</p>
+                    {% else %}
+                    <div class="h-24 bg-gradient-to-r from-brand-950 via-blue-900 to-emerald-900 px-5 flex items-center justify-between">
+                        <span class="text-xs font-bold text-blue-200 uppercase tracking-wider">Vacante Disponible</span>
+                        <span class="text-2xl opacity-80">💼</span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Cuerpo de la Tarjeta -->
+                    <div class="p-5 space-y-3">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">
+                                {{ o.modalidad }}
+                            </span>
+                            {% if o.carrera %}
+                            <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full truncate max-w-[230px]" title="{{ o.carrera }}">
+                                🎓 {{ o.carrera }}
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="flex items-center gap-3 pt-1">
+                            <div class="w-10 h-10 rounded-xl bg-gray-50 border border-gray-200 overflow-hidden flex items-center justify-center shrink-0">
+                                {% if empresa.logo_url %}
+                                    <img src="{{ empresa.logo_url }}" alt="{{ empresa.nombre }}" class="w-full h-full object-cover">
+                                {% else %}
+                                    <span class="text-lg">🏢</span>
+                                {% endif %}
+                            </div>
+                            <div class="min-w-0">
+                                <h3 class="font-extrabold text-gray-900 text-base leading-snug group-hover:text-blue-600 transition truncate">
+                                    {{ o.titulo }}
+                                </h3>
+                                <p class="text-xs font-semibold text-gray-500 truncate">{{ empresa.nombre }}</p>
+                            </div>
+                        </div>
+
+                        <p class="text-gray-600 text-xs leading-relaxed line-clamp-3">
+                            {{ o.descripcion }}
+                        </p>
+                    </div>
                 </div>
-                {% if request.session.user_rol == 'estudiante' %}
-                <a href="{% url 'oferta_detail' o.id %}" class="block text-center bg-gray-50 hover:bg-blue-600 hover:text-white text-gray-700 font-bold py-2 rounded-xl text-xs transition">
-                    Ver Oferta →
-                </a>
-                {% endif %}
+
+                <!-- Pie de Tarjeta -->
+                <div class="px-5 pb-5 pt-2">
+                    {% if request.session.user_rol == 'estudiante' %}
+                    <a href="{% url 'oferta_detail' o.id %}" 
+                       class="block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition shadow-xs">
+                        Ver Detalle y Postular →
+                    </a>
+                    {% elif not request.session.user_id %}
+                    <a href="{% url 'login' %}" 
+                       class="block text-center bg-gray-100 hover:bg-blue-600 hover:text-white text-gray-700 font-bold py-2.5 px-4 rounded-xl text-xs transition">
+                        Inicia sesión para postular →
+                    </a>
+                    {% endif %}
+                </div>
+
             </div>
             {% endfor %}
         </div>
         {% else %}
-        <p class="text-sm text-gray-500 bg-white p-6 rounded-xl border border-gray-100 text-center">
-            Esta empresa no tiene otras prácticas vigentes en este momento.
-        </p>
+        <div class="bg-white p-10 rounded-2xl border border-gray-100 text-center space-y-2">
+            <div class="text-3xl">📭</div>
+            <p class="text-sm font-semibold text-gray-700">Esta empresa no tiene prácticas vigentes en este momento.</p>
+        </div>
         {% endif %}
     </div>
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const mapas = document.querySelectorAll('.mini-mapa-empresa');
+    mapas.forEach(function (el) {
+        const lat = parseFloat((el.dataset.lat || '').replace(',', '.'));
+        const lng = parseFloat((el.dataset.lng || '').replace(',', '.'));
+        if (isNaN(lat) || isNaN(lng)) return;
+
+        const mapa = L.map(el.id, {
+            zoomControl: false,
+            scrollWheelZoom: false,
+            dragging: false,
+            doubleClickZoom: false,
+            boxZoom: false
+        }).setView([lat, lng], 15);
+
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 19,
+            attribution: '&copy; Esri'
+        }).addTo(mapa);
+
+        L.marker([lat, lng]).addTo(mapa).bindPopup(
+            `<strong>${el.dataset.titulo}</strong><br><span style="font-size:11px;color:#475569;">${el.dataset.empresa}</span>`
+        );
+    });
+});
+</script>
 {% endblock %}
