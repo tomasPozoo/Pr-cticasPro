@@ -664,6 +664,7 @@ CARRERAS_LISTA = [
     "Publicidad"
 ]
 
+
 def ofertas_list(request):
     if request.session.get('user_rol') != 'estudiante':
         return redirect('login')
@@ -677,6 +678,8 @@ def ofertas_list(request):
     ofertas_ref = db.collection('ofertas').where('estado', '==', 'activa').stream()
 
     lista_ofertas = []
+    logos_cache = {}
+
     for doc in ofertas_ref:
         data = doc.to_dict()
         data['id'] = doc.id
@@ -698,6 +701,17 @@ def ofertas_list(request):
             if not (titulo_match or empresa_match or descripcion_match):
                 continue
 
+        # 4. Inyectar logo de la empresa
+        empresa_id = data.get('empresa_id')
+        if empresa_id:
+            if empresa_id not in logos_cache:
+                emp_doc = db.collection('usuarios').document(empresa_id).get()
+                emp_data = emp_doc.to_dict() if emp_doc.exists else {}
+                logos_cache[empresa_id] = emp_data.get('logo_url', '')
+            data['logo_url'] = logos_cache[empresa_id]
+        else:
+            data['logo_url'] = ''
+
         lista_ofertas.append(data)
 
     context = {
@@ -710,6 +724,8 @@ def ofertas_list(request):
     }
 
     return render(request, 'ofertas_list.html', context)
+
+
 def oferta_detail(request, oferta_id):
     if request.session.get('user_rol') != 'estudiante':
         return redirect('login')

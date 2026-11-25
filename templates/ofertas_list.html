@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<!-- Cargar CSS de Leaflet para los mini-mapas -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     <!-- Encabezado -->
@@ -90,39 +93,70 @@
         {% endif %}
     </div>
 
-    <!-- Tarjetas de Ofertas -->
+    <!-- Tarjetas de Ofertas con Logo + Mini-Mapa -->
     {% if ofertas %}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for oferta in ofertas %}
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition flex flex-col justify-between p-6">
-            <div>
-                <!-- Badges -->
-                <div class="flex flex-wrap gap-2 mb-3">
-                    <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">
-                        {{ oferta.modalidad }}
-                    </span>
-                    {% if oferta.carrera %}
-                    <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-0.5 rounded-full truncate max-w-[200px]">
-                        {{ oferta.carrera }}
-                    </span>
-                    {% endif %}
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition duration-200 overflow-hidden flex flex-col h-full">
+            
+            <!-- Cabecera: Logo Empresa + Título + Modalidad -->
+            <div class="p-5 pb-3 flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-12 h-12 rounded-xl bg-gray-50 border border-gray-200 overflow-hidden flex items-center justify-center shrink-0">
+                        {% if oferta.logo_url %}
+                            <img src="{{ oferta.logo_url }}" alt="Logo {{ oferta.empresa_nombre }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <span class="text-xl text-gray-400">🏢</span>
+                        {% endif %}
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-xs font-bold text-emerald-700 truncate">{{ oferta.empresa_nombre }}</p>
+                        <h3 class="text-base font-extrabold text-gray-900 truncate" title="{{ oferta.titulo }}">
+                            {{ oferta.titulo }}
+                        </h3>
+                    </div>
                 </div>
 
-                <!-- Título y Empresa -->
-                <h3 class="text-lg font-bold text-gray-900 mb-1 line-clamp-1">{{ oferta.titulo }}</h3>
-                <p class="text-sm text-emerald-600 font-semibold mb-3 flex items-center gap-1">
-                    🏢 {{ oferta.empresa_nombre }}
-                </p>
+                <span class="bg-blue-50 text-blue-700 border border-blue-100 text-[11px] font-bold px-2.5 py-1 rounded-full shrink-0">
+                    {{ oferta.modalidad }}
+                </span>
+            </div>
 
-                <!-- Descripción Resumida -->
-                <p class="text-gray-600 text-sm line-clamp-3 mb-4 leading-relaxed">
+            <!-- Cuerpo: Carrera + Descripción -->
+            <div class="px-5 flex-grow">
+                {% if oferta.carrera %}
+                <div class="mb-2.5">
+                    <span class="inline-block bg-emerald-50 text-emerald-800 border border-emerald-100 text-[11px] font-semibold px-2.5 py-0.5 rounded-md truncate max-w-full">
+                        🎓 {{ oferta.carrera }}
+                    </span>
+                </div>
+                {% endif %}
+
+                <p class="text-gray-600 text-xs line-clamp-2 mb-3 leading-relaxed">
                     {{ oferta.descripcion }}
                 </p>
             </div>
 
+            <!-- Mini-Mapa de Ubicación -->
+            <div class="px-5 pb-3">
+                {% if oferta.latitud and oferta.longitud %}
+                    <div class="relative rounded-xl overflow-hidden border border-gray-200 h-28 bg-gray-100">
+                        <div id="list-map-{{ forloop.counter }}" class="w-full h-full z-10"></div>
+                        <span class="absolute bottom-1.5 right-1.5 z-20 bg-white/90 text-[10px] font-bold text-gray-700 px-2 py-0.5 rounded-md border border-gray-200">
+                            📍 Ubicación
+                        </span>
+                    </div>
+                {% else %}
+                    <div class="rounded-xl border border-dashed border-gray-200 h-28 bg-slate-50 flex flex-col items-center justify-center text-gray-400 text-xs">
+                        <span class="text-lg mb-1">🌐</span>
+                        <span>Modalidad {{ oferta.modalidad }}</span>
+                    </div>
+                {% endif %}
+            </div>
+
             <!-- Botón Ver Oferta -->
-            <div class="pt-4 border-t border-gray-50">
-                <a href="{% url 'oferta_detail' oferta.id %}" class="block w-full bg-gray-50 hover:bg-blue-600 hover:text-white text-gray-700 font-bold py-2.5 px-4 rounded-xl text-center text-sm transition">
+            <div class="px-5 pb-5 pt-1 mt-auto">
+                <a href="{% url 'oferta_detail' oferta.id %}" class="block w-full bg-gray-900 hover:bg-blue-600 text-white font-bold py-2.5 px-4 rounded-xl text-center text-xs transition">
                     Ver Detalles y Postular →
                 </a>
             </div>
@@ -145,4 +179,44 @@
     {% endif %}
 
 </div>
+
+<!-- Script Leaflet para los mini-mapas de cada tarjeta -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const mapasOfertas = [
+            {% for oferta in ofertas %}
+            {
+                id: "list-map-{{ forloop.counter }}",
+                lat: "{{ oferta.latitud|default:'' }}",
+                lng: "{{ oferta.longitud|default:'' }}"
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        mapasOfertas.forEach(function (item) {
+            const el = document.getElementById(item.id);
+            if (el && item.lat && item.lng) {
+                const lat = parseFloat(item.lat.replace(',', '.'));
+                const lng = parseFloat(item.lng.replace(',', '.'));
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    const m = L.map(item.id, {
+                        zoomControl: false,
+                        attributionControl: false,
+                        dragging: false,
+                        scrollWheelZoom: false,
+                        doubleClickZoom: false,
+                        boxZoom: false
+                    }).setView([lat, lng], 14);
+
+                    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+                        maxZoom: 18
+                    }).addTo(m);
+
+                    L.marker([lat, lng]).addTo(m);
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}
