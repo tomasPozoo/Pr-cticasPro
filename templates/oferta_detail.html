@@ -17,34 +17,52 @@
         <!-- Columna Izquierda: Detalle principal (Ocupa 2 de 3 columnas) -->
         <div class="lg:col-span-2 space-y-6">
             
-            <!-- Tarjeta de Cabecera -->
+            <!-- Tarjeta de Cabecera con Logo -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
-                <div class="flex flex-wrap gap-2 mb-4">
-                    <!-- Etiqueta Modalidad -->
-                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-bold inline-flex items-center gap-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                        {{ oferta.modalidad }}
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <div class="flex flex-wrap gap-2">
+                        <!-- Etiqueta Modalidad -->
+                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-bold inline-flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            {{ oferta.modalidad }}
+                        </span>
+                        <!-- Etiqueta Carrera -->
+                        {% if oferta.carrera %}
+                        <span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-sm font-bold inline-flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
+                            {{ oferta.carrera }}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <span class="text-xs font-semibold text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                        👥 {{ total_postulantes }} postulante{% if total_postulantes != 1 %}s{% endif %}
                     </span>
-                    <!-- Etiqueta Carrera (Si existe) -->
-                    {% if oferta.carrera %}
-                    <span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-sm font-bold inline-flex items-center gap-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
-                        {{ oferta.carrera }}
-                    </span>
-                    {% endif %}
                 </div>
                 
-                <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-2 leading-tight">{{ oferta.titulo }}</h1>
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4 leading-tight">{{ oferta.titulo }}</h1>
                 
-                <div class="flex flex-wrap items-center justify-between gap-4 pt-2">
-                    <p class="text-xl text-gray-600 font-medium flex items-center gap-2">
-                        <span class="text-2xl">🏢</span> {{ oferta.empresa_nombre }}
-                    </p>
+                <div class="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-gray-100">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-14 h-14 rounded-xl bg-gray-50 border border-gray-200 overflow-hidden flex items-center justify-center shrink-0 shadow-xs">
+                            {% if oferta.logo_url %}
+                                <img src="{{ oferta.logo_url }}" alt="Logo {{ oferta.empresa_nombre }}" class="w-full h-full object-cover">
+                            {% else %}
+                                <span class="text-2xl text-gray-400">🏢</span>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <p class="text-lg text-gray-900 font-bold leading-tight">{{ oferta.empresa_nombre }}</p>
+                            {% if oferta.empresa_rubro %}
+                                <p class="text-xs text-gray-500 font-medium mt-0.5">{{ oferta.empresa_rubro }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
 
                     <!-- Botón Perfil de Empresa -->
                     {% if oferta.empresa_id %}
                     <a href="{% url 'ver_perfil_empresa_publico' oferta.empresa_id %}" 
-                       class="inline-flex items-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold py-2 px-3.5 rounded-xl border border-emerald-200 transition shadow-sm">
+                       class="inline-flex items-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold py-2.5 px-4 rounded-xl border border-emerald-200 transition shadow-xs">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                         Ver Perfil de la Empresa
                     </a>
@@ -94,7 +112,13 @@
                 
                 <ul class="space-y-4 mb-6 text-sm">
                     <li class="flex items-start gap-3">
-                        <div class="bg-gray-100 p-2 rounded-lg text-gray-600"><i class="bi bi-building"></i></div>
+                        <div class="w-9 h-9 rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center text-gray-600 shrink-0">
+                            {% if oferta.logo_url %}
+                                <img src="{{ oferta.logo_url }}" alt="Logo" class="w-full h-full object-cover">
+                            {% else %}
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                            {% endif %}
+                        </div>
                         <div>
                             <p class="text-gray-500 font-medium">Empresa</p>
                             <p class="text-gray-900 font-bold">{{ oferta.empresa_nombre }}</p>
@@ -106,7 +130,7 @@
                         </div>
                     </li>
                     <li class="flex items-start gap-3">
-                        <div class="bg-gray-100 p-2 rounded-lg text-gray-600">
+                        <div class="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 shrink-0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                         </div>
                         <div>
@@ -116,7 +140,7 @@
                     </li>
                     {% if oferta.carrera %}
                     <li class="flex items-start gap-3">
-                        <div class="bg-gray-100 p-2 rounded-lg text-gray-600">
+                        <div class="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 shrink-0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path></svg>
                         </div>
                         <div>
@@ -129,10 +153,20 @@
 
                 <hr class="border-gray-100 mb-6">
 
-                <a href="{% url 'postular_oferta' oferta.id %}" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition shadow-md text-center transform hover:-translate-y-0.5">
-                    Postular a esta práctica
-                </a>
-                <p class="text-xs text-center text-gray-400 mt-3">Al postular, tu perfil será enviado directamente a la empresa.</p>
+                {% if ya_postulo %}
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
+                        <p class="text-emerald-800 font-bold text-sm">✓ Ya postulaste a esta práctica</p>
+                        <p class="text-emerald-700 text-xs mt-1 mb-3">Puedes revisar el avance de tu solicitud en tu panel.</p>
+                        <a href="{% url 'mis_postulaciones' %}" class="inline-block w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition">
+                            Ir a Mis Postulaciones →
+                        </a>
+                    </div>
+                {% else %}
+                    <a href="{% url 'postular_oferta' oferta.id %}" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition shadow-md text-center transform hover:-translate-y-0.5">
+                        Postular a esta práctica
+                    </a>
+                    <p class="text-xs text-center text-gray-400 mt-3">Al postular, tu perfil será enviado directamente a la empresa.</p>
+                {% endif %}
             </div>
         </div>
 

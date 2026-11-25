@@ -739,8 +739,36 @@ def oferta_detail(request, oferta_id):
         
     oferta_data = doc_ref.to_dict()
     oferta_data['id'] = doc_ref.id
+
+    # 1. Obtener logo y rubro de la empresa desde 'usuarios'
+    empresa_id = oferta_data.get('empresa_id')
+    if empresa_id:
+        emp_doc = db.collection('usuarios').document(empresa_id).get()
+        emp_data = emp_doc.to_dict() if emp_doc.exists else {}
+        oferta_data['logo_url'] = emp_data.get('logo_url', '')
+        oferta_data['empresa_rubro'] = emp_data.get('rubro', '')
+    else:
+        oferta_data['logo_url'] = ''
+        oferta_data['empresa_rubro'] = ''
+
+    # 2. Verificar si el estudiante ya postuló a esta oferta y contar total de postulantes
+    estudiante_id = request.session.get('user_id')
+    postulaciones_ref = db.collection('postulaciones').where('oferta_id', '==', oferta_id).stream()
     
-    return render(request, 'oferta_detail.html', {'oferta': oferta_data})
+    ya_postulo = False
+    total_postulantes = 0
+    for p_doc in postulaciones_ref:
+        total_postulantes += 1
+        if p_doc.to_dict().get('estudiante_id') == estudiante_id:
+            ya_postulo = True
+
+    context = {
+        'oferta': oferta_data,
+        'ya_postulo': ya_postulo,
+        'total_postulantes': total_postulantes
+    }
+    
+    return render(request, 'oferta_detail.html', context)
 
 def postular_oferta(request, oferta_id):
     if request.session.get('user_rol') != 'estudiante':
