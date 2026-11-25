@@ -19,7 +19,31 @@ import csv
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 import unicodedata
+import base64
+from io import BytesIO
+from PIL import Image
 # ==========================================
+
+
+
+def _procesar_imagen_base64(archivo_imagen) -> str:
+    """Redimensiona y comprime una imagen a JPEG Base64 (~25 KB) para guardarla en Firestore."""
+    img = Image.open(archivo_imagen)
+    if img.mode in ("RGBA", "P", "LA"):
+        fondo = Image.new("RGB", img.size, (255, 255, 255))
+        if img.mode in ("RGBA", "LA"):
+            fondo.paste(img, mask=img.split()[-1])
+        else:
+            fondo.paste(img)
+        img = fondo
+    elif img.mode != "RGB":
+        img = img.convert("RGB")
+
+    img.thumbnail((300, 300))
+    buffer = BytesIO()
+    img.save(buffer, format="JPEG", quality=82)
+    img_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+    return f"data:image/jpeg;base64,{img_base64}"
 # CONFIGURACIÓN GENERAL Y PRECIO DEL PLAN
 # ==========================================
 PRECIO_PLAN = 2990.0  # <--- PRECIO OFICIAL EN CLP DEL PLAN PREMIUM
@@ -543,6 +567,8 @@ def home_estudiante(request):
     }
     return render(request, 'home_estudiante.html', context)
 
+
+
 def perfil_estudiante(request):
     user_id = request.session.get('user_id')
     user_rol = request.session.get('user_rol')
@@ -565,17 +591,11 @@ def perfil_estudiante(request):
         foto_url = data_actual.get('foto_url', '')
 
         if 'foto' in request.FILES:
-            foto_file = request.FILES['foto']
-            fs = FileSystemStorage()
-            
-            extension = foto_file.name.split('.')[-1]
-            nombre_archivo = f"perfiles/{user_id}.{extension}"
-
-            if fs.exists(nombre_archivo):
-                fs.delete(nombre_archivo)
-
-            filename = fs.save(nombre_archivo, foto_file)
-            foto_url = fs.url(filename)
+            try:
+                foto_url = _procesar_imagen_base64(request.FILES['foto'])
+            except Exception as e:
+                print("❌ Error procesando foto de estudiante:", str(e))
+                messages.warning(request, "Se guardaron tus datos, pero hubo un problema al procesar la imagen.")
 
         user_ref.update({
             'nombre': nombre,
@@ -820,6 +840,9 @@ def home_empresa(request):
         'total_postulantes': total_postulantes,
     }
     return render(request, 'home_empresa.html', context)
+
+
+
 def perfil_empresa(request):
     user_id = request.session.get('user_id')
     user_rol = request.session.get('user_rol')
@@ -843,21 +866,13 @@ def perfil_empresa(request):
         data_actual = doc_actual.to_dict() if doc_actual.exists else {}
         logo_url = data_actual.get('logo_url', '')
 
-        # Manejo de la subida del logo corporativo
         if 'logo' in request.FILES:
-            logo_file = request.FILES['logo']
-            fs = FileSystemStorage()
-            
-            extension = logo_file.name.split('.')[-1]
-            nombre_archivo = f"logos_empresas/{user_id}.{extension}"
+            try:
+                logo_url = _procesar_imagen_base64(request.FILES['logo'])
+            except Exception as e:
+                print("❌ Error procesando logo de empresa:", str(e))
+                messages.warning(request, "Se guardaron los datos, pero hubo un problema al procesar el logo.")
 
-            if fs.exists(nombre_archivo):
-                fs.delete(nombre_archivo)
-
-            filename = fs.save(nombre_archivo, logo_file)
-            logo_url = fs.url(filename)
-
-        # Actualizar en Firestore
         user_ref.update({
             'nombre': nombre,
             'rut': rut,
@@ -868,7 +883,6 @@ def perfil_empresa(request):
             'logo_url': logo_url
         })
 
-        # Sincronizar el nombre en la sesión activa
         request.session['user_name'] = nombre
 
         messages.success(request, "¡Perfil de la empresa actualizado exitosamente!")
@@ -878,6 +892,7 @@ def perfil_empresa(request):
     empresa_data = doc.to_dict() if doc.exists else {}
 
     return render(request, 'perfil_empresa.html', {'empresa': empresa_data})
+
 
 def crear_oferta(request):
     if request.session.get('user_rol') != 'empresa':
